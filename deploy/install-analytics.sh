@@ -40,7 +40,7 @@ PW="$(cat "$CRED")"
 log "database + site"
 DB="sqlite+$DBDIR/db.sqlite3"
 if ! "$BIN" db test -db "$DB" >/dev/null 2>&1; then
-  "$BIN" db create site -db "$DB" -vhost "$DOMAIN" -user.email "$EMAIL" -user.password "$PW"
+  "$BIN" db create site -createdb -db "$DB" -vhost "$DOMAIN" -user.email "$EMAIL" -user.password "$PW"
 else
   echo "database already present"
 fi
