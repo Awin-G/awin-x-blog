@@ -59,4 +59,9 @@ for the resulting referrers.
 
 | Target | Type | Date | Status |
 |---|---|---|---|
-| _(pending GitHub auth)_ | | | |
+| `github.com/Awin-G/awin-x-blog` | public source repo + homepage link | 2026-10-12 | ✅ live |
+| EasyTier Discussions #2681 | community "show and tell" | 2026-10-12 | ✅ live |
+| Google Search Console (Domain `awin-x.top`) | DNS TXT verified | 2026-10-12 | TXT added — awaiting "Verify" click |
+| 1MB Club | email patch (1mb-club@freelists.org) | — | todo |
+| 512KB Club | SourceHut email patch | — | todo |
+| 250KB Club | Codeberg issue | — | todo |
