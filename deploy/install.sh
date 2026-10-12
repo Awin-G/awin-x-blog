@@ -27,8 +27,8 @@ if [ ! -d "$REPO/.git" ]; then
 fi
 git -C "$REPO" config --add safe.directory "$REPO" 2>/dev/null || true
 
-log "install deploy script"
-install -m 0755 "$REPO/scripts/deploy.sh" "$BASE/deploy.sh"
+log "install deploy entrypoint (self-updating wrapper)"
+install -m 0755 "$REPO/deploy/run-deploy.sh" "$BASE/deploy.sh"
 
 log "systemd units"
 install -m 0644 "$REPO/deploy/blog-deploy.service" /etc/systemd/system/blog-deploy.service
