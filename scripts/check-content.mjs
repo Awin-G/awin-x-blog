@@ -74,6 +74,17 @@ for (const lang of ['en', 'zh']) {
   }
 }
 
+// duplicate titles within a locale
+for (const lang of ['en', 'zh']) {
+  const seen = new Map();
+  for (const p of posts.filter((x) => x.lang === lang)) {
+    const t = (p.data.title ?? '').toLowerCase();
+    if (!t) continue;
+    if (seen.has(t)) errors.push(`duplicate ${lang} title "${p.data.title}" in ${p.file} and ${seen.get(t)}`);
+    else seen.set(t, p.file);
+  }
+}
+
 // translationKey must exist in both locales
 const keys = {};
 for (const p of posts) {

@@ -114,6 +114,8 @@ Ordered roughly by (traffic × feasibility). Tick off as published.
 - [ ] Anycast and DNS-based load balancing without a load balancer
 
 **AI / agents**
+- [ ] Containing an agent with root: blast radius, sandbox, and the rules I enforce  ← trending
+- [ ] Prompt injection for people who *run* agents, not models  ← trending
 - [ ] Context engineering for coding agents
 - [ ] Giving an agent a sandbox: safety without stalling it
 - [ ] Evaluating agent output: confident work vs good work

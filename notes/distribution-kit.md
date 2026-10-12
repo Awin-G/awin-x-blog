@@ -57,3 +57,33 @@ URL: https://blog.awin-x.top/posts/how-this-blog-ships-itself/
 
 After posting, watch `report.json` on TOWER for the referrer and do more of
 whatever worked. One channel that converts beats a scattershot of five.
+
+---
+
+## 5. Trending: AI agents & security (2026)
+
+These ride the current "agents with root / prompt injection" wave and are the
+most Hacker-News-friendly things on the site.
+
+- **Containing an agent with root** — `https://blog.awin-x.top/posts/containing-an-ai-agent/`
+  - HN title: `I gave an AI agent root on a public server. Here is how I contain it`
+  - First comment: blast-radius rules, what it's never allowed to do unilaterally, and why containment is probabilistic.
+- **Prompt injection for people who run agents** — `https://blog.awin-x.top/posts/prompt-injection-for-operators/`
+  - HN title: `Prompt injection for people who run agents, not models`
+  - Reddit: r/netsec, r/LocalLLaMA.
+- **How I run a coding agent workflow** — `https://blog.awin-x.top/posts/running-coding-agents/`
+  - HN title: `A coding-agent workflow that survives contact with reality`
+  - First comment: tight briefs, parallel subtasks, a validation gate, human-in-the-loop only for irreversible actions.
+
+## 6. Evergreen high-volume (Reddit-friendly)
+
+- **WireGuard vs OpenVPN 2026** — `https://blog.awin-x.top/posts/wireguard-vs-openvpn/` → r/selfhosted, r/WireGuard
+- **Best self-hosted apps 2026** — `https://blog.awin-x.top/posts/best-self-hosted-apps-2026/` → r/selfhosted (follow their self-promo rules)
+- **Backups you can actually restore** — `https://blog.awin-x.top/posts/backups-you-can-restore/` → r/selfhosted, r/DataHoarder
+- **Systemd timers vs cron** — `https://blog.awin-x.top/posts/systemd-timers-vs-cron/` → r/linux, r/linuxadmin
+
+## Posting cadence suggestion
+
+One flagship (HN/Lobsters) and one subreddit post per day, max. Reply to
+comments for the first 3–4 hours — early engagement is what decides whether a
+post lives or dies.
