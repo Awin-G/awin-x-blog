@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import Ipv6Calculator from '@/components/tools/Ipv6Calculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="ipv6"
+  title="IPv6 address calculator"
+  description="Expand, compress and classify any IPv6 address — see the canonical form, the /64 prefix, the address type and the binary layout. Runs entirely in your browser."
+>
+  <Ipv6Calculator lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Compressed</strong> — the canonical form, with the longest run of zero groups replaced by <code>::</code>.</li>
+      <li><strong>Expanded</strong> — all eight 16-bit groups, zero-padded.</li>
+      <li><strong>Type</strong> — loopback, link-local, unique-local, global unicast, multicast, IPv4-mapped and so on.</li>
+      <li><strong>/64 prefix</strong> — the subnet most networks are handed.</li>
+    </ul>
+    <p>
+      Read the background in <a href={localePath('en', '/posts/ipv6-practical-intro/')}>IPv6 for beginners</a>,
+      or the resolution path in <a href={localePath('en', '/posts/how-dns-resolves/')}>how DNS resolves</a>.
+    </p>
+  </div>
+</ToolShell>

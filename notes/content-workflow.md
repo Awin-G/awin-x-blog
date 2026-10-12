@@ -37,6 +37,13 @@ build break.
 > **SEO:** ~1300–1900 words EN (ZH a faithful translation); title ≤ 100 chars
 > with a primary keyword; descriptive H2/H3; at least 2 fenced code blocks.
 >
+> **Visuals (optional, 0–3 per article):** where a diagram genuinely helps,
+> include an **inline SVG** (hand-authored, simple: boxes, arrows, labels) or a
+> clean ASCII diagram. SVG is preferred (vector, crisp, no image files to
+> source). Do **not** force a figure — only add one when it replaces a
+> paragraph. Keep colours minimal (use `currentColor` / `#0f766e` accent) so it
+> works in light and dark mode. Wrap in `<figure>` + `<figcaption>`.
+>
 > **Output (exactly these two; touch nothing else):**
 > `src/content/blog/en/<slug>.md`, `src/content/blog/zh/<slug>.md`
 >
@@ -56,4 +63,10 @@ linux, seo, meta`
   artefact (a command, a config, a diagram, a real number). No filler.
 - Never invent facts about commercial products or versions. Honesty is a
   feature; it is also what earns links.
+- Visuals: 0–3 figures max, **SVG-first** (or ASCII). A figure must earn its
+  place; text is fine when a diagram adds nothing. Add a figure when it removes
+  a wall of prose, not for decoration.
+- Tools beat prose for some topics: if a concept has an interactive core
+  (calculators, converters, planners), build a small client-side tool under
+  `/tools/` as well — tools earn links and repeat visits. See `/tools/`.
 - Keep the backlog ahead of the subagents: at least 5 unstarted topics.

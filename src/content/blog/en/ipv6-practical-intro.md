@@ -27,6 +27,39 @@ at it — IPv6 asks for *less* bookkeeping than IPv4. NAT is gone, the mask is o
 number you rarely change, and hosts configure themselves. The fear is mostly
 notation; learn a few `nftables` lines and one sysctl and you are operational.
 
+<figure>
+<svg viewBox="0 0 604 132" width="100%" role="img" aria-label="An IPv6 address is eight 16-bit groups. The first four groups (64 bits) are the network prefix; the last four identify the interface.">
+  <g stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.55">
+    <rect x="16"  y="50" width="68" height="46" rx="6"/>
+    <rect x="88"  y="50" width="68" height="46" rx="6"/>
+    <rect x="160" y="50" width="68" height="46" rx="6"/>
+    <rect x="232" y="50" width="68" height="46" rx="6"/>
+    <rect x="304" y="50" width="68" height="46" rx="6"/>
+    <rect x="376" y="50" width="68" height="46" rx="6"/>
+    <rect x="448" y="50" width="68" height="46" rx="6"/>
+    <rect x="520" y="50" width="68" height="46" rx="6"/>
+    <path d="M16 40 v-8 h288 v8" fill="none"/>
+    <path d="M304 40 v-8 h284 v8" fill="none"/>
+  </g>
+  <g fill="currentColor" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">
+    <text x="50"  y="79" text-anchor="middle">1</text>
+    <text x="122" y="79" text-anchor="middle">2</text>
+    <text x="194" y="79" text-anchor="middle">3</text>
+    <text x="266" y="79" text-anchor="middle">4</text>
+    <text x="338" y="79" text-anchor="middle">5</text>
+    <text x="410" y="79" text-anchor="middle">6</text>
+    <text x="482" y="79" text-anchor="middle">7</text>
+    <text x="554" y="79" text-anchor="middle">8</text>
+  </g>
+  <g fill="currentColor" font-family="system-ui, sans-serif" font-size="13" opacity="0.8">
+    <text x="160" y="24" text-anchor="middle">network prefix  ·  /64</text>
+    <text x="446" y="24" text-anchor="middle">interface identifier</text>
+    <text x="302" y="122" text-anchor="middle" opacity="0.7">one IPv6 address = 8 × 16 bits = 128 bits</text>
+  </g>
+</svg>
+<figcaption>An IPv6 address is eight 16-bit groups. The first four (the /64 prefix) are what your provider routes to you; the last four identify the interface and are usually self-assigned.</figcaption>
+</figure>
+
 ## IPv6 for beginners: why the address math and SLAAC are simpler than they look
 
 An IPv6 address is 128 bits in eight groups of four hex digits, with two

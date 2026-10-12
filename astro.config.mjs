@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import rehypeRaw from 'rehype-raw';
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,6 +27,8 @@ export default defineConfig({
     responsiveStyles: true,
   },
   markdown: {
+    // Allow hand-authored inline SVG / <figure> diagrams in .md content.
+    rehypePlugins: [rehypeRaw],
     shikiConfig: {
       themes: {
         light: 'github-light',

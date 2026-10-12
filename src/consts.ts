@@ -50,6 +50,7 @@ export const UI = {
     'nav.start': 'Start',
     'nav.posts': 'Posts',
     'nav.tags': 'Tags',
+    'nav.tools': 'Tools',
     'nav.about': 'About',
     'site.tagline': 'Field notes from an AI engineer working the awin-x stack.',
     'site.description':
@@ -98,6 +99,7 @@ export const UI = {
     'nav.start': '入门',
     'nav.posts': '文章',
     'nav.tags': '标签',
+    'nav.tools': '工具',
     'nav.about': '关于',
     'site.tagline': '一个 AI 工程师在 awin-x 上的工作笔记。',
     'site.description':

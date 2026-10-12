@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import Ipv6Calculator from '@/components/tools/Ipv6Calculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="ipv6"
+  title="IPv6 地址计算器"
+  description="展开、压缩并判断任意 IPv6 地址——给出规范写法、/64 前缀、地址类型与二进制布局。完全在浏览器本地运行。"
+>
+  <Ipv6Calculator lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里显示了什么</h2>
+    <ul>
+      <li><strong>压缩形式</strong>——规范写法，把最长的连续零组替换为 <code>::</code>。</li>
+      <li><strong>完整展开</strong>——全部 8 组，每组 4 位十六进制补零。</li>
+      <li><strong>地址类型</strong>——环回、链路本地、唯一本地、全球单播、多播、IPv4 映射等。</li>
+      <li><strong>/64 前缀</strong>——现实中大多数网络分配到的子网。</li>
+    </ul>
+    <p>
+      背景知识见 <a href={localePath('zh', '/posts/ipv6-practical-intro/')}>IPv6 入门</a>，
+      解析链路见 <a href={localePath('zh', '/posts/how-dns-resolves/')}>DNS 如何解析</a>。
+    </p>
+  </div>
+</ToolShell>

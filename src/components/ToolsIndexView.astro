@@ -1,0 +1,60 @@
+---
+import ToolShell from './ToolShell.astro';
+import { localePath, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const copy =
+  lang === 'zh'
+    ? {
+        title: '小工具',
+        description:
+          '免费、纯前端的网络与运维小工具。全部在浏览器本地计算，不上传任何数据，也不跟踪你。',
+        tools: [
+          {
+            slug: 'ipv6',
+            name: 'IPv6 地址计算器',
+            desc: '把 IPv6 地址在压缩形式与完整展开之间互相转换，并判断地址类型（环回、链路本地、ULA、全局单播、映射地址等）。',
+          },
+          {
+            slug: 'subnet',
+            name: 'IPv4 子网计算器',
+            desc: '输入 IP/前缀，算出网络地址、广播地址、掩码、可用主机范围与地址数量，并判断地址类型。',
+          },
+        ],
+        note: '更多工具会陆续加入——如果你想要某个特定工具，欢迎来信。',
+      }
+    : {
+        title: 'Tools',
+        description:
+          'Free, client-side networking utilities. Everything is computed locally in your browser — nothing is uploaded, nothing tracks you.',
+        tools: [
+          {
+            slug: 'ipv6',
+            name: 'IPv6 address calculator',
+            desc: 'Convert an IPv6 address between compressed and fully expanded forms, and identify its type (loopback, link-local, ULA, global unicast, mapped, …).',
+          },
+          {
+            slug: 'subnet',
+            name: 'IPv4 subnet calculator',
+            desc: 'Enter an IP/prefix to get the network, broadcast, netmask, usable host range and host count — plus the address type.',
+          },
+        ],
+        note: 'More tools are coming. If there is one you wish existed, get in touch.',
+      };
+---
+
+<ToolShell lang={lang} slug="" title={copy.title} description={copy.description}>
+  <ul class="tool-index">
+    {copy.tools.map((tool) => (
+      <li class="tool-index__item">
+        <a class="tool-index__name" href={localePath(lang, `/tools/${tool.slug}/`)}>{tool.name}</a>
+        <p class="tool-index__desc">{tool.desc}</p>
+      </li>
+    ))}
+  </ul>
+  <p class="muted" style="margin-top:2rem;font-size:.9rem">{copy.note}</p>
+</ToolShell>

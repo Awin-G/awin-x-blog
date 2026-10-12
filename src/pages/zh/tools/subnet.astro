@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import SubnetCalculator from '@/components/tools/SubnetCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="subnet"
+  title="IPv4 子网计算器"
+  description="输入 IP/前缀，算出网络地址、广播地址、子网掩码、反掩码、可用主机范围与数量，并判断是私有、CGNAT、链路本地还是公网地址。"
+>
+  <SubnetCalculator lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里显示了什么</h2>
+    <ul>
+      <li><strong>网络地址与广播地址</strong>——该网段的第一个与最后一个地址。</li>
+      <li><strong>掩码与反掩码</strong>——点分十进制掩码，以及它的取反（ACL 里常用）。</li>
+      <li><strong>可用范围与数量</strong>——第一个/最后一个可分配地址，以及可容纳的主机数。</li>
+      <li><strong>地址类型</strong>——私有（RFC 1918）、CGNAT、链路本地、多播、环回或公网。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/nat-traversal-explained/')}>NAT 穿透是怎么回事</a>
+      与 <a href={localePath('zh', '/posts/home-network-segmentation/')}>家庭网络分段</a>。
+    </p>
+  </div>
+</ToolShell>

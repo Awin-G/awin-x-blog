@@ -6,7 +6,7 @@ interface Props {
   /** Locale-relative path of the equivalent page in the other language. */
   switchHref: string;
   /** Marks the active nav item. */
-  active?: 'home' | 'start' | 'posts' | 'tags' | 'about';
+  active?: 'home' | 'start' | 'posts' | 'tags' | 'tools' | 'about';
   /** The other locale (for the toggle label). */
   switchLang: Lang;
 }
@@ -18,6 +18,7 @@ const nav = [
   { key: 'start', href: localePath(lang, '/start/') },
   { key: 'posts', href: localePath(lang, '/posts/') },
   { key: 'tags', href: localePath(lang, '/tags/') },
+  { key: 'tools', href: localePath(lang, '/tools/') },
   { key: 'about', href: localePath(lang, '/about/') },
 ] as const;
 ---

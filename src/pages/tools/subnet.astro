@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import SubnetCalculator from '@/components/tools/SubnetCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="subnet"
+  title="IPv4 subnet calculator"
+  description="Turn an IP/prefix into the network, broadcast, netmask, wildcard, usable host range and host count — and see whether it is private, CGNAT, link-local or public."
+>
+  <SubnetCalculator lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Network &amp; broadcast</strong> — the first and last address of the block.</li>
+      <li><strong>Netmask &amp; wildcard</strong> — dotted-decimal mask and its inverse (as used by ACLs).</li>
+      <li><strong>Usable range &amp; count</strong> — first/last assignable address and how many hosts fit.</li>
+      <li><strong>Type</strong> — private (RFC 1918), CGNAT, link-local, multicast, loopback or public.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/nat-traversal-explained/')}>how NAT traversal works</a>
+      and <a href={localePath('en', '/posts/home-network-segmentation/')}>segmenting a home network</a>.
+    </p>
+  </div>
+</ToolShell>

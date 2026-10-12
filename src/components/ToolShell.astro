@@ -1,0 +1,46 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { t, localePath, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+  /** '' for the tools index, otherwise the tool slug (e.g. 'ipv6'). */
+  slug: string;
+  title: string;
+  description: string;
+}
+
+const { lang, slug, title, description } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const suffix = slug ? `/tools/${slug}/` : '/tools/';
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', suffix),
+  zh: localePath('zh', suffix),
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  path={localePath(lang, suffix)}
+  alternates={alternates}
+  switchHref={localePath(other, suffix)}
+  active="tools"
+>
+  <div class="wrap wrap--narrow" style="padding-top:2.5rem">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href={localePath(lang, '/')}>{t(lang, 'nav.home')}</a></li>
+        <li><a href={localePath(lang, '/tools/')}>{t(lang, 'nav.tools')}</a></li>
+        {slug && <li aria-current="page">{title}</li>}
+      </ol>
+    </nav>
+
+    <h1>{title}</h1>
+    <p class="lead">{description}</p>
+
+    <slot />
+  </div>
+</BaseLayout>

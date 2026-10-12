@@ -1,0 +1,295 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        input: '输入一个 IPv6 地址（支持 :: 简写，也可粘贴 IPv4 映射地址）',
+        placeholder: '例如 2001:db8::1 或 ::1 或 ::ffff:192.0.2.1',
+        expanded: '完整展开（8 组）',
+        compressed: '压缩形式（规范写法）',
+        type: '地址类型',
+        prefix: '/64 网络前缀',
+        binary: '二进制（每 16 位）',
+        valid: '有效',
+        invalid: '无效',
+        hint: '输入后自动计算。全部在浏览器本地完成，不会发送任何数据。',
+        samples: '示例',
+        types: {
+          unspecified: '未指定地址 (::)',
+          loopback: '环回地址 (::1)',
+          linklocal: '链路本地 (fe80::/10)',
+          ula: '唯一本地地址 ULA (fc00::/7)',
+          multicast: '多播 (ff00::/8)',
+          documentation: '文档用地址 (2001:db8::/32)',
+          '6to4': '6to4 (2002::/16)',
+          teredo: 'Teredo (2001::/32)',
+          v4mapped: 'IPv4 映射 (::ffff:0:0/96)',
+          nat64: 'NAT64 (64:ff9b::/96)',
+          global: '全球单播 (2000::/3)',
+          sitelocal: '站点本地（已废弃，fec0::/10）',
+          reserved: '其它/保留',
+        },
+      }
+    : {
+        input: 'Enter an IPv6 address (with :: shorthand; IPv4-mapped accepted)',
+        placeholder: 'e.g. 2001:db8::1 or ::1 or ::ffff:192.0.2.1',
+        expanded: 'Fully expanded (8 groups)',
+        compressed: 'Compressed (canonical)',
+        type: 'Address type',
+        prefix: '/64 prefix',
+        binary: 'Binary (per 16 bits)',
+        valid: 'valid',
+        invalid: 'not a valid IPv6 address',
+        hint: 'Computed locally in your browser — nothing is sent anywhere.',
+        samples: 'Try',
+        types: {
+          unspecified: 'Unspecified (::)',
+          loopback: 'Loopback (::1)',
+          linklocal: 'Link-local (fe80::/10)',
+          ula: 'Unique local (ULA, fc00::/7)',
+          multicast: 'Multicast (ff00::/8)',
+          documentation: 'Documentation (2001:db8::/32)',
+          '6to4': '6to4 (2002::/16)',
+          teredo: 'Teredo (2001::/32)',
+          v4mapped: 'IPv4-mapped (::ffff:0:0/96)',
+          nat64: 'NAT64 (64:ff9b::/96)',
+          global: 'Global unicast (2000::/3)',
+          sitelocal: 'Site-local, deprecated (fec0::/10)',
+          reserved: 'Other / reserved',
+        },
+      };
+
+const json = JSON.stringify(L.types).replace(/'/g, '&#39;');
+---
+
+<div class="tool ipv6" data-ipv6 data-labels={json} data-valid={L.valid} data-invalid={L.invalid}>
+  <label for="ipv6-in">{L.input}</label>
+  <input id="ipv6-in" type="text" autocomplete="off" spellcheck="false" placeholder={L.placeholder} value="2001:db8::1" />
+  <p class="ipv6__status" data-status aria-live="polite"></p>
+
+  <div class="ipv6__out">
+    <div class="ipv6__row">
+      <span class="ipv6__k">{L.compressed}</span>
+      <output data-out="compressed">—</output>
+    </div>
+    <div class="ipv6__row">
+      <span class="ipv6__k">{L.expanded}</span>
+      <output data-out="expanded">—</output>
+    </div>
+    <div class="ipv6__row">
+      <span class="ipv6__k">{L.type}</span>
+      <output data-out="type">—</output>
+    </div>
+    <div class="ipv6__row">
+      <span class="ipv6__k">{L.prefix}</span>
+      <output data-out="prefix">—</output>
+    </div>
+    <div class="ipv6__row">
+      <span class="ipv6__k">{L.binary}</span>
+      <output data-out="binary">—</output>
+    </div>
+  </div>
+
+  <p class="ipv6__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="ipv6__chip" data-sample="::1">::1</button>
+    <button type="button" class="ipv6__chip" data-sample="fe80::1">fe80::1</button>
+    <button type="button" class="ipv6__chip" data-sample="fd00:1234::5678">ULA</button>
+    <button type="button" class="ipv6__chip" data-sample="2001:db8::dead:beef">2001:db8::</button>
+    <button type="button" class="ipv6__chip" data-sample="::ffff:192.0.2.1">v4-mapped</button>
+  </p>
+</div>
+
+<script>
+  type Labels = Record<string, string>;
+
+  function groups(input: string): number[] | null {
+    let s = input.trim().toLowerCase();
+    if (!s) return null;
+    // strip zone id (e.g. %eth0)
+    s = s.replace(/%.*$/, '');
+
+    // IPv4-mapped / trailing IPv4
+    let v4: number[] | null = null;
+    const m = s.match(/(\d{1,3}(?:\.\d{1,3}){3})$/);
+    if (m) {
+      const parts = m[1].split('.').map(Number);
+      if (parts.some((n) => n > 255)) return null;
+      v4 = [(parts[0] << 8) | parts[1], (parts[2] << 8) | parts[3]];
+      s = s.slice(0, m.index);
+    }
+
+    const dbl = s.indexOf('::');
+    let head: string[] = [];
+    let tail: string[] = [];
+    if (dbl !== -1) {
+      if (s.indexOf('::', dbl + 1) !== -1) return null; // only one ::
+      head = s.slice(0, dbl).split(':').filter((x) => x !== '');
+      tail = s.slice(dbl + 2).split(':').filter((x) => x !== '');
+    } else {
+      head = s.split(':').filter((x) => x !== '');
+    }
+
+    const hexOK = (x: string) => /^[0-9a-f]{1,4}$/.test(x);
+    if (![...head, ...tail].every(hexOK)) return null;
+
+    const hv = (x: string) => parseInt(x, 16);
+    let g: number[] = [...head.map(hv)];
+
+    const tailV4 = v4 ?? [];
+    const target = 8 - tailV4.length;
+    GET: {
+      if (dbl !== -1) {
+        const gap = target - g.length - tail.length;
+        if (gap < 0) return null;
+        g = g.concat(new Array(gap).fill(0));
+      }
+      g = g.concat(tail.map(hv));
+    }
+    g = g.concat(tailV4);
+    return g.length === 8 ? g : null;
+  }
+
+  function compress(g: number[]): string {
+    const h = g.map((x) => x.toString(16));
+    // find longest run of zeros (len >= 2), leftmost on tie
+    let best = { i: -1, len: 0 };
+    for (let i = 0; i < 8; ) {
+      if (g[i] === 0) {
+        let j = i;
+        while (j < 8 && g[j] === 0) j++;
+        if (j - i > best.len) best = { i, len: j - i };
+        i = j;
+      } else i++;
+    }
+    if (best.len < 2) return h.join(':');
+    const left = h.slice(0, best.i).join(':');
+    const right = h.slice(best.i + best.len).join(':');
+    return left + '::' + right;
+  }
+
+  function classify(g: number[]): string {
+    const isZero = g.every((x) => x === 0);
+    if (isZero) return 'unspecified';
+    if (g.slice(0, 7).every((x) => x === 0) && g[7] === 1) return 'loopback';
+    if ((g[0] & 0xffc0) === 0xfe80) return 'linklocal';
+    if ((g[0] & 0xfe00) === 0xfc00) return 'ula';
+    if ((g[0] & 0xff00) === 0xff00) return 'multicast';
+    if (g[0] === 0x2001 && g[1] === 0x0db8) return 'documentation';
+    if (g[0] === 0x2002) return '6to4';
+    if (g[0] === 0x2001 && g[1] === 0x0000) return 'teredo';
+    if (g.slice(0, 5).every((x) => x === 0) && g[5] === 0xffff) return 'v4mapped';
+    if (g[0] === 0x0064 && g[1] === 0xff9b && g[2] === 0 && g[3] === 0 && g[4] === 0 && g[5] === 0)
+      return 'nat64';
+    if ((g[0] & 0xe000) === 0x2000) return 'global';
+    if ((g[0] & 0xffc0) === 0xfec0) return 'sitelocal';
+    return 'reserved';
+  }
+
+  function binary(g: number[]): string {
+    return g.map((x) => x.toString(2).padStart(16, '0')).join(' ');
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-ipv6]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('input[type=text]')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const labels: Labels = JSON.parse(root.dataset.labels || '{}');
+    const validText = root.dataset.valid || 'valid';
+    const invalidText = root.dataset.invalid || 'invalid';
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    function render() {
+      const g = groups(input.value);
+      if (!g) {
+        status.textContent = input.value.trim() ? invalidText : '';
+        status.dataset.state = 'bad';
+        for (const k of ['compressed', 'expanded', 'type', 'prefix', 'binary']) out(k).textContent = '—';
+        return;
+      }
+      status.textContent = validText;
+      status.dataset.state = 'ok';
+      out('compressed').textContent = compress(g);
+      out('expanded').textContent = g.map((x) => x.toString(16).padStart(4, '0')).join(':');
+      out('type').textContent = labels[classify(g)] || classify(g);
+      out('prefix').textContent = g.slice(0, 4).map((x) => x.toString(16)).join(':') + '::/64';
+      out('binary').textContent = binary(g);
+    }
+
+    input.addEventListener('input', render);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        input.value = b.dataset.sample!;
+        render();
+      }),
+    );
+    render();
+  });
+</script>
+
+<style>
+  .ipv6__out {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .ipv6__row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 12rem) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.92rem;
+  }
+  .ipv6__k {
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .ipv6__row output {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    word-break: break-all;
+  }
+  .ipv6__status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .ipv6__status[data-state='ok'] {
+    color: var(--accent);
+  }
+  .ipv6__status[data-state='bad'] {
+    color: #d9534f;
+  }
+  .ipv6__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .ipv6__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .ipv6__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (max-width: 34rem) {
+    .ipv6__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>
