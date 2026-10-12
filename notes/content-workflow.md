@@ -56,6 +56,9 @@ build break.
 >   server, …). Keep volumes under the scratch dir, prefer `--rm`, publish only
 >   to `127.0.0.1` ports, and remove containers/images when done. This is the
 >   best way to get genuinely reproducible output.
+>   **Prefer official / well-known images.** If the official image isn't
+>   available, do not run an untrusted repackaged image — either use a reputable
+>   mirror or describe the behaviour instead of demonstrating it.
 >
 > Hard limits: **no `sudo`, no host system package installs, no `--privileged`,
 > no network scans or anything against third parties, nothing destructive, write
