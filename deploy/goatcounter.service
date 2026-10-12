@@ -1,0 +1,20 @@
+[Unit]
+Description=GoatCounter — cookie-less web analytics
+Documentation=https://www.goatcounter.com/
+After=network.target
+
+[Service]
+Type=simple
+User=goatcounter
+Group=goatcounter
+WorkingDirectory=/var/lib/goatcounter
+ExecStart=/usr/local/bin/goatcounter serve -listen 127.0.0.1:8081 -tls http -automigrate -db sqlite+/var/lib/goatcounter/db.sqlite3
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
