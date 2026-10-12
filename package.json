@@ -7,9 +7,10 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "prebuild": "node scripts/og.mjs",
+    "prebuild": "node scripts/check-content.mjs && node scripts/og.mjs",
     "preview": "astro preview",
     "check": "astro check",
+    "check:content": "node scripts/check-content.mjs",
     "astro": "astro"
   },
   "dependencies": {
