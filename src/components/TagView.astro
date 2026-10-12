@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostCard from '@/components/PostCard.astro';
 import { t, localePath, type Lang } from '@/consts';
 import { postsWithTag, tagPath } from '@/lib/posts';
+import { tagDescription } from '@/lib/tags';
 
 interface Props {
   lang: Lang;
@@ -11,6 +12,7 @@ interface Props {
 const { lang, tag } = Astro.props;
 const other: Lang = lang === 'zh' ? 'en' : 'zh';
 const posts = await postsWithTag(lang, tag);
+const desc = tagDescription(tag, lang);
 
 const path = tagPath(lang, tag);
 const alternates: Partial<Record<Lang, string>> = {
@@ -21,7 +23,7 @@ const alternates: Partial<Record<Lang, string>> = {
 
 <BaseLayout
   title={`${tag} — ${t(lang, 'tags.title')}`}
-  description={`${t(lang, 'tags.description')} #${tag}`}
+  description={desc || `${t(lang, 'tags.description')} #${tag}`}
   lang={lang}
   path={path}
   alternates={alternates}
@@ -37,7 +39,8 @@ const alternates: Partial<Record<Lang, string>> = {
       </ol>
     </nav>
     <h1>#{tag}</h1>
-    <p class="lead">
+    {desc && <p class="lead">{desc}</p>}
+    <p class="muted" style="font-size:.9rem">
       {posts.length === 1 ? t(lang, 'tags.onePost') : t(lang, 'tags.count', { count: posts.length })}
     </p>
 

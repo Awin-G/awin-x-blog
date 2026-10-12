@@ -101,20 +101,23 @@ export async function translationsOf(post: Post): Promise<Post[]> {
   );
 }
 
-/** Related posts: shared tags within the locale, ranked by overlap + recency. */
+/** Related posts: shared tags first, then recent posts to always fill `limit`. */
 export async function relatedPosts(post: Post, limit = 3): Promise<Post[]> {
   const posts = await getPosts(post.data.lang);
   const tags = new Set(post.data.tags);
-  return posts
+  const scored = posts
     .filter((p) => p.id !== post.id)
     .map((p) => ({
       post: p,
       score: p.data.tags.filter((t) => tags.has(t)).length,
     }))
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score || b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf())
-    .slice(0, limit)
-    .map((x) => x.post);
+    .sort(
+      (a, b) => b.score - a.score || b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf(),
+    );
+  const withTag = scored.filter((x) => x.score > 0).map((x) => x.post);
+  if (withTag.length >= limit) return withTag.slice(0, limit);
+  const rest = scored.filter((x) => x.score === 0).map((x) => x.post);
+  return [...withTag, ...rest].slice(0, limit);
 }
 
 /** Previous / next post within the same locale (by publication date). */

@@ -2,6 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { t, localePath, type Lang } from '@/consts';
 import { tagsOf, tagPath } from '@/lib/posts';
+import { tagDescription } from '@/lib/tags';
 
 interface Props {
   lang: Lang;
@@ -28,12 +29,14 @@ const alternates: Partial<Record<Lang, string>> = {
   <div class="wrap" style="padding-top:2.5rem">
     <h1>{t(lang, 'tags.title')}</h1>
     <p class="lead">{t(lang, 'tags.description')}</p>
-    <ul class="tag-cloud">
+    <ul class="tag-index">
       {tags.map(({ tag, count }) => (
-        <li>
-          <a class="chip" href={tagPath(lang, tag)}>
-            {tag} <span class="chip__count">{count}</span>
-          </a>
+        <li class="tag-index__item">
+          <a class="tag-index__name" href={tagPath(lang, tag)}>#{tag}</a>
+          <span class="tag-index__count">
+            {count === 1 ? t(lang, 'tags.onePost') : t(lang, 'tags.count', { count })}
+          </span>
+          {tagDescription(tag, lang) && <p class="tag-index__desc">{tagDescription(tag, lang)}</p>}
         </li>
       ))}
     </ul>

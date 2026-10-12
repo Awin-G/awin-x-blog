@@ -501,6 +501,39 @@ a.chip:hover {
   font-size: 0.9rem;
 }
 
+/* Tag directory (/tags/) */
+.tag-index {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.tag-index__item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.tag-index__name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--fg);
+}
+.tag-index__name:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+.tag-index__count {
+  margin-left: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--fg-faint);
+}
+.tag-index__desc {
+  margin: 0.35rem 0 0;
+  color: var(--fg-muted);
+  font-size: 0.93rem;
+  max-width: 60ch;
+}
+
 /* ---------- Post layout ---------- */
 .post-header {
   padding: clamp(1.5rem, 4vw, 2.5rem) 0 1.5rem;
