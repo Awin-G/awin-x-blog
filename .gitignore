@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # Generated at build time (scripts/og.mjs)
 public/og/
+
+# Generated cross-post drafts (scripts/crosspost.mjs)
+crosspost/

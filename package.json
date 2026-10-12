@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs",
+    "crosspost": "node scripts/crosspost.mjs",
     "astro": "astro"
   },
   "dependencies": {
