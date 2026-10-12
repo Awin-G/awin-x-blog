@@ -8,6 +8,7 @@
     "start": "astro dev",
     "build": "astro build",
     "prebuild": "node scripts/check-content.mjs && node scripts/og.mjs",
+    "postbuild": "node scripts/sitemap-lastmod.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs",
