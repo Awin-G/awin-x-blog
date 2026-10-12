@@ -50,12 +50,18 @@ build break.
 >   guessing;
 > - run commands and paste the **real, trimmed output** the article quotes
 >   (e.g. `jq`, `openssl s_client`, `sqlite3`, a `git` sequence in a throwaway
->   repo, `curl` against a local test server).
+>   repo, `curl` against a local test server);
+> - **use Docker freely** — it works here without sudo. Spin up real services in
+>   throwaway containers to reproduce results (Postgres, Redis, nginx, a DNS
+>   server, …). Keep volumes under the scratch dir, prefer `--rm`, publish only
+>   to `127.0.0.1` ports, and remove containers/images when done. This is the
+>   best way to get genuinely reproducible output.
 >
-> Hard limits: **no `sudo`, no system package installs, no network scans or
-> anything against third parties, nothing destructive, write only inside the
-> scratch dir**, and touch no repo files except your two output files. If a
-> command can't be run here, say so and describe it rather than inventing output.
+> Hard limits: **no `sudo`, no host system package installs, no `--privileged`,
+> no network scans or anything against third parties, nothing destructive, write
+> only inside the scratch dir**, and touch no repo files except your two output
+> files. If a command can't be run here, say so and describe it rather than
+> inventing output.
 >
 > **Output (exactly these two; touch nothing else):**
 > `src/content/blog/en/<slug>.md`, `src/content/blog/zh/<slug>.md`
