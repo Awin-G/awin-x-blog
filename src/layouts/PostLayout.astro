@@ -18,6 +18,7 @@ import {
   translationsOf,
   relatedPosts,
   adjacentPosts,
+  slugOf,
   type Post,
 } from '@/lib/posts';
 
@@ -102,7 +103,7 @@ const shareLinks =
   switchHref={switchHref}
   active="posts"
   type="article"
-  image={post.data.cover}
+  image={post.data.cover ?? `/og/${lang}/${slugOf(post)}.png`}
   publishedTime={post.data.pubDate}
   modifiedTime={updated}
   tags={post.data.tags}
