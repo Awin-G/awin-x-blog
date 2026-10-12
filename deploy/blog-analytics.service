@@ -4,6 +4,9 @@ After=network.target nginx.service
 
 [Service]
 Type=oneshot
+# GoAccess aborts without $HOME; render the report in China time.
+Environment=HOME=/root
+Environment=TZ=Asia/Shanghai
 ExecStart=/srv/blog/analytics/report.sh
 Nice=15
 CPUWeight=40
