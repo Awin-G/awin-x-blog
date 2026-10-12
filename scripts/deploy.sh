@@ -83,7 +83,12 @@ mv -Tf "$WEBROOT.tmp" "$WEBROOT"
 echo "$TARGET" > "$STATE/last-built"
 log "published $(basename "$REL") -> $WEBROOT"
 
-# ---- 5. Prune -------------------------------------------------------------
+# ---- 5. Announce to search engines (best-effort) --------------------------
+if [ -x "$REPO/scripts/indexnow.sh" ] || [ -f "$REPO/scripts/indexnow.sh" ]; then
+  bash "$REPO/scripts/indexnow.sh" "$REL" || log "indexnow: skipped"
+fi
+
+# ---- 6. Prune -------------------------------------------------------------
 ls -1dt "$RELEASES"/*/ 2>/dev/null | tail -n +$((KEEP_RELEASES + 1)) | xargs -r rm -rf
 
 log "done in $(basename "$REL")"
