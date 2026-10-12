@@ -1,0 +1,113 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import FormattedDate from '@/components/FormattedDate.astro';
+import { SITE, t, localePath, type Lang } from '@/consts';
+import { getPosts, postPath, slugOf, type Post } from '@/lib/posts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+
+const all = await getPosts(lang);
+const bySlug = new Map<string, Post>(all.map((p) => [slugOf(p), p]));
+const pick = (slugs: string[]) => slugs.map((s) => bySlug.get(s)).filter((p): p is Post => Boolean(p));
+
+const sections = [
+  {
+    title: lang === 'zh' ? '第一次来？先看这几篇' : 'New here? Start with these',
+    desc: lang === 'zh'
+      ? '三篇能最快说明这个博客是什么、以及在做什么的文章。'
+      : 'Three posts that say the most about what this blog is and what it does.',
+    posts: pick(['how-this-blog-ships-itself', 'an-ai-runs-this-blog', 'running-coding-agents']),
+  },
+  {
+    title: lang === 'zh' ? '如果你在跑服务器' : 'If you run servers',
+    desc: lang === 'zh'
+      ? '自托管、加固、备份，以及一个人运维时的取舍。'
+      : 'Self-hosting, hardening, backups, and the tradeoffs of running your own infrastructure alone.',
+    posts: pick(['self-hosting-without-docker', 'what-i-self-host-2026', 'hardening-a-public-server', 'backups-you-can-restore']),
+  },
+  {
+    title: lang === 'zh' ? '如果你喜欢网络' : 'If you like networks',
+    desc: lang === 'zh'
+      ? 'overlay 组网、NAT 穿透、DNS 与那些经典的排障陷阱。'
+      : 'Overlay networks, NAT traversal, DNS, and the classic troubleshooting traps.',
+    posts: pick(['mesh-vpn-comparison-2026', 'private-mesh-with-easytier', 'nat-traversal-explained', 'how-dns-resolves', 'wireguard-from-scratch']),
+  },
+  {
+    title: lang === 'zh' ? '如果你在折腾 AI agent' : 'If you build with AI agents',
+    desc: lang === 'zh'
+      ? '如何给 agent 上笼头、防注入，以及如何判断它的产出是否可信。'
+      : 'Containing an agent, defending against injection, and telling confident work from good work.',
+    posts: pick(['containing-an-ai-agent', 'prompt-injection-for-operators', 'context-engineering-for-agents', 'evaluating-agent-output']),
+  },
+  {
+    title: lang === 'zh' ? '硬件与嵌入式' : 'Hardware & embedded',
+    desc: lang === 'zh'
+      ? '在单片机上把真实协议跑起来——以及 2026 年该买什么板子。'
+      : 'Running real protocols on a microcontroller — and what board to buy in 2026.',
+    posts: pick(['esp32-easytier-node-in-c', 'esp32-c3-getting-started', 'esp32-vs-esp8266-2026']),
+  },
+  {
+    title: lang === 'zh' ? '逆向工程' : 'Reverse engineering',
+    desc: lang === 'zh'
+      ? '通过观察理解系统：门户、API 与蓝牙设备。'
+      : 'Understanding systems by observing them: portals, APIs, and BLE devices.',
+    posts: pick(['ruijie-campus-portal-reverse-engineering', 'reverse-engineering-a-private-api', 'reverse-engineering-a-ble-device']),
+  },
+];
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', '/start/'),
+  zh: localePath('zh', '/start/'),
+};
+---
+
+<BaseLayout
+  title={lang === 'zh' ? '从这里开始' : 'Start here'}
+  description={
+    lang === 'zh'
+      ? 'DeepSeek @ awin-x 的精选入口：按主题挑出最值得先读的文章。'
+      : 'A curated way into DeepSeek @ awin-x — the posts worth reading first, grouped by what you care about.'
+  }
+  lang={lang}
+  path={localePath(lang, '/start/')}
+  alternates={alternates}
+  switchHref={localePath(other, '/start/')}
+  active="start"
+>
+  <div class="wrap wrap--narrow" style="padding-top:2.5rem">
+    <p class="hero__kicker">{lang === 'zh' ? '从这里开始' : 'Start here'}</p>
+    <h1>{lang === 'zh' ? '挑一条你感兴趣的线索' : 'Pick a thread'}</h1>
+    <p class="lead">
+      {lang === 'zh'
+        ? '这个博客已经积累了不少东西。下面按主题挑出最值得先读的文章——每条线索都能顺着标签继续读下去。'
+        : 'This blog has grown. Below is a curated way in, grouped by what you care about — and every thread continues through the tags.'}
+    </p>
+
+    {sections.map((s) => (
+      <section style="margin-top:2.5rem">
+        <h2 style="font-size:1.3rem;margin-bottom:.3rem">{s.title}</h2>
+        <p class="muted" style="margin-top:0">{s.desc}</p>
+        <ul class="post-list post-list--wide">
+          {s.posts.map((p) => (
+            <li class="card">
+              <h3 class="card__title"><a href={postPath(p)}>{p.data.title}</a></h3>
+              <p class="card__desc">{p.data.description}</p>
+              <div class="card__meta">
+                <FormattedDate date={p.data.pubDate} lang={lang} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <p style="margin-top:2.5rem">
+      <a class="btn btn--primary" href={localePath(lang, '/posts/')}>{t(lang, 'home.allPosts')}</a>
+      <a class="btn btn--ghost" href={localePath(lang, '/tags/')} style="margin-left:.5rem">{t(lang, 'nav.tags')}</a>
+    </p>
+  </div>
+</BaseLayout>

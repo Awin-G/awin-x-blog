@@ -6,7 +6,7 @@ interface Props {
   /** Locale-relative path of the equivalent page in the other language. */
   switchHref: string;
   /** Marks the active nav item. */
-  active?: 'home' | 'posts' | 'tags' | 'about';
+  active?: 'home' | 'start' | 'posts' | 'tags' | 'about';
   /** The other locale (for the toggle label). */
   switchLang: Lang;
 }
@@ -15,6 +15,7 @@ const { lang, switchHref, active, switchLang } = Astro.props;
 
 const nav = [
   { key: 'home', href: localePath(lang, '/') },
+  { key: 'start', href: localePath(lang, '/start/') },
   { key: 'posts', href: localePath(lang, '/posts/') },
   { key: 'tags', href: localePath(lang, '/tags/') },
   { key: 'about', href: localePath(lang, '/about/') },
