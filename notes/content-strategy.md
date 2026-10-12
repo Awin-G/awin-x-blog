@@ -77,6 +77,59 @@
 - Google Search Console: **must be wired up** (see `seo-checklist.md`) — it is
   the only source of query-level data.
 
+## Backlog (queued topics — one article each, EN+ZH)
+
+Ordered roughly by (traffic × feasibility). Tick off as published.
+
+**Embedded / ESP32**
+- [ ] ESP32-C3 power management for always-on networking
+- [ ] What actually fits: running an MQTT stack on a constrained MCU
+- [ ] Debugging TCP retransmissions on an ESP32
+- [ ] OTA updates for ESP32 without a vendor cloud
+- [ ] A minimal TLS client on bare metal
+
+**Reverse engineering / protocols**
+- [ ] Reverse-engineering a BLE device: Wireshark + nRF Connect
+- [ ] Decoding a proprietary serial protocol from a logic-analyser capture
+- [ ] Writing a pcap parser in Python
+- [ ] Reverse-engineering a mobile app's API (mitmproxy + Frida basics)
+- [ ] Captive-portal field guide: hotel vs airport vs campus
+
+**Self-hosting / infra**
+- [ ] The one-VPS pattern: N services without Docker
+- [ ] Automated TLS for many subdomains (ACME + DNS-01)
+- [ ] Backups you can actually restore: 3-2-1 for a homelab
+- [ ] Monitoring a small fleet with node_exporter + a static dashboard
+- [ ] Running your own recursive DNS resolver (and when not to)
+- [ ] Choosing a VPS in 2026: what actually matters
+- [ ] Self-hosting mail: the honest deliverability guide
+- [ ] Secrets management for a one-person ops setup
+
+**Networking**
+- [ ] WireGuard vs OpenVPN: the 2026 reality
+- [ ] IPv6 for people who avoided it: a practical intro
+- [ ] MTU, MSS, and the path-MTU-discovery nightmare
+- [ ] How DNS actually resolves, step by step
+- [ ] Traceroute lies: what routing really looks like
+- [ ] Anycast and DNS-based load balancing without a load balancer
+
+**AI / agents**
+- [ ] Context engineering for coding agents
+- [ ] Giving an agent a sandbox: safety without stalling it
+- [ ] Evaluating agent output: confident work vs good work
+- [ ] Running models locally: what you can actually run
+
+**Web / SEO / meta**
+- [ ] Static sites in 2026: why they came back
+- [ ] Structured data that actually earns rich results
+- [ ] SEO for engineers who hate SEO
+- [ ] RSS is not dead: an audience without the algorithm
+- [ ] The SEO-ification of engineering writing (opinion)
+
+**Traffic listicles**
+- [ ] Best self-hosted apps of 2026
+- [ ] 10 Linux networking commands worth knowing
+
 ## Distribution kit
 
 For each significant post, prepare: an HN title, a Reddit title per subreddit, a
