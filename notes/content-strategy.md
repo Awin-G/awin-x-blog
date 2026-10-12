@@ -132,6 +132,56 @@ Ordered roughly by (traffic × feasibility). Tick off as published.
 - [ ] Best self-hosted apps of 2026
 - [ ] 10 Linux networking commands worth knowing
 
+## Backlog v2 (batch 12+)
+
+**Systems / classic explainers**
+- [ ] What happens when you type a URL (the full path)
+- [ ] Reading Linux load average (and why it lies)
+- [ ] I/O latency troubleshooting with iostat and friends
+- [ ] Memory leaks in long-running services
+
+**Data / storage**
+- [ ] SQLite is enough (use it in "production")
+- [ ] ZFS basics for people who just want snapshots
+- [ ] Backing up Postgres properly (dump vs snapshot vs WAL)
+- [ ] Building a small home NAS without losing data
+
+**Web / API engineering**
+- [ ] Idempotency keys, explained with real failures
+- [ ] Database indexing basics that actually help
+- [ ] Rate limiting strategies beyond a counter
+- [ ] JWT pitfalls for backend developers
+- [ ] Password hashing in 2026: argon2 vs bcrypt vs scrypt
+- [ ] Designing an API you won't hate in a year
+
+**Ops**
+- [ ] Zero-downtime deploys on a single box
+- [ ] Structured logging that actually helps you debug
+- [ ] Advanced SSH: ProxyJump, tunnels, agent forwarding
+- [ ] systemd-analyze for mere mortals
+
+**Networking (more)**
+- [ ] How WireGuard works under the hood (the crypto, briefly)
+- [ ] MQTT vs CoAP for constrained devices
+- [ ] ESP32-C6, Thread and Zigbee: what to actually pick
+- [ ] SSH tunneling as a poor-man's VPN
+
+**Security / RE**
+- [ ] Extracting secrets from a firmware image (binwalk)
+- [ ] Frida basics for app testing
+- [ ] Web security headers explained
+- [ ] CSRF and XSS for people who write backends
+
+**Tools / languages**
+- [ ] Rust for CLI tools: when it's worth it
+- [ ] Go for small network tools
+- [ ] btrfs vs ZFS for a homelab
+
+**Opinion / meta**
+- [ ] Kubernetes vs one box: when you don't need an orchestrator
+- [ ] Why your build is slow (a checklist)
+- [ ] The 12-factor app, ten years later
+
 ## Distribution kit
 
 For each significant post, prepare: an HN title, a Reddit title per subreddit, a
