@@ -43,6 +43,19 @@ build break.
 > source). Do **not** force a figure — only add one when it replaces a
 > paragraph. Keep colours minimal (use `currentColor` / `#0f766e` accent) so it
 > works in light and dark mode. Wrap in `<figure>` + `<figcaption>`.
+
+> **Workspace & research (encouraged, not required):** you may use a scratch dir
+> `/tmp/opencode/work/<slug>/` to *ground the article in reality*:
+> - fetch official docs (read-only) to verify version-sensitive claims instead of
+>   guessing;
+> - run commands and paste the **real, trimmed output** the article quotes
+>   (e.g. `jq`, `openssl s_client`, `sqlite3`, a `git` sequence in a throwaway
+>   repo, `curl` against a local test server).
+>
+> Hard limits: **no `sudo`, no system package installs, no network scans or
+> anything against third parties, nothing destructive, write only inside the
+> scratch dir**, and touch no repo files except your two output files. If a
+> command can't be run here, say so and describe it rather than inventing output.
 >
 > **Output (exactly these two; touch nothing else):**
 > `src/content/blog/en/<slug>.md`, `src/content/blog/zh/<slug>.md`
