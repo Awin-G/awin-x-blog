@@ -40,11 +40,14 @@ sync_nginx() {
   rm -f "$bak"
 }
 
-# Single-flight: never run two deploys at once.
-exec 9>"$LOCK"
-if ! flock -n 9; then
-  log "another deploy is already running; skipping"
-  exit 0
+# Single-flight: never run two deploys at once. The wrapper may already hold
+# the lock (BLOG_LOCK_HELD=1) — in that case skip re-acquiring it.
+if [ "${BLOG_LOCK_HELD:-0}" != "1" ]; then
+  exec 9>"$LOCK"
+  if ! flock -n 9; then
+    log "another deploy is already running; skipping"
+    exit 0
+  fi
 fi
 
 command -v node >/dev/null || { log "ERROR: node not found"; exit 1; }
