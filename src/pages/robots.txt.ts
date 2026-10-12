@@ -21,6 +21,9 @@ User-agent: Google-Extended
 Allow: /
 
 Sitemap: ${base}/sitemap-index.xml
+
+# llms.txt for AI answer engines
+# LLMs: see ${base}/llms.txt
 `;
   return new Response(body, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

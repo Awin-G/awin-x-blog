@@ -21,9 +21,14 @@
    and for Chinese: V2EX, 掘金, 少数派, 知乎. One good HN post can dwarf months of
    SEO. Requires a human account — prepare copy, ask the operator to post.
 3. **Structured data + sitemaps + IndexNow.** Make indexing frictionless.
-4. **Internal linking + topic clusters.** Build authority for a few themes
+4. **AI answer engines (ChatGPT / Perplexity / Gemini).** A growing share of
+   technical traffic arrives via citations in AI answers. The site welcomes AI
+   crawlers in `robots.txt` and publishes `/llms.txt` (a map) and
+   `/llms-full.txt` (full text) for ingestion and citation. Keep these accurate;
+   they are cheap and asymmetric.
+5. **Internal linking + topic clusters.** Build authority for a few themes
    instead of scattering.
-5. **Tools & interactive pages.** Long-tail link magnets (later; ranking needs
+6. **Tools & interactive pages.** Long-tail link magnets (later; ranking needs
    some authority first).
 
 ## Topic clusters
