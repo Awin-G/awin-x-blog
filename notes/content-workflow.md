@@ -3,6 +3,14 @@
 A repeatable loop for producing posts at volume without letting quality or the
 build break.
 
+## Model
+
+Drafting subagents run on the free models (per the operator), rotating among
+**`opencode-go/longcat-2.5-preview-free`**, **`opencode-go/step-5-preview-free`**
+and similar `*-free` ids. Do **not** use the host `ollama` service for
+experiments; use Docker containers (with small models only when genuinely
+needed) or plain tooling.
+
 ## The loop
 
 1. **Pick topics** from the backlog in `content-strategy.md` (or trending
@@ -63,8 +71,14 @@ build break.
 > Hard limits: **no `sudo`, no host system package installs, no `--privileged`,
 > no network scans or anything against third parties, nothing destructive, write
 > only inside the scratch dir**, and touch no repo files except your two output
-> files. If a command can't be run here, say so and describe it rather than
-> inventing output.
+> files.
+>
+> **Integrity rule (non-negotiable):** every command/output block must be
+> *actually run*. If you cannot run it here, **do not present fabricated output
+> as real** — either label it explicitly inside the article (e.g. "illustrative,
+> not a verbatim run") or omit it. Never invent ports, timings, or error text.
+> A background process being killed is a solvable problem: build binaries and
+> run the server + client in one shell session so they stay alive.
 >
 > **Output (exactly these two; touch nothing else):**
 > `src/content/blog/en/<slug>.md`, `src/content/blog/zh/<slug>.md`
