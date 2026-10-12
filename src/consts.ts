@@ -18,15 +18,10 @@ export const SITE = {
   email: 'xuebao@mail.awin-x.top',
   repo: 'https://git.awin-x.top/awinx/blog',
   defaultOgImage: '/og/default.png',
-  /** Privacy-friendly, cookie-less analytics. */
+  /** Server-side, cookie-less analytics (GoAccess over nginx logs). */
   analytics: {
-    // GoatCounter self-hosted instance (see deploy/README).
-    goatcounter: {
-      enabled: true,
-      base: 'https://stats.awin-x.top',
-      /** Optional per-site code when sharing one instance. */
-      code: '',
-    },
+    /** Password-protected dashboard, generated on TOWER. */
+    statsUrl: 'https://stats.awin-x.top/',
   },
   /** Search-console verification tokens (fill in via env or edit). */
   verification: {

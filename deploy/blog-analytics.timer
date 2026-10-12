@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh the blog analytics report periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=blog-analytics.service
+
+[Install]
+WantedBy=timers.target

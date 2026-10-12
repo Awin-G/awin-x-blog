@@ -1,0 +1,9 @@
+[Unit]
+Description=Generate the blog analytics report from nginx logs
+After=network.target nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/blog/analytics/report.sh
+Nice=15
+CPUWeight=40

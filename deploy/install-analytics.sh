@@ -1,86 +1,82 @@
 #!/usr/bin/env bash
 #
-# Install / update GoatCounter (cookie-less analytics) on TOWER. Idempotent.
+# Install / update server-side analytics on TOWER. Idempotent.
+# GoAccess parses the per-vhost nginx access log; the report is served at
+# https://stats.awin-x.top/ behind HTTP basic auth.
+#
 # Run as root:   bash /srv/blog/repo/deploy/install-analytics.sh
 #
 set -euo pipefail
 
 DOMAIN="stats.awin-x.top"
 EMAIL="xuebao@mail.awin-x.top"
-BIN="/usr/local/bin/goatcounter"
-VERSION="v2.7.0"
-DBDIR="/var/lib/goatcounter"
 WEBROOT="/var/www/stats"
-CRED="/root/goatcounter-credentials.txt"
+CRED="/root/blog-stats-credentials.txt"
+HTPASS="/etc/nginx/.htpasswd-blog-stats"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
 log() { printf '\n=== %s ===\n' "$*"; }
 
 log "dns record"
-python3 "$DIR/tools/dnspod_set.py" stats A 88.218.79.95 600 || echo "  (DNS step failed — check credentials)"
+python3 "$DIR/tools/dnspod_set.py" stats A 88.218.79.95 600 || echo "  (DNS step failed)"
 
-log "user + dirs"
-id goatcounter >/dev/null 2>&1 || useradd --system --home "$DBDIR" --shell /usr/sbin/nologin goatcounter
-mkdir -p "$DBDIR" "$WEBROOT"
+log "install goaccess"
+command -v goaccess >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y goaccess; }
+goaccess --version | head -1
 
-log "binary"
-if [ ! -x "$BIN" ]; then
-  curl -sL "https://github.com/arp242/goatcounter/releases/download/$VERSION/goatcounter-$VERSION-linux-amd64.gz" | gunzip > "$BIN"
-  chmod +x "$BIN"
-fi
-"$BIN" version
+log "report script"
+mkdir -p /srv/blog/analytics "$WEBROOT"
+install -m 0755 "$DIR/analytics-report.sh" /srv/blog/analytics/report.sh
 
-log "credentials"
+log "basic auth"
 if [ ! -f "$CRED" ]; then
-  openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 24 > "$CRED"
+  openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 20 > "$CRED"
   chmod 600 "$CRED"
 fi
 PW="$(cat "$CRED")"
+printf 'stats:%s\n' "$(openssl passwd -apr1 "$PW")" > "$HTPASS"
+chmod 640 "$HTPASS"
+chown root:www-data "$HTPASS" 2>/dev/null || true
 
-log "database + site"
-DB="sqlite+$DBDIR/db.sqlite3"
-if ! "$BIN" db test -db "$DB" >/dev/null 2>&1; then
-  "$BIN" db create site -createdb -db "$DB" -vhost "$DOMAIN" -user.email "$EMAIL" -user.password "$PW"
-else
-  echo "database already present"
-fi
-chown -R goatcounter:goatcounter "$DBDIR"
-
-log "service"
-install -m 0644 "$DIR/goatcounter.service" /etc/systemd/system/goatcounter.service
+log "systemd timer"
+install -m 0644 "$DIR/blog-analytics.service" /etc/systemd/system/blog-analytics.service
+install -m 0644 "$DIR/blog-analytics.timer" /etc/systemd/system/blog-analytics.timer
 systemctl daemon-reload
-systemctl enable --now goatcounter.service
-sleep 1
-systemctl is-active goatcounter.service
 
-log "nginx (http, for the ACME challenge)"
-cat > /etc/nginx/sites-available/stats-http <<EOF
+log "retire goatcounter (superseded by server-side analytics)"
+systemctl disable --now goatcounter 2>/dev/null || true
+
+log "nginx: stats vhost (as needed for the cert)"
+if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  cat > /etc/nginx/sites-available/stats-tmp <<EOF
 server {
     listen 80;
     server_name $DOMAIN;
     location /.well-known/acme-challenge/ { root $WEBROOT; }
-    location / { proxy_pass http://127.0.0.1:8081; proxy_set_header Host \$host; }
 }
 EOF
-ln -sfn /etc/nginx/sites-available/stats-http /etc/nginx/sites-enabled/stats-http
-nginx -t && systemctl reload nginx
-
-log "tls"
-if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  ln -sfn /etc/nginx/sites-available/stats-tmp /etc/nginx/sites-enabled/stats-tmp
+  nginx -t && systemctl reload nginx
   certbot certonly --webroot -w "$WEBROOT" -d "$DOMAIN" \
-    --non-interactive --agree-tos --no-eff-email --preferred-challenges http -m "$EMAIL" \
-    || certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --no-eff-email -m "$EMAIL"
+    --non-interactive --agree-tos --no-eff-email --preferred-challenges http -m "$EMAIL"
+  rm -f /etc/nginx/sites-enabled/stats-tmp /etc/nginx/sites-available/stats-tmp
 fi
 
-log "nginx (tls, final)"
-rm -f /etc/nginx/sites-enabled/stats-http /etc/nginx/sites-available/stats-http
 install -m 0644 "$DIR/nginx-stats.conf" /etc/nginx/sites-available/stats
 ln -sfn /etc/nginx/sites-available/stats /etc/nginx/sites-enabled/stats
+rm -f /etc/nginx/sites-enabled/stats-http /etc/nginx/sites-available/stats-http
+
+log "nginx: blog vhost (adds the per-vhost access log)"
+install -m 0644 "$DIR/nginx-blog.conf" /etc/nginx/sites-available/blog
 nginx -t && systemctl reload nginx
 
+log "first report"
+/srv/blog/analytics/report.sh
+systemctl enable --now blog-analytics.timer
+
 log "verify"
-curl -sS -o /dev/null -w "https://%{url_effective} -> %{http_code}\n" "https://$DOMAIN/" || true
+curl -sS -o /dev/null -w "stats (with auth) -> %{http_code}\n" -u "stats:$PW" "https://$DOMAIN/" || true
 echo
-echo "Dashboard : https://$DOMAIN/"
-echo "Login     : $EMAIL"
+echo "Dashboard : https://$DOMAIN/  (user: stats)"
 echo "Password  : stored in $CRED"
+echo "Raw JSON  : $WEBROOT/report.json"
