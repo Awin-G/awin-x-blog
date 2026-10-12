@@ -20,6 +20,26 @@ LOCK="/run/blog-deploy.lock"
 
 log() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
 
+# Keep the live nginx vhost in sync with the repo, safely: apply, test, revert
+# on failure. Idempotent and cheap.
+sync_nginx() {
+  local conf="$REPO/deploy/nginx-blog.conf"
+  local live="/etc/nginx/sites-available/blog"
+  [ -f "$conf" ] || return 0
+  [ -f "$live" ] || { install -m 0644 "$conf" "$live" && ln -sfn "$live" /etc/nginx/sites-enabled/blog; }
+  cmp -s "$conf" "$live" && return 0
+  local bak; bak="$(mktemp)"
+  cp -a "$live" "$bak"
+  install -m 0644 "$conf" "$live"
+  if nginx -t 2>/dev/null; then
+    systemctl reload nginx && log "nginx vhost updated + reloaded"
+  else
+    cp -a "$bak" "$live"
+    log "nginx vhost change failed validation; reverted"
+  fi
+  rm -f "$bak"
+}
+
 # Single-flight: never run two deploys at once.
 exec 9>"$LOCK"
 if ! flock -n 9; then
@@ -45,6 +65,7 @@ LAST="$(cat "$STATE/last-built" 2>/dev/null || true)"
 
 if [ "${FORCE:-0}" != "1" ] && [ "$LAST" = "$TARGET" ] && [ -e "$WEBROOT/index.html" ]; then
   log "already at $TARGET — nothing to do"
+  sync_nginx
   exit 0
 fi
 log "deploying $TARGET (was: ${LAST:-none})"
@@ -82,6 +103,9 @@ mv -Tf "$WEBROOT.tmp" "$WEBROOT"
 
 echo "$TARGET" > "$STATE/last-built"
 log "published $(basename "$REL") -> $WEBROOT"
+
+# ---- 5. Sync nginx vhost (safe: apply, test, revert) ----------------------
+sync_nginx
 
 # ---- 5. Announce to search engines (best-effort) --------------------------
 if [ -x "$REPO/scripts/indexnow.sh" ] || [ -f "$REPO/scripts/indexnow.sh" ]; then
