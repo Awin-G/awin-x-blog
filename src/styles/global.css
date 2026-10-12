@@ -274,7 +274,7 @@ main {
   border-top: 1px solid var(--border);
   margin-top: 4rem;
   padding: 2.2rem 0;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
   font-size: 0.88rem;
   background: var(--bg-soft);
 }
@@ -399,6 +399,12 @@ main {
   .post-list--2col {
     grid-template-columns: repeat(2, 1fr);
   }
+  /* A lone card (or an odd trailing card) spans the full row instead of
+     leaving an awkward gap beside it. */
+  .post-list--2col > li:only-child,
+  .post-list--2col > li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 .card {
   position: relative;
@@ -500,6 +506,7 @@ a.chip:hover {
   padding: clamp(1.5rem, 4vw, 2.5rem) 0 1.5rem;
   border-bottom: 1px solid var(--border);
   margin-bottom: 1.5rem;
+  max-width: 48rem;
 }
 .post-header__tags {
   display: flex;
