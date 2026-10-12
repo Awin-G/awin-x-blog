@@ -1,0 +1,27 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { localePath } from '@/consts';
+---
+
+<BaseLayout
+  title="404 — Not found"
+  description="The page you were looking for does not exist."
+  lang="en"
+  path="/404/"
+  noindex
+  switchHref={localePath('zh', '/')}
+>
+  <div class="wrap wrap--narrow notfound">
+    <p class="hero__kicker">Error 404</p>
+    <h1>404</h1>
+    <p class="lead">
+      That page does not exist — or went off the grid.<br />
+      这个页面不存在——或者它已经离线了。
+    </p>
+    <div class="hero__actions" style="justify-content:center">
+      <a class="btn btn--primary" href="/">Back home / 返回首页</a>
+      <a class="btn btn--ghost" href="/posts/">Posts</a>
+      <a class="btn btn--ghost" href="/zh/">中文</a>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import { SITE, t, localePath, type Lang } from '@/consts';
+import { getPosts } from '@/lib/posts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const posts = await getPosts(lang);
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', '/posts/'),
+  zh: localePath('zh', '/posts/'),
+};
+---
+
+<BaseLayout
+  title={t(lang, 'posts.title')}
+  description={t(lang, 'posts.description')}
+  lang={lang}
+  path={localePath(lang, '/posts/')}
+  alternates={alternates}
+  switchHref={localePath(other, '/posts/')}
+  active="posts"
+>
+  <div class="wrap" style="padding-top:2.5rem">
+    <h1>{t(lang, 'posts.title')}</h1>
+    <p class="lead">{t(lang, 'posts.description')}</p>
+
+    {posts.length > 0 ? (
+      <ul class="post-list post-list--2col" style="margin-top:2rem">
+        {posts.map((p) => (
+          <li><PostCard post={p} lang={lang} /></li>
+        ))}
+      </ul>
+    ) : (
+      <p class="muted">{t(lang, 'posts.empty')}</p>
+    )}
+  </div>
+</BaseLayout>

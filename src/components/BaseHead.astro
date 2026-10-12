@@ -1,0 +1,120 @@
+---
+import {
+  SITE,
+  DEFAULT_LOCALE,
+  HTML_LANG,
+  OG_LOCALE,
+  HREFLANG,
+  LOCALES,
+  type Lang,
+} from '@/consts';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  /** Locale-relative path of this page, e.g. `/posts/foo/`. */
+  path: string;
+  /** Locale-relative paths of all translations (including x-default). */
+  alternates?: Partial<Record<Lang, string>>;
+  /** og:type — mostly 'website' | 'article'. */
+  type?: 'website' | 'article';
+  image?: string;
+  imageAlt?: string;
+  /** Article metadata */
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  tags?: string[];
+  noindex?: boolean;
+  /** Pre-rendered JSON-LD objects for this page. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  lang,
+  path,
+  alternates,
+  type = 'website',
+  image = SITE.defaultOgImage,
+  imageAlt,
+  publishedTime,
+  modifiedTime,
+  tags,
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+
+const site = SITE.url.replace(/\/$/, '');
+const canonical = new URL(path, site + '/').href;
+const ogImage = new URL(image, site).href;
+
+// Full title: keep the brand suffix but avoid duplication.
+const fullTitle = title.includes(SITE.name) ? title : `${title} · ${SITE.name}`;
+
+// hreflang alternates. Only include locales we actually have.
+const altMap: Partial<Record<Lang, string>> = alternates ?? { [lang]: path };
+const hreflangTags = LOCALES.filter((l) => altMap[l]).map((l) => ({
+  lang: HREFLANG[l],
+  href: new URL(altMap[l] as string, site + '/').href,
+}));
+const xDefault = altMap[DEFAULT_LOCALE] ?? altMap[lang];
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+{!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
+
+<!-- hreflang -> bilingual targeting -->
+{hreflangTags.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+{xDefault && <link rel="alternate" hreflang="x-default" href={new URL(xDefault, site + '/').href} />}
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={OG_LOCALE[lang]} />
+{LOCALES.filter((l) => l !== lang && altMap[l]).map((l) => (
+  <meta property="og:locale:alternate" content={OG_LOCALE[l]} />
+))}
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+{imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+{publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+{tags?.map((t) => <meta property="article:tag" content={t} />)}
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Feeds -->
+<link rel="alternate" type="application/rss+xml" title={`${SITE.name} (${lang})`} href={new URL(lang === DEFAULT_LOCALE ? '/rss.xml' : `/${lang}/rss.xml`, site + '/').href} />
+
+<!-- Icons -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0d1012" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
+
+<!-- Search console verification -->
+{SITE.verification.google && <meta name="google-site-verification" content={SITE.verification.google} />}
+{SITE.verification.bing && <meta name="msvalidate.01" content={SITE.verification.bing} />}
+
+{jsonLd.map((obj) => (
+  <script type="application/ld+json" set:html={JSON.stringify(obj)} />
+))}

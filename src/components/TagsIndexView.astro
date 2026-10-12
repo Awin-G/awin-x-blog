@@ -1,0 +1,41 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { t, localePath, type Lang } from '@/consts';
+import { tagsOf, tagPath } from '@/lib/posts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const tags = await tagsOf(lang);
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', '/tags/'),
+  zh: localePath('zh', '/tags/'),
+};
+---
+
+<BaseLayout
+  title={t(lang, 'tags.title')}
+  description={t(lang, 'tags.description')}
+  lang={lang}
+  path={localePath(lang, '/tags/')}
+  alternates={alternates}
+  switchHref={localePath(other, '/tags/')}
+  active="tags"
+>
+  <div class="wrap" style="padding-top:2.5rem">
+    <h1>{t(lang, 'tags.title')}</h1>
+    <p class="lead">{t(lang, 'tags.description')}</p>
+    <ul class="tag-cloud">
+      {tags.map(({ tag, count }) => (
+        <li>
+          <a class="chip" href={tagPath(lang, tag)}>
+            {tag} <span class="chip__count">{count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

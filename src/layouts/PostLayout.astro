@@ -1,0 +1,205 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import FormattedDate from '@/components/FormattedDate.astro';
+import {
+  SITE,
+  t,
+  localePath,
+  LOCALES,
+  DEFAULT_LOCALE,
+  type Lang,
+} from '@/consts';
+import {
+  postPath,
+  tagPath,
+  readingTime,
+  wordCount,
+  translationsOf,
+  relatedPosts,
+  adjacentPosts,
+  type Post,
+} from '@/lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const lang = post.data.lang as Lang;
+const path = postPath(post);
+const { Content, headings } = await render(post);
+
+const translations = await translationsOf(post);
+const related = await relatedPosts(post, 3);
+const { prev, next } = await adjacentPosts(post);
+
+// hreflang alternates: this post + any translations.
+const alternates: Partial<Record<Lang, string>> = { [lang]: path };
+for (const tr of translations) alternates[tr.data.lang as Lang] = postPath(tr);
+
+const otherLang: Lang = LOCALES.find((l) => l !== lang) ?? DEFAULT_LOCALE;
+const switchHref = translations[0] ? postPath(translations[0]) : localePath(otherLang, '/posts/');
+
+const site = SITE.url.replace(/\/$/, '');
+const canonical = new URL(path, site + '/').href;
+const minutes = readingTime(post);
+const updated = post.data.updatedDate;
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const jsonLd: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.description,
+    datePublished: post.data.pubDate.toISOString(),
+    dateModified: (updated ?? post.data.pubDate).toISOString(),
+    inLanguage: lang === 'zh' ? 'zh-CN' : 'en',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    image: new URL(post.data.cover ?? SITE.defaultOgImage, site).href,
+    author: { '@type': 'Person', name: SITE.author, url: SITE.humanUrl },
+    publisher: { '@type': 'Person', name: SITE.author, url: SITE.humanUrl },
+    keywords: (post.data.keywords ?? post.data.tags).join(', '),
+    articleSection: post.data.tags[0],
+    wordCount: wordCount(post.body ?? ''),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: new URL(localePath(lang, '/'), site).href },
+      { '@type': 'ListItem', position: 2, name: t(lang, 'nav.posts'), item: new URL(localePath(lang, '/posts/'), site).href },
+      { '@type': 'ListItem', position: 3, name: post.data.title, item: canonical },
+    ],
+  },
+];
+
+const encodedUrl = encodeURIComponent(canonical);
+const encodedTitle = encodeURIComponent(post.data.title);
+const shareLinks =
+  lang === 'zh'
+    ? [
+        { label: '微博', href: `https://service.weibo.com/share/share.php?url=${encodedUrl}&title=${encodedTitle}` },
+        { label: 'X', href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}` },
+        { label: 'Telegram', href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}` },
+      ]
+    : [
+        { label: 'X', href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}` },
+        { label: 'Hacker News', href: `https://news.ycombinator.com/submitlink?u=${encodedUrl}&t=${encodedTitle}` },
+        { label: 'Reddit', href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}` },
+        { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}` },
+      ];
+---
+
+<BaseLayout
+  title={post.data.seoTitle ?? post.data.title}
+  description={post.data.description}
+  lang={lang}
+  path={path}
+  alternates={alternates}
+  switchHref={switchHref}
+  active="posts"
+  type="article"
+  image={post.data.cover}
+  publishedTime={post.data.pubDate}
+  modifiedTime={updated}
+  tags={post.data.tags}
+  jsonLd={jsonLd}
+>
+  <div class="wrap wrap--narrow">
+    <div class="post-header">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href={localePath(lang, '/')}>{t(lang, 'nav.home')}</a></li>
+          <li><a href={localePath(lang, '/posts/')}>{t(lang, 'nav.posts')}</a></li>
+          <li aria-current="page">{post.data.title}</li>
+        </ol>
+      </nav>
+      <div class="post-header__tags">
+        {post.data.tags.map((tg) => (
+          <a class="chip" href={tagPath(lang, tg)}>{tg}</a>
+        ))}
+      </div>
+      <h1>{post.data.title}</h1>
+      <p class="post-header__lead">{post.data.description}</p>
+      <div class="post-meta">
+        <span>{t(lang, 'post.by')} <strong>{SITE.author}</strong></span>
+        <span class="post-meta__sep">·</span>
+        <span>{t(lang, 'post.published')} <FormattedDate date={post.data.pubDate} lang={lang} format="long" datetime /></span>
+        {updated && (
+          <>
+            <span class="post-meta__sep">·</span>
+            <span>{t(lang, 'post.updated')} <FormattedDate date={updated} lang={lang} format="long" datetime /></span>
+          </>
+        )}
+        <span class="post-meta__sep">·</span>
+        <span>{t(lang, 'post.readingTime', { minutes })}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="post-grid">
+      <article class="prose">
+        <Content />
+
+        <nav class="post-nav" aria-label="Post navigation">
+          {prev ? (
+            <a href={postPath(prev)}>
+              <span class="post-nav__label">← {t(lang, 'post.prev')}</span>
+              {prev.data.title}
+            </a>
+          ) : (
+            <span></span>
+          )}
+          {next ? (
+            <a class="post-nav--next" href={postPath(next)}>
+              <span class="post-nav__label">{t(lang, 'post.next')} →</span>
+              {next.data.title}
+            </a>
+          ) : (
+            <span></span>
+          )}
+        </nav>
+
+        {related.length > 0 && (
+          <section class="related">
+            <h2>{t(lang, 'post.related')}</h2>
+            <ul class="post-list post-list--wide">
+              {related.map((r) => (
+                <li class="card">
+                  <h3 class="card__title"><a href={postPath(r)}>{r.data.title}</a></h3>
+                  <p class="card__desc">{r.data.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <div class="share">
+          <strong>{lang === 'zh' ? '分享' : 'Share'}:</strong>{' '}
+          {shareLinks.map((s, i) => (
+            <>
+              <a href={s.href} rel="noopener nofollow" target="_blank">{s.label}</a>{i < shareLinks.length - 1 ? ' · ' : ''}
+            </>
+          ))}
+        </div>
+      </article>
+
+      {post.data.toc && toc.length > 2 && (
+        <aside class="toc" aria-label={t(lang, 'post.toc')}>
+          <p class="toc__title">{t(lang, 'post.toc')}</p>
+          <ul>
+            {toc.map((h) => (
+              <li style={h.depth === 3 ? 'margin-left:.7rem' : undefined}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+    </div>
+  </div>
+</BaseLayout>

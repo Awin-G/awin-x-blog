@@ -1,0 +1,13 @@
+[Unit]
+Description=Periodically deploy the blog when Gitea has new commits
+
+[Timer]
+# Fast first convergence after boot, then a steady poll.
+OnBootSec=90s
+OnUnitActiveSec=3min
+AccuracySec=30s
+Persistent=true
+Unit=blog-deploy.service
+
+[Install]
+WantedBy=timers.target

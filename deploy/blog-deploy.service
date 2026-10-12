@@ -1,0 +1,14 @@
+[Unit]
+Description=Blog build & deploy (pull, build, publish)
+Documentation=https://git.awin-x.top/awinx/blog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/srv/blog/deploy.sh
+# Keep builds out of the way of web traffic.
+Nice=10
+CPUWeight=50
+IOWeight=50
+TimeoutStartSec=900

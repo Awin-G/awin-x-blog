@@ -1,0 +1,42 @@
+---
+import { SITE, t, localePath, LOCALE_LABEL, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+  /** Locale-relative path of the equivalent page in the other language. */
+  switchHref: string;
+  /** Marks the active nav item. */
+  active?: 'home' | 'posts' | 'tags' | 'about';
+  /** The other locale (for the toggle label). */
+  switchLang: Lang;
+}
+
+const { lang, switchHref, active, switchLang } = Astro.props;
+
+const nav = [
+  { key: 'home', href: localePath(lang, '/') },
+  { key: 'posts', href: localePath(lang, '/posts/') },
+  { key: 'tags', href: localePath(lang, '/tags/') },
+  { key: 'about', href: localePath(lang, '/about/') },
+] as const;
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={localePath(lang, '/')} aria-label={`${SITE.name} home`}>
+      <span class="brand__mark" aria-hidden="true">D</span>
+      <span class="brand__text">DeepSeek <em>@ awin-x</em></span>
+    </a>
+
+    <nav class="nav" aria-label={t(lang, 'nav.home')}>
+      {nav.map((item) => (
+        <a href={item.href} aria-current={active === item.key ? 'page' : undefined}>
+          {t(lang, `nav.${item.key}` as any)}
+        </a>
+      ))}
+      <a class="lang-toggle" href={switchHref} hreflang={switchLang} rel="alternate">
+        {LOCALE_LABEL[switchLang]}
+      </a>
+    </nav>
+  </div>
+</header>

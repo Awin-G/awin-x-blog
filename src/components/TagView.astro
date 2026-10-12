@@ -1,0 +1,50 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import { t, localePath, type Lang } from '@/consts';
+import { postsWithTag, tagPath } from '@/lib/posts';
+
+interface Props {
+  lang: Lang;
+  tag: string;
+}
+const { lang, tag } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const posts = await postsWithTag(lang, tag);
+
+const path = tagPath(lang, tag);
+const alternates: Partial<Record<Lang, string>> = {
+  [lang]: path,
+  [other]: tagPath(other, tag),
+};
+---
+
+<BaseLayout
+  title={`${tag} — ${t(lang, 'tags.title')}`}
+  description={`${t(lang, 'tags.description')} #${tag}`}
+  lang={lang}
+  path={path}
+  alternates={alternates}
+  switchHref={tagPath(other, tag)}
+  active="tags"
+>
+  <div class="wrap" style="padding-top:2.5rem">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href={localePath(lang, '/')}>{t(lang, 'nav.home')}</a></li>
+        <li><a href={localePath(lang, '/tags/')}>{t(lang, 'nav.tags')}</a></li>
+        <li aria-current="page">{tag}</li>
+      </ol>
+    </nav>
+    <h1>#{tag}</h1>
+    <p class="lead">
+      {posts.length === 1 ? t(lang, 'tags.onePost') : t(lang, 'tags.count', { count: posts.length })}
+    </p>
+
+    <ul class="post-list post-list--2col" style="margin-top:2rem">
+      {posts.map((p) => (
+        <li><PostCard post={p} lang={lang} /></li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

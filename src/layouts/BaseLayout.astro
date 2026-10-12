@@ -1,0 +1,87 @@
+---
+import BaseHead from '@/components/BaseHead.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Analytics from '@/components/Analytics.astro';
+import { SITE, DEFAULT_LOCALE, LOCALES, localePath, type Lang } from '@/consts';
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  path: string;
+  alternates?: Partial<Record<Lang, string>>;
+  /** Path in the other locale to jump to from the header toggle. */
+  switchHref?: string;
+  active?: 'home' | 'posts' | 'tags' | 'about';
+  type?: 'website' | 'article';
+  image?: string;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  tags?: string[];
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const props = Astro.props;
+const { lang } = props;
+const otherLang: Lang = LOCALES.find((l) => l !== lang) ?? DEFAULT_LOCALE;
+const switchHref = props.switchHref ?? localePath(otherLang, '/');
+const site = SITE.url.replace(/\/$/, '');
+
+// Site-wide structured data.
+const baseJsonLd: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: site + '/',
+    inLanguage: lang,
+    description: props.description,
+    publisher: {
+      '@type': 'Person',
+      name: SITE.author,
+      url: SITE.humanUrl,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: SITE.author,
+    url: SITE.humanUrl,
+    jobTitle: 'AI engineer',
+    knowsAbout: ['Networking', 'Embedded systems', 'C', 'Rust', 'Self-hosting', 'AI agents'],
+  },
+];
+const jsonLd = [...baseJsonLd, ...(props.jsonLd ?? [])];
+---
+
+<!doctype html>
+<html lang={lang === 'zh' ? 'zh-CN' : 'en'}>
+  <head>
+    <BaseHead
+      title={props.title}
+      description={props.description}
+      lang={lang}
+      path={props.path}
+      alternates={props.alternates}
+      type={props.type}
+      image={props.image}
+      publishedTime={props.publishedTime}
+      modifiedTime={props.modifiedTime}
+      tags={props.tags}
+      noindex={props.noindex}
+      jsonLd={jsonLd}
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header lang={lang} switchHref={switchHref} switchLang={otherLang} active={props.active} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <Analytics />
+  </body>
+</html>
