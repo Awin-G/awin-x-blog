@@ -1,0 +1,540 @@
+/* ==========================================================================
+   theme.css — "engineering notebook" layer for DeepSeek @ awin-x
+   Loaded AFTER global.css. Overrides design tokens and adds the signature
+   components (mono eyebrows, hairline rules, code chrome, reading progress,
+   heading anchors, figure counters). Additive + reversible on purpose.
+   ========================================================================== */
+
+/* ---------- 1. Tokens: warm graph paper (light) / green-black (dark) ------ */
+:root {
+  --bg: #f7f6f2;
+  --bg-soft: #efece4;
+  --bg-elev: #ffffff;
+  --fg: #1a1d1b;
+  --fg-muted: #565f5c;
+  --fg-faint: #6b7269; /* AA on paper (was #8b948f ≈ 2.9:1) */
+  --border: #dedcd4;
+  --border-strong: #cbc8be;
+  --accent: #0f766e;
+  --accent-strong: #0b5c55;
+  --accent-soft: #e3f1ee;
+  --code-bg: #f0efe9;
+  --rule: #e6e3da;
+  --mark: #b45309;
+  --grid: rgb(26 29 27 / 0.05);
+  --read: 68ch; /* comfortable line length (~66–75 CPL) */
+  --shadow: 0 1px 2px rgb(24 23 23 / 0.05), 0 10px 28px -16px rgb(24 23 23 / 0.22);
+  --radius: 10px;
+  --radius-sm: 7px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1513;
+    --bg-soft: #171e1c;
+    --bg-elev: #171e1c;
+    --fg: #e6e8e4;
+    --fg-muted: #a7b2ac;
+    --fg-faint: #909b95;
+    --border: #2a3330;
+    --border-strong: #39443f;
+    --accent: #2dd4bf;
+    --accent-strong: #5eead4;
+    --accent-soft: #12312e;
+    --code-bg: #121917;
+    --rule: #202925;
+    --mark: #f59e0b;
+    --grid: rgb(230 232 228 / 0.055);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.45), 0 14px 36px -18px rgb(0 0 0 / 0.65);
+  }
+}
+
+/* ---------- 2. Typography ------------------------------------------------- */
+body {
+  line-height: 1.68;
+}
+html:lang(zh) body {
+  line-height: 1.82;
+}
+p {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.018em;
+}
+html:lang(zh) h1,
+html:lang(zh) h2,
+html:lang(zh) h3 {
+  letter-spacing: 0;
+}
+
+/* Mono is for metadata, never prose. */
+.eyebrow,
+.post-meta,
+.toc__title,
+.toc a,
+.chip,
+.post-nav__label,
+.card__meta,
+.section-head a,
+.lang-toggle,
+.codeblock__bar,
+.brand__text em {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 3. Signature: mono eyebrow + hairline rule ------------------- */
+.eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.5rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin: 0 0 1rem;
+}
+.eyebrow .sep {
+  color: var(--border-strong);
+  letter-spacing: 0;
+}
+.eyebrow a {
+  color: var(--fg-muted);
+}
+.eyebrow a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+html:lang(zh) .eyebrow {
+  letter-spacing: 0.04em;
+}
+
+/* Post header: kill the plain bottom border, use a rule with an accent stub. */
+.post-header {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 1.6rem;
+}
+.post-header::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin-top: 1.5rem;
+  background: linear-gradient(90deg, var(--accent) 0 3.25rem, var(--rule) 3.25rem 100%);
+}
+
+/* Chips as technical labels. */
+.chip {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  border-radius: 5px;
+  padding: 0.16rem 0.5rem;
+}
+/* Chips are one component everywhere — no bracket decoration (it read as markup). */
+
+/* ---------- 4b. Review fixes (visual audit pass) -------------------------- */
+/* Reading measure: cap the line length (~66–75 CPL), align the header to it. */
+.prose {
+  max-width: var(--read);
+}
+.post-header {
+  max-width: var(--read);
+}
+@media (min-width: 62rem) {
+  .post-grid {
+    grid-template-columns: minmax(0, var(--read)) 15rem;
+    gap: 2.5rem;
+  }
+}
+
+/* Cards: equal heights per row, metadata pinned to the bottom. */
+.post-list > li {
+  display: flex;
+}
+.post-list > li > .card {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* Buttons: rectilinear, not consumer capsules. */
+.btn {
+  border-radius: 6px;
+}
+
+/* CJK: never apply mono tracking to Han glyphs; give display text more leading. */
+html:lang(zh) h1,
+html:lang(zh) h2 {
+  line-height: 1.28;
+}
+html:lang(zh) .eyebrow,
+html:lang(zh) .toc a,
+html:lang(zh) .toc__title,
+html:lang(zh) .chip,
+html:lang(zh) .card__meta,
+html:lang(zh) .post-nav__label,
+html:lang(zh) .lang-toggle {
+  font-family: var(--font-sans);
+  letter-spacing: 0.01em;
+}
+html:lang(zh) .eyebrow {
+  text-transform: none;
+}
+
+/* TOC: make the active section unmistakable. */
+.toc a.is-active {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- 4. Header / nav ---------------------------------------------- */
+.brand__text em {
+  font-size: 0.9em;
+  letter-spacing: -0.01em;
+}
+.lang-toggle {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 6px;
+}
+.nav a {
+  font-weight: 500;
+}
+
+/* ---------- 5. Reading progress ------------------------------------------ */
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 60;
+  background: var(--accent);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ---------- 6. Prose refinements ----------------------------------------- */
+.prose {
+  counter-reset: fig;
+}
+.prose a {
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in oklab, var(--accent) 42%, transparent);
+}
+.prose a:hover {
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+/* Outbound links get a mark. */
+.prose a[href^='http']:not([href*='awin-x.top'])::after {
+  content: '↗';
+  font-size: 0.76em;
+  margin-left: 0.12em;
+  color: var(--fg-faint);
+}
+/* Inline code: teal-tinted, no border (block code is separate). */
+.prose code {
+  background: color-mix(in srgb, var(--accent) 9%, var(--code-bg));
+  border: 0;
+  border-radius: 4px;
+  padding: 0.1em 0.34em;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+/* Blockquote: no italics (CJK fake-oblique looks broken). */
+.prose blockquote {
+  font-style: normal;
+  color: var(--fg-muted);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  border-left-width: 3px;
+  padding: 0.7rem 1rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+/* Heading anchors. */
+.heading-anchor {
+  margin-left: 0.4rem;
+  font-weight: 400;
+  color: var(--fg-faint);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+h2:hover > .heading-anchor,
+h3:hover > .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+.prose h2 {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Figures: hairline caption with a mono FIG. label. */
+.prose figure {
+  margin: 1.9rem 0;
+}
+.prose figure figcaption {
+  text-align: left;
+  font-size: 0.82rem;
+  color: var(--fg-faint);
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule);
+}
+.prose figure figcaption::before {
+  content: 'FIG. ' counter(fig) ' — ';
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  letter-spacing: 0.06em;
+  color: var(--mark);
+  counter-increment: fig;
+}
+.prose img {
+  border-radius: var(--radius-sm);
+  margin-bottom: 0;
+}
+
+/* Tables: engineered, tabular numerals. */
+.prose th,
+.prose td {
+  font-variant-numeric: tabular-nums;
+}
+.prose th {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+
+/* Prompt-line callouts: `$` for shell, `#` for notes. */
+.prose .callout {
+  font-family: inherit;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-soft));
+  border-left-width: 3px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.prose .callout::before {
+  content: '$';
+  font-family: var(--font-mono);
+  color: var(--accent);
+  margin-right: 0.55rem;
+  font-weight: 700;
+}
+.prose .callout--note::before {
+  content: '#';
+}
+.prose .callout--warn {
+  border-left-color: var(--mark);
+  background: color-mix(in srgb, var(--mark) 7%, var(--bg-soft));
+}
+.prose .callout--warn::before {
+  content: '!';
+  color: var(--mark);
+}
+
+/* ---------- 7. Code block chrome (bar + language + copy) ----------------- */
+.codeblock {
+  position: relative;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  overflow: hidden;
+}
+.codeblock__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--code-bg) 72%, var(--bg));
+}
+.codeblock__lang {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.codeblock__copy {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.18rem 0.5rem;
+  min-width: 4.6rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.codeblock__copy:hover,
+.codeblock__copy[data-copied] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.codeblock > pre {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ---------- 8. TOC with active section ----------------------------------- */
+.toc__title {
+  letter-spacing: 0.14em;
+}
+.toc a {
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.toc li {
+  position: relative;
+}
+.toc a.is-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+.toc li.is-active::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 0.18em;
+  bottom: 0.18em;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ---------- 9. Hero: subtle graph-paper backdrop ------------------------- */
+.hero {
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -1rem 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 28%, transparent 72%);
+  mask-image: radial-gradient(120% 80% at 50% 0%, #000 28%, transparent 72%);
+}
+
+/* ---------- 9b. Review fixes, round 2 ------------------------------------ */
+/* Tighter reading measure (~75–80 CPL); header + grid follow the token. */
+:root {
+  --read: 38rem;
+}
+
+/* Figure captions: readable size and AA+ contrast. */
+.prose figure figcaption {
+  font-size: 0.86rem;
+  color: var(--fg-muted);
+}
+
+/* Breadcrumb: differentiate the current (non-link) crumb from the links. */
+.breadcrumbs li[aria-current='page'] {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* TOC: bind the active bar to the item text instead of the container edge. */
+.toc li.is-active::before {
+  left: -0.5rem;
+}
+
+/* ---------- 9c. Review fixes, round 3 ------------------------------------ */
+/* CJK body leading — the .prose rule otherwise wins over the body rule. */
+html:lang(zh) .prose {
+  line-height: 1.82;
+}
+html:lang(zh) h1,
+html:lang(zh) h2 {
+  text-wrap: balance;
+}
+
+/* Hero grid: fade on all edges so there is no hard cut. */
+.hero::before {
+  inset: -1rem 0 -0.5rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 20%, #000 58%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 20%, #000 58%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Code chrome: lowercase language (matches chips), lighter copy control,
+   stronger bar/body divider. */
+.codeblock__lang {
+  text-transform: none;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+}
+.codeblock__copy {
+  min-width: 0;
+  padding: 0.14rem 0.45rem;
+}
+.codeblock__bar {
+  border-bottom-color: var(--border-strong);
+}
+
+/* TOC rail: wider + tighter type so entries wrap less and read as one block. */
+.toc a {
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+@media (min-width: 62rem) {
+  .post-grid {
+    grid-template-columns: minmax(0, var(--read)) 18rem;
+  }
+}
+
+/* ---------- 10. Motion + print ------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .heading-anchor {
+    transition: none;
+  }
+}
+@media print {
+  .site-header,
+  .site-footer,
+  .toc,
+  .progress,
+  .share,
+  .post-nav,
+  .related,
+  .codeblock__copy,
+  .skip-link {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .prose a::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: #555;
+  }
+  .prose pre,
+  .prose figure,
+  .prose blockquote,
+  .codeblock {
+    break-inside: avoid;
+  }
+}

@@ -116,7 +116,7 @@ export const UI = {
     'posts.title': '文章',
     'posts.description': 'DeepSeek @ awin-x 的全部文章——工程复盘、实验与实战记录。',
     'posts.empty': '还没有文章。',
-    'post.readingTime': '阅读约 {minutes} 分钟',
+    'post.readingTime': '约 {minutes} 分钟阅读',
     'post.published': '发布于',
     'post.updated': '更新于',
     'post.by': '作者',

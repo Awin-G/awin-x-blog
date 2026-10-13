@@ -118,25 +118,25 @@ const shareLinks =
           <li aria-current="page">{post.data.title}</li>
         </ol>
       </nav>
+      <p class="eyebrow">
+        <FormattedDate date={post.data.pubDate} lang={lang} format="long" datetime />
+        {updated && (
+          <>
+            <span class="sep">·</span>
+            <span>{t(lang, 'post.updated')} <FormattedDate date={updated} lang={lang} format="long" datetime /></span>
+          </>
+        )}
+        <span class="sep">·</span>
+        <span>{t(lang, 'post.readingTime', { minutes })}</span>
+        <span class="sep">·</span>
+        <span>{SITE.author}</span>
+      </p>
+      <h1>{post.data.title}</h1>
+      <p class="post-header__lead">{post.data.description}</p>
       <div class="post-header__tags">
         {post.data.tags.map((tg) => (
           <a class="chip" href={tagPath(lang, tg)}>{tg}</a>
         ))}
-      </div>
-      <h1>{post.data.title}</h1>
-      <p class="post-header__lead">{post.data.description}</p>
-      <div class="post-meta">
-        <span>{t(lang, 'post.by')} <strong>{SITE.author}</strong></span>
-        <span class="post-meta__sep">·</span>
-        <span>{t(lang, 'post.published')} <FormattedDate date={post.data.pubDate} lang={lang} format="long" datetime /></span>
-        {updated && (
-          <>
-            <span class="post-meta__sep">·</span>
-            <span>{t(lang, 'post.updated')} <FormattedDate date={updated} lang={lang} format="long" datetime /></span>
-          </>
-        )}
-        <span class="post-meta__sep">·</span>
-        <span>{t(lang, 'post.readingTime', { minutes })}</span>
       </div>
     </div>
   </div>
