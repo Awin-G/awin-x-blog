@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-13T11:35:06.880Z",
+  "generatedAt": "2026-10-13T13:39:49.721Z",
   "count": {
-    "en": 206,
-    "zh": 206
+    "en": 212,
+    "zh": 212
   },
   "en": [
     {
@@ -434,6 +434,25 @@
         "distroless",
         "docker history",
         ".dockerignore"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "container-seccomp-hardening",
+      "title": "Hardening a Container: seccomp, Read-Only Filesystems, and Capabilities",
+      "description": "A practical guide to Docker security options with real experiments: seccomp profiles, read-only containers, capability dropping, and no-new-privileges.",
+      "pubDate": "2027-01-26",
+      "translationKey": "container-seccomp-hardening",
+      "tags": [
+        "security",
+        "devops"
+      ],
+      "keywords": [
+        "container seccomp",
+        "docker security options",
+        "read-only container",
+        "cap-drop",
+        "no-new-privileges"
       ]
     },
     {
@@ -1520,6 +1539,27 @@
     },
     {
       "lang": "en",
+      "slug": "io-uring-in-practice",
+      "title": "io_uring in practice: why batch submission beats syscall-per-I/O",
+      "description": "io_uring trades one syscall per I/O for a shared ring between user space and the kernel. Real fio ioengine comparisons on Linux 7.2: what queue depth changes, what it doesn't, and where SQPOLL and registered buffers actually help.",
+      "pubDate": "2027-01-24",
+      "translationKey": "io-uring-in-practice",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "io_uring",
+        "asynchronous I/O",
+        "fio ioengine",
+        "queue depth",
+        "epoll",
+        "libaio",
+        "SQPOLL"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "ipv6-at-home",
       "title": "IPv6 home network: getting IPv6 working at home (ISP, router, firewall, DNS)",
       "description": "A practical guide to an IPv6 home network: check that your ISP really does prefix delegation, get the router advertising a /64 over SLAAC, lock the IPv6 firewall to default-deny inbound, publish the right AAAA record, and debug the stall a broken IPv6 path causes.",
@@ -1731,6 +1771,24 @@
         "iowait",
         "vmstat",
         "pressure stall information"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "linux-page-cache-and-mmap",
+      "title": "The Linux page cache and mmap: where your file reads really happen",
+      "description": "Where do file reads really happen? I measure the Linux page cache with /proc/meminfo, show a 25x cold-vs-warm read, count read() vs mmap() syscalls with strace, and demonstrate msync, fadvise, and why drop_caches is the wrong tool.",
+      "pubDate": "2027-01-25",
+      "translationKey": "linux-page-cache-and-mmap",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "Linux page cache",
+        "mmap vs read",
+        "drop_caches",
+        "page fault",
+        "/proc/meminfo"
       ]
     },
     {
@@ -1953,6 +2011,25 @@
     },
     {
       "lang": "en",
+      "slug": "mqtt-5-in-practice",
+      "title": "MQTT 5 in practice: shared subscriptions, request/response and the reason codes that matter",
+      "description": "MQTT 5 adds shared subscriptions, request-response MQTT patterns, user properties, message expiry and real reason codes. Here is what each one actually changes, with real mosquitto 2.1.2 output.",
+      "pubDate": "2027-01-26",
+      "translationKey": "mqtt-5-in-practice",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "MQTT 5",
+        "shared subscriptions",
+        "user properties",
+        "request response MQTT",
+        "mosquitto"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "mqtt-on-a-microcontroller",
       "title": "What actually fits: running an MQTT ESP32 stack on a constrained microcontroller",
       "description": "MQTT fits a microcontroller's budget better than most IoT messaging stacks — a two-byte minimum header, publish/subscribe decoupling, and QoS you can dial down. Here is what an MQTT ESP32 system actually costs once TLS, certificates and reconnects enter the picture.",
@@ -2050,6 +2127,25 @@
         "STUN TURN ICE",
         "symmetric NAT",
         "P2P networking"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "nats-jetstream",
+      "title": "NATS JetStream in practice: durable streams without a cluster",
+      "description": "I ran a throwaway single-node NATS JetStream server and pasted real output: stream creation, durable consumers, explicit consumer acks, and an at-least-once redelivery demo where an unacked message comes back with tries: 2 and num_redelivered: 1. Retention policies, limits, and the KV layer included.",
+      "pubDate": "2027-01-25",
+      "translationKey": "nats-jetstream",
+      "tags": [
+        "networking",
+        "devops"
+      ],
+      "keywords": [
+        "NATS JetStream",
+        "durable streams",
+        "at-least-once delivery",
+        "consumer acks",
+        "retention policy"
       ]
     },
     {
@@ -2474,6 +2570,25 @@
         "pg_stat_replication",
         "failover",
         "WAL"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "postgres-row-level-security",
+      "title": "Postgres Row Level Security: Multi-Tenancy Enforced by the Database",
+      "description": "How Postgres RLS policies filter rows per tenant, the difference between ENABLE and FORCE, USING vs WITH CHECK, the pooler trap, and real isolation proofs you can reproduce.",
+      "pubDate": "2027-01-24",
+      "translationKey": "postgres-row-level-security",
+      "tags": [
+        "devops",
+        "security"
+      ],
+      "keywords": [
+        "Postgres row level security",
+        "RLS",
+        "CREATE POLICY",
+        "multi-tenancy",
+        "current_setting"
       ]
     },
     {
@@ -4488,6 +4603,25 @@
     },
     {
       "lang": "zh",
+      "slug": "container-seccomp-hardening",
+      "title": "加固容器：seccomp、只读文件系统与 capabilities",
+      "description": "通过真实实验讲解 Docker 安全选项：seccomp 配置文件、只读容器、丢弃 capabilities 与 no-new-privileges 的实际用法与效果。",
+      "pubDate": "2027-01-26",
+      "translationKey": "container-seccomp-hardening",
+      "tags": [
+        "security",
+        "devops"
+      ],
+      "keywords": [
+        "容器 seccomp",
+        "docker 安全选项",
+        "只读容器",
+        "cap-drop",
+        "no-new-privileges"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "container-security",
       "title": "容器安全基础：容器保护了什么，又没保护什么",
       "description": "容器不是虚拟机，而是跑在宿主机内核上的一个进程。本文用真实的 Docker 实验展示你继承来的默认值——root 用户、14 个 capability、宽松的 seccomp 配置——以及真正有用的开关：--user、--cap-drop、no-new-privileges、--read-only、内存限制、rootless，还有 docker.sock 这个致命陷阱。",
@@ -5576,6 +5710,27 @@
     },
     {
       "lang": "zh",
+      "slug": "io-uring-in-practice",
+      "title": "io_uring 实战：为什么批量提交胜过每次 I/O 一次系统调用",
+      "description": "io_uring 用用户态与内核共享的提交/完成环，取代每次 I/O 一次系统调用。基于 Linux 7.2 与 fio ioengine 的真实对比：队列深度带来什么、不改变什么，以及 SQPOLL 与注册缓冲区何时才值得用。",
+      "pubDate": "2027-01-24",
+      "translationKey": "io-uring-in-practice",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "io_uring",
+        "异步 I/O",
+        "fio ioengine",
+        "队列深度",
+        "epoll",
+        "libaio",
+        "SQPOLL"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "ipv6-at-home",
       "title": "IPv6 家庭网络：一步步把 IPv6 跑起来（运营商、路由器、防火墙、DNS）",
       "description": "一篇把 IPv6 家庭网络跑通的实操指南：先确认运营商真的做了前缀委派，再让路由器用 SLAAC 通告一个 /64，把 IPv6 防火墙收紧成默认拒绝入站，配好 AAAA 记录，并排查一条残缺 IPv6 路径造成的卡顿。",
@@ -5788,6 +5943,24 @@
         "iowait",
         "vmstat",
         "压力失速信息"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "linux-page-cache-and-mmap",
+      "title": "Linux 页缓存与 mmap：你的文件读取到底发生在哪里",
+      "description": "文件读取到底发生在哪里？我用 /proc/meminfo 实测 Linux 页缓存，展示冷读与热读 25 倍差距，用 strace 统计 read() 与 mmap() 的系统调用，并演示 msync、fadvise，以及为什么 drop_caches 是错的办法。",
+      "pubDate": "2027-01-25",
+      "translationKey": "linux-page-cache-and-mmap",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "Linux 页缓存",
+        "mmap 与 read 对比",
+        "drop_caches",
+        "缺页错误",
+        "/proc/meminfo"
       ]
     },
     {
@@ -6010,6 +6183,25 @@
     },
     {
       "lang": "zh",
+      "slug": "mqtt-5-in-practice",
+      "title": "MQTT 5 实战：共享订阅、请求响应 MQTT、用户属性与 reason code",
+      "description": "MQTT 5 带来了共享订阅、请求响应、用户属性、消息过期和真正的 reason code。这篇用 mosquitto 2.1.2 逐个实测，看看哪些特性真正改变了设备端的设计。",
+      "pubDate": "2027-01-26",
+      "translationKey": "mqtt-5-in-practice",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "MQTT 5",
+        "共享订阅",
+        "用户属性",
+        "请求响应 MQTT",
+        "mosquitto"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "mqtt-on-a-microcontroller",
       "title": "什么才真正装得下：在受限单片机上跑一套 MQTT ESP32 栈",
       "description": "MQTT 比大多数 IoT 消息协议都更契合单片机的预算——最小两字节的固定头、发布/订阅解耦、以及可按下调的 QoS。本文说清楚，一旦把 TLS、证书和重连都算进来，一套 MQTT ESP32 方案到底要付出什么。",
@@ -6107,6 +6299,26 @@
         "STUN TURN ICE",
         "对称型 NAT",
         "P2P 网络"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "nats-jetstream",
+      "title": "NATS JetStream 实战：不用集群的持久化流",
+      "description": "我跑了一个一次性的单节点 NATS JetStream，输出全部原样贴出：建流、发布消息、持久化消费者、显式 consumer acks，以及一次 least-once 反例演示——故意不 ack 的消息带着 tries: 2 和 num_redelivered: 1 回来了。另附 retention 策略、limit 上限和 KV 层的真实结果，以及与 Kafka 的诚实对比。",
+      "pubDate": "2027-01-25",
+      "translationKey": "nats-jetstream",
+      "tags": [
+        "networking",
+        "devops"
+      ],
+      "keywords": [
+        "NATS JetStream",
+        "持久化流",
+        "at-least-once",
+        "consumer acks",
+        "retention 策略",
+        "KV store"
       ]
     },
     {
@@ -6531,6 +6743,25 @@
         "pg_stat_replication",
         "failover",
         "WAL"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "postgres-row-level-security",
+      "title": "Postgres 行级安全：由数据库强制执行的多租户隔离",
+      "description": "Postgres RLS 策略如何按租户过滤行、ENABLE 与 FORCE 的区别、USING 与 WITH CHECK、连接池陷阱，以及可复现的真实隔离验证。",
+      "pubDate": "2027-01-24",
+      "translationKey": "postgres-row-level-security",
+      "tags": [
+        "devops",
+        "security"
+      ],
+      "keywords": [
+        "Postgres 行级安全",
+        "RLS",
+        "CREATE POLICY",
+        "多租户",
+        "current_setting"
       ]
     },
     {
