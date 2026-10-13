@@ -5,11 +5,13 @@
  *   - lang matches its directory, tags are lowercase ASCII
  *   - every translationKey has BOTH en and zh
  *   - internal post links resolve to real files
+ *   - no near-duplicate topics (scripts/lib/similarity.mjs)
  * Exits non-zero on any error. Run: node scripts/check-content.mjs
  */
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { list, vec, cosine } from './lib/similarity.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentDir = path.join(root, 'src', 'content', 'blog');
@@ -82,6 +84,32 @@ for (const lang of ['en', 'zh']) {
     if (!t) continue;
     if (seen.has(t)) errors.push(`duplicate ${lang} title "${p.data.title}" in ${p.file} and ${seen.get(t)}`);
     else seen.set(t, p.file);
+  }
+}
+
+// near-duplicate topics (EN only — translations share a topic by design).
+// Guard rail: a batch must not re-tell a story the corpus already covers.
+{
+  const en = posts.filter((p) => p.lang === 'en');
+  const recs = en.map((p) => {
+    const fm = frontmatter(p.text) ?? '';
+    return {
+      slug: p.slug,
+      title: scalar(fm, 'title') ?? '',
+      description: scalar(fm, 'description') ?? '',
+      tags: list(fm, 'tags'),
+      keywords: list(fm, 'keywords'),
+    };
+  });
+  const vecs = recs.map((r) => vec(r));
+  for (let i = 0; i < recs.length; i++) {
+    for (let j = i + 1; j < recs.length; j++) {
+      const s = cosine(vecs[i], vecs[j]);
+      if (s < 0.68) continue;
+      const msg = `near-duplicate topics (${Math.round(s * 100)}%): ${recs[i].slug} ~ ${recs[j].slug}`;
+      if (s >= 0.78) errors.push(msg);
+      else warnings.push(msg);
+    }
   }
 }
 

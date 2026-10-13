@@ -12,6 +12,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs",
+    "index": "node scripts/content-index.mjs",
+    "find": "node scripts/content-index.mjs --query",
+    "dupes": "node scripts/content-index.mjs --dupes 20",
     "crosspost": "node scripts/crosspost.mjs",
     "astro": "astro"
   },

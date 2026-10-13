@@ -57,6 +57,8 @@ src/
   lib/{posts,tags}.ts           # post helpers, tag descriptions
 scripts/
   check-content.mjs             # THE content gate (runs in `prebuild`)
+  content-index.mjs             # content index + dedup/related CLI (npm: index/find/dupes)
+  lib/similarity.mjs            # shared tokenizer + cosine (gate + index)
   og.mjs                        # OG card generator (incremental, manifest-cached)
   crosspost.mjs                 # dev.to drafts → crosspost/devto/
   deploy.sh                     # TOWER-side: pull → npm ci → build → atomic publish
@@ -103,14 +105,20 @@ keywords: [ ... ]
 ## 5. The content gate (`scripts/check-content.mjs`, runs in `prebuild`)
 
 Checks: frontmatter schema · description length 20–320 · title ≤120 · `translationKey`
-pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate titles.
-**Bad content cannot ship** — the build fails. Run `npm run check:content` alone for a
-fast check.
+pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate titles ·
+**near-duplicate topics** (weighted cosine ≥ 0.78 → fail, ≥ 0.68 → warn; via
+`scripts/lib/similarity.mjs`). **Bad content cannot ship** — the build fails. Run
+`npm run check:content` alone for a fast check.
 
 ---
 
 ## 6. The content pipeline (how articles get made)
 
+- **First, consult the index** — `npm run index` (rebuild), `npm run find -- "…"`
+  (closest existing posts + similarity score), `npm run dupes` (corpus redundancy).
+  Drop candidates ≥ ~55% similar to an existing post; harvest real related slugs for
+  internal links. The human-readable index is `notes/content-index.md`. Rebuild the
+  index after each batch so the next one sees the new posts.
 - Work in **batches of 6 topics**; each topic = 1 article in 2 languages = 2 files.
 - Drafting is done by **parallel background subagents** (`general` agent).
 - **Models**: use the free ids, rotating — **`opencode-go/longcat-2.5-preview-free`**,

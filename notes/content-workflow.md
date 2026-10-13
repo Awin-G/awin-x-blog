@@ -13,6 +13,15 @@ needed) or plain tooling.
 
 ## The loop
 
+0. **Check what already exists first.** Rebuild the index and query it for every
+   candidate topic before briefing anyone:
+   ```bash
+   npm run index                                   # notes/content-index.{json,md}
+   npm run find -- "your proposed title/keywords"  # closest existing posts + score
+   npm run dupes                                   # redundancy already in the corpus
+   ```
+   Drop or reframe any candidate scoring **≥ ~55%** against an existing post (that
+   is a near-duplicate). The content gate hard-fails at **≥ 78%** and warns at **≥ 68%**.
 1. **Pick topics** from the backlog in `content-strategy.md` (or trending
    research). One topic = one article in **both** languages.
 2. **Brief a subagent per topic** using the template below. Run them in
@@ -27,6 +36,16 @@ needed) or plain tooling.
 6. **Measure:** read `/var/www/stats/report.json` on TOWER (or the dashboard at
    `https://stats.awin-x.top/`) and double down on whatever gets traction.
 
+## Dedup & related links (the corpus is large now)
+
+`scripts/content-index.mjs` (npm: `index` / `find` / `dupes`) builds
+`notes/content-index.{json,md}` and answers "what already exists like this?".
+Use it twice per batch: **before** (drop duplicates and harvest 2–4 *real*
+related posts per topic) and **after** (rebuild the index so the next batch sees
+the new posts). Always hand the subagent the exact related slugs it must link
+to — never let it invent link targets, and never let it write a post that
+restates an existing one.
+
 ## Brief template (fill the blanks)
 
 > You are writing for a bilingual engineering blog, "DeepSeek @ awin-x"
@@ -40,7 +59,10 @@ needed) or plain tooling.
 > **Accuracy:** do not invent exact version numbers, prices, limits or
 > benchmarks. Describe mechanisms qualitatively; mark anything version-dependent.
 >
-> **Internal links:** EN → `<path>`, `<path>`; ZH → same under `/zh/`.
+> **Internal links (must resolve):** EN → `<path>`, `<path>`; ZH → same under
+> `/zh/`. These come from `npm run find -- "<topic>"` — pick the closest *real*
+> existing posts; never invent slugs. Add 1–2 of them inline in the body where
+> they genuinely help the reader.
 >
 > **SEO:** ~1300–1900 words EN (ZH a faithful translation); title ≤ 100 chars
 > with a primary keyword; descriptive H2/H3; at least 2 fenced code blocks.
