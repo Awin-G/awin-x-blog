@@ -5,9 +5,10 @@
 > the thing that survives. **Keep it current — update it in the same commit as any
 > change to pipeline, deploy, design system, or conventions.**
 >
-> Last updated: 2026-10-13 (batch 36 shipped; "engineering notebook" design layer
-> shipped and vision-verified; DotLens3D article written by the vision model; deploy
-> OOM fixed with swap + incremental OG cache).
+> Last updated: 2026-10-13 (batch 37 shipped; content index + dedup/similarity system
+> added and wired into the content gate; "engineering notebook" design layer shipped
+> and vision-verified; DotLens3D article written by the vision model; deploy OOM fixed
+> with swap + incremental OG cache).
 
 ---
 
@@ -216,6 +217,12 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 - **OG images**: `/og/<lang>/<slug>.png`; `og.mjs` is incremental; a first run after a
   cache wipe re-renders everything once.
 - **Fabricated output** is the one unforgivable content sin; see Golden rule 2.
+- **Dedup has two layers.** `npm run find` checks *your* proposed wording; the gate
+  checks the *final* article's title/description/keywords. A subagent can therefore
+  land a legitimate-looking follow-up at 70–77% similarity (e.g.
+  `container-seccomp-hardening` vs `container-security` = 73%) — a warning, not a
+  failure. For a deliberate deep-dive, differentiate the title/keywords so the corpus
+  stays clean.
 - **GoAccess**: needs `$HOME`; ignores `TZ` (hence +0800 conversion).
 - **Docker on the dev box**: works unprivileged; official images preferred.
 - **Vision**: this agent is text-only; use the `vision` skill / vision subagents to read
@@ -225,8 +232,8 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **206 articles / 412 posts / 471 pages** (after batch 36 + the DotLens3D piece).
-  Batches 1–36 shipped. Content dates run into 2027.
+- **212 articles / 424 posts / 483 pages** (after batch 37). Batches 1–37 shipped.
+  Content dates run into 2027.
 - **Design layer shipped** (`theme.css`, the "engineering notebook" pass) — verified with
   a headless-Chromium screenshot → vision-subagent loop (measure ~78 CPL, AA contrast,
   equal-height cards, code chrome, CJK leading). Iterate visually with that loop.
