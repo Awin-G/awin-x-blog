@@ -1,14 +1,21 @@
-// Build-time Open Graph card generator.
+// Build-time Open Graph card generator (incremental).
 // Writes public/og/<lang>/<slug>.png for every post, plus public/og/default.png.
 // Run automatically via the `prebuild` npm script; safe to re-run.
+//
+// Cards are cached via public/og/.manifest.json (slug -> content hash) so a
+// build only re-renders cards whose title/eyebrow changed. public/og/ is
+// gitignored, so it survives the deploy's `git clean` and the cache persists
+// between deploys.
 import sharp from 'sharp';
-import { readdir, readFile, mkdir, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, rm, access } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentDir = path.join(root, 'src', 'content', 'blog');
 const outDir = path.join(root, 'public', 'og');
+const manifestPath = path.join(outDir, '.manifest.json');
 
 const W = 1200;
 const H = 630;
@@ -110,29 +117,67 @@ async function parseTitle(file) {
   return raw.replace(/^["']|["']$/g, '');
 }
 
-await rm(outDir, { recursive: true, force: true });
+const hash = (s) => createHash('sha1').update(s).digest('hex').slice(0, 16);
+const exists = async (p) => {
+  try {
+    await access(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const fileFor = (key) => (key === 'default' ? path.join(outDir, 'default.png') : path.join(outDir, `${key}.png`));
+
+let prev = {};
+try {
+  prev = JSON.parse(await readFile(manifestPath, 'utf8'));
+} catch {
+  /* no cache yet */
+}
+
 await mkdir(outDir, { recursive: true });
 
+const next = {};
+let rendered = 0;
+let reused = 0;
+
+async function ensure(key, svg) {
+  const h = hash(svg);
+  next[key] = h;
+  const file = fileFor(key);
+  if (prev[key] === h && (await exists(file))) {
+    reused++;
+    return;
+  }
+  await mkdir(path.dirname(file), { recursive: true });
+  await sharp(Buffer.from(svg)).png().toFile(file);
+  rendered++;
+}
+
 const langs = await readdir(contentDir, { withFileTypes: true });
-let count = 0;
 for (const entry of langs) {
   if (!entry.isDirectory()) continue;
   const lang = entry.name;
   const dir = path.join(contentDir, lang);
-  await mkdir(path.join(outDir, lang), { recursive: true });
   for (const f of await readdir(dir)) {
     if (!/\.mdx?$/.test(f)) continue;
     const slug = f.replace(/\.mdx?$/, '');
     const title = await parseTitle(path.join(dir, f));
     if (!title) continue;
     const eyebrow = lang === 'zh' ? '工作笔记' : 'Work log';
-    await sharp(Buffer.from(card(title, eyebrow, lang))).png().toFile(path.join(outDir, lang, `${slug}.png`));
-    count++;
+    await ensure(`${lang}/${slug}`, card(title, eyebrow, lang));
   }
 }
 
-await sharp(Buffer.from(card('Systems, embedded nets, and the odd idea worth shipping.', 'Work log', 'en')))
-  .png()
-  .toFile(path.join(outDir, 'default.png'));
+await ensure('default', card('Systems, embedded nets, and the odd idea worth shipping.', 'Work log', 'en'));
 
-console.log(`og: generated ${count} post cards + default`);
+// Prune cards for posts that no longer exist.
+for (const key of Object.keys(prev)) {
+  if (key in next) continue;
+  await rm(fileFor(key), { force: true });
+}
+
+await writeFile(manifestPath, JSON.stringify(next));
+
+console.log(`og: ${rendered} rendered, ${reused} reused (${Object.keys(next).length} total)`);
