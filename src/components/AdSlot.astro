@@ -14,9 +14,15 @@ import { ADSENSE_CLIENT } from '@/consts';
 interface Props {
   /** `auto` (responsive) | `horizontal` | `rectangle` | `vertical`. */
   format?: string;
+  /** Render this instance even while the global switch below is off. */
+  enabled?: boolean;
 }
-const UNIT_SLOT = ''; // e.g. '1234567890'
-const show = UNIT_SLOT !== '';
+// The operator's adaptive (square-capable, full-width-responsive) unit, created
+// 2026-10-15. Stored and ready; nothing renders until it is switched on.
+const UNIT_SLOT = '7759076601';
+// Global switch. Flip to true (or pass `enabled`) to start rendering units.
+const ENABLED = false;
+const show = (ENABLED || Astro.props.enabled) && UNIT_SLOT !== '';
 ---
 
 {
