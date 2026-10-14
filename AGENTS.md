@@ -177,6 +177,11 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
   - GoAccess 1.3 needs `$HOME` set (silent-failure fix) and **ignores `TZ`**, so logs are
     converted to **China time (+0800)** before parsing. No `--ignore-crawlers`.
   - Use this data to steer topics and (over months) the design (§9).
+  - **Trend data for the observation window**: `blog-analytics-snapshot.timer` runs
+    `deploy/analytics-snapshot.sh` daily on TOWER, appending one line per day to
+    `/var/www/stats/history.tsv` (date, requests, visitors, files, bandwidth, top pages,
+    referrers). The live report only shows the current window, so this file is what a
+    multi-week review is read from.
 - **Verification files** live: Google (DNS TXT), Bing (`BingSiteAuth.xml`),
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
