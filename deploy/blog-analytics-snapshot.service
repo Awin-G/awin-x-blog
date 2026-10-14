@@ -1,0 +1,7 @@
+[Unit]
+Description=Daily blog analytics snapshot (appends a line to history.tsv)
+After=blog-analytics.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /srv/blog/analytics-snapshot.sh

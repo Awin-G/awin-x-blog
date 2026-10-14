@@ -253,10 +253,12 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   `/search/` + `/zh/search/` (index generated in `postbuild`). Fill `SUPPORT` in
   `SupportView.astro` and the `href`s in `UsesView.astro` once the affiliate/donation
   accounts exist.
-- **Tools** (`/tools/`, 6 total, bilingual, zero server cost): IPv6 + IPv4 subnet
+- **Tools** (`/tools/`, 8 total, bilingual, zero server cost): IPv6 + IPv4 subnet
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
-  CRC calculator (6 algorithms, verified against standard check values), chmod calculator.
-  Each links into the matching posts. Add more when they can earn a link.
+  CRC calculator (6 algorithms, verified against standard check values), chmod calculator,
+  Base64/URL/Hex/HTML-entity encoder, cron explainer. Each links into the matching posts;
+  all verified to load without JS errors in a headless browser. Add more when they can
+  earn a link.
 - **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`
   (tags + counts), generated at build time. The sitemap filter now excludes machine
   endpoints (`/api/`, `*.xml`, `*.json`, `*.txt`) so only HTML pages are listed.
