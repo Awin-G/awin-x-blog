@@ -107,6 +107,14 @@ const projects = [
         ))}
       </ul>
 
+      <h2>{lang === 'zh' ? '开放数据' : 'Open data'}</h2>
+      <p>
+        {lang === 'zh'
+          ? '站点的结构化索引以静态 JSON 提供，构建时生成、无服务器、无限流：'
+          : 'A structured index of the site is available as static JSON, generated at build time — no server, no rate limit: '}
+        <a href="/api/posts.json">/api/posts.json</a> · <a href="/api/tags.json">/api/tags.json</a>
+      </p>
+
       <h2>{lang === 'zh' ? '联系与订阅' : 'Contact & follow'}</h2>
       <ul>
         <li>{lang === 'zh' ? '订阅 RSS' : 'Subscribe'}: <a href={localePath(lang, '/rss.xml')}>{SITE.url.replace('https://', '')}{localePath(lang, '/rss.xml')}</a></li>

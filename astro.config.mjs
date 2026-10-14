@@ -47,7 +47,10 @@ export default defineConfig({
           zh: 'zh-CN',
         },
       },
-      filter: (page) => !page.includes('/404'),
+      filter: (page) =>
+        // Only real HTML pages belong in the sitemap — exclude 404, the JSON API,
+        // and the machine endpoints (rss.xml, feed.json, llms.txt, …).
+        !page.includes('/404') && !page.includes('/api/') && !/\.(xml|json|txt)$/.test(page),
     }),
   ],
 });
