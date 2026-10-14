@@ -344,6 +344,14 @@ direction takes off, **scale the machine up**. The operator has delegated the "h
 entirely: I decide and direct the (free) models. Monetisation options + "static content
 beyond articles" ideas live in `notes/next-horizon.md`.
 
+**Ad network (operator's choice, 2026-10-15): Google AdSense.** `adsbygoogle.js` is in
+`<head>` on every page (client `ca-pub-4702033324942872` → `ADSENSE_CLIENT` in
+`consts.ts`), `public/ads.txt` is served, and `AdSlot.astro` holds a manual unit that
+renders nothing until a slot id is pasted. **Operator still needs to**: verify the site in
+the AdSense dashboard, enable Auto ads (or send a unit slot id), and enable a consent
+message for EEA/UK traffic. Ads are the site's only third-party tracker, and `/support/`
++ `/about/` now disclose that.
+
 ### Plan (set by the operator)
 - **Batch 45 is the last mass content batch.**
 - Then **observe ~2 months** (to ~2026-12-15) on real analytics + GSC data.

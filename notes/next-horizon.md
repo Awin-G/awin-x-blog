@@ -52,6 +52,12 @@ default and degrades to nothing** (zero perf/CLS cost until enabled).
 **Do not** trade the design/readability for ads — text-only developer ads only, and only
 if the numbers justify it.
 
+**Update 2026-10-15:** the operator chose **Google AdSense** — it is now live (script in
+`<head>`, `ads.txt`, honest disclosure on `/support/`). See `AGENTS.md` §15 for the
+outstanding dashboard steps (verify the site, enable Auto ads, enable a consent message).
+The affiliate and donation paths above still apply; AdSense is the baseline that should
+clear ¥160/year on its own.
+
 ---
 
 ## 1. The decision
