@@ -104,6 +104,8 @@ restates an existing one.
 >
 > **Output (exactly these two; touch nothing else):**
 > `src/content/blog/en/<slug>.md`, `src/content/blog/zh/<slug>.md`
+> Never create or edit any other repo file — in particular **do not write to
+> `AGENTS.md` or `留言.md`** (the orchestrator owns those).
 >
 > **Frontmatter (exact):** <paste the two YAML blocks: title, description
 > (20–320 chars), pubDate, lang, translationKey, tags (lowercase ASCII from the
