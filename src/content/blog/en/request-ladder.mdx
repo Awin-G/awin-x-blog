@@ -1,0 +1,68 @@
+---
+title: "1.07 seconds per request, and only a quarter of it is the server"
+description: "I traced one real request to this site and timed every phase. The surprising part is not the total — it is how little of it the server is responsible for, and which single phase would be worth fixing first."
+pubDate: 2027-02-21
+lang: en
+translationKey: request-ladder
+tags: [networking, nginx]
+featured: false
+keywords:
+  - request timing
+  - TLS handshake
+  - TTFB
+  - curl timing
+  - round trip time
+---
+
+import RequestLadder from '@/components/RequestLadder.astro';
+
+I pointed `curl` at this site and timed every phase of one request. Total: **1.07 seconds**.
+
+The server's share was **278 ms**. Everything else — three quarters of that second — was the network deciding whether it was allowed to talk to the server at all.
+
+That surprised me, and I built this site. I had been thinking of "the site" as nginx and a static file, which is the part I control. The measurement says the part I control is a minority of what a reader waits for.
+
+<RequestLadder lang="en" />
+
+## The server is a quarter of it, and I had been optimising the wrong thing
+
+Look at the bar again: DNS is a rounding error (5 ms, because it was cached), and the three heavy phases are TCP connect, TLS, and the transfer itself. The file is 15 KB. There is nothing left to squeeze there.
+
+The thing I had been treating as "performance work" — smaller HTML, fewer requests, a leaner build — moves the 278 ms phase. Even if I got nginx to answer instantly, the request would still take ~800 ms, because a reader in Europe is 300 ms away from a box that only has an A record and one IP.
+
+## Round trips are the tax, and TLS 1.3 already refunded one
+
+The handshake is the part worth understanding, because it is the part that changed recently:
+
+```
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / x25519 / RSASSA-PSS
+* ALPN: server accepted h2
+```
+
+That is one round trip. Under TLS 1.2 this exchange needs two before the first byte of HTTP can move — the server has to send its certificate and *wait* for the client to acknowledge before it will accept a request. TLS 1.3 folds that away, and on a link with 150 ms of latency it saves roughly 150 ms per connection.
+
+Which is the argument for keeping TLS current even when it feels like busywork. It is not a security-only upgrade; on a long link it is a latency upgrade that shows up in the same measurement as everything else.
+
+## What I would actually change, in order
+
+If this site were slow, this is the order I would work in, and it is not the order I expected:
+
+1. **Connection reuse.** The single biggest number in that trace is the connect-plus-TLS pair. If a reader loads one page, they pay it once; if they load five, they should still pay it once. HTTP/2 (which the trace shows negotiated via ALPN) makes that possible, and so does a CDN terminating closer to the reader.
+2. **Where the box lives.** 324 ms to connect is geography, not engineering. Moving the machine, or putting a cache in front of it, changes that number in a way no amount of nginx tuning will.
+3. **The server.** Then, and only then, the 278 ms phase — and on a static site it is already mostly reading a file off disk.
+
+The measurement is one command, and it is worth running against your own site before you believe anything about where the time goes:
+
+```bash
+curl --noproxy '*' -o /dev/null -sS \
+  -w 'dns=%{time_namelookup}s connect=%{time_connect}s tls=%{time_appconnect}s ttfb=%{time_starttransfer}s total=%{time_total}s\n' \
+  https://blog.awin-x.top/
+```
+
+## The part I cannot fix from here
+
+The honest conclusion is uncomfortable: for a reader far from this one small box, the floor is set by distance, and no amount of work inside the server moves it. What I *can* do is stop paying for round trips I do not need — keep TLS modern, keep the connection alive, and eventually put something closer to the reader in front of it.
+
+The number that would actually change the experience is not on the server at all. It is the 324 ms before the server ever hears the request.

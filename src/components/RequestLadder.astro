@@ -1,0 +1,399 @@
+---
+/**
+ * The request ladder — a real `curl -v` transcript as a scroll-driven timeline.
+ *
+ * Zero JavaScript: the reveal is CSS `animation-timeline: view()`. Browsers
+ * without scroll-driven animations just see the same content, static and fully
+ * readable. All numbers are measured, not illustrative.
+ *
+ * Source: `curl --noproxy '*' -v --trace-time` + `-w` against this very site,
+ * captured 2026-10-15 (see the article for the raw command).
+ */
+interface Props {
+  lang?: string;
+}
+const zh = (Astro.props.lang ?? 'en') === 'zh';
+
+const total = 1071; // ms
+const phases = zh
+  ? [
+      { key: 'dns', label: 'DNS 解析', ms: 5.2, note: '名字变成地址。这里只有 5 毫秒，因为答案早已在缓存里。' },
+      { key: 'tcp', label: 'TCP 连接', ms: 324.3, note: '三次握手。这是纯网络往返——离服务器越远越贵。' },
+      { key: 'tls', label: 'TLS 握手', ms: 234.3, note: 'TLS 1.3，x25519 密钥交换，ALPN 协商出 h2。证书在这里被验证。' },
+      { key: 'server', label: '服务器处理', ms: 278.0, note: 'nginx 找到静态文件、读出来、加上安全响应头。' },
+      { key: 'transfer', label: '传输', ms: 229.5, note: '15 KB 的 HTML 发回来。' },
+    ]
+  : [
+      { key: 'dns', label: 'DNS', ms: 5.2, note: 'The name becomes an address. Only 5 ms, because the answer was already cached.' },
+      { key: 'tcp', label: 'TCP connect', ms: 324.3, note: 'The three-way handshake. This is pure network round-trip — it costs more the further away the server is.' },
+      { key: 'tls', label: 'TLS handshake', ms: 234.3, note: 'TLS 1.3, x25519 key exchange, ALPN negotiating h2. This is where the certificate gets verified.' },
+      { key: 'server', label: 'Server', ms: 278.0, note: 'nginx finds the static file, reads it, adds the security headers.' },
+      { key: 'transfer', label: 'Transfer', ms: 229.5, note: 'The 15 KB of HTML comes back.' },
+    ];
+
+const steps = zh
+  ? [
+      {
+        label: 'DNS 解析',
+        ms: '5.2 ms',
+        lines: [
+          '$ getent hosts blog.awin-x.top',
+          '88.218.79.95    blog.awin-x.top',
+        ],
+        note: '如果这一步很慢，问题不在服务器，在你的解析器。',
+      },
+      {
+        label: 'TCP 连接',
+        ms: '324.3 ms',
+        lines: [
+          '* Host blog.awin-x.top:443 was resolved.',
+          '* IPv4: 88.218.79.95',
+          '*   Trying 88.218.79.95:443...',
+        ],
+        note: '注意这里没有 IPv6 记录——只有一条 A 记录。',
+      },
+      {
+        label: 'TLS 握手',
+        ms: '234.3 ms',
+        lines: [
+          '* TLSv1.3 (OUT), TLS handshake, Client hello (1):',
+          '* TLSv1.3 (IN), TLS handshake, Server hello (2):',
+          '* TLSv1.3 (IN), TLS handshake, Certificate (11):',
+          '* TLSv1.3 (IN), TLS handshake, Finished (20):',
+          '* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / x25519 / RSASSA-PSS',
+          '* ALPN: server accepted h2',
+        ],
+        note: '一次往返就完成了——TLS 1.3 的握手只需要 1-RTT，这是它比 1.2 快的地方。',
+      },
+      {
+        label: '请求',
+        ms: '',
+        lines: [
+          '* using HTTP/2',
+          '* [HTTP/2] [1] OPENED stream for https://blog.awin-x.top/',
+          '> GET / HTTP/2',
+          '> Host: blog.awin-x.top',
+        ],
+        note: 'HTTP/2 里，请求是流（stream），一条连接上可以同时开很多条。',
+      },
+      {
+        label: '响应',
+        ms: '278.0 ms → TTFB',
+        lines: [
+          '< HTTP/2 200',
+          '< server: nginx/1.18.0 (Ubuntu)',
+          '< content-type: text/html',
+          '< content-length: 15122',
+          '< strict-transport-security: max-age=31536000',
+          '< x-content-type-options: nosniff',
+        ],
+        note: '服务端只花了不到 300 毫秒——对一台 981 MB 的小机器上的静态文件来说，这是正常水平。',
+      },
+      {
+        label: '传输',
+        ms: '229.5 ms',
+        lines: ['< content-length: 15122', '* Connection #0 to host blog.awin-x.top left intact'],
+        note: '总共 1.07 秒。其中真正"服务器"的部分只占四分之一，其余全在网络往返上。',
+      },
+    ]
+  : [
+      {
+        label: 'DNS',
+        ms: '5.2 ms',
+        lines: ['$ getent hosts blog.awin-x.top', '88.218.79.95    blog.awin-x.top'],
+        note: 'If this step is slow, the problem is not the server — it is your resolver.',
+      },
+      {
+        label: 'TCP connect',
+        ms: '324.3 ms',
+        lines: [
+          '* Host blog.awin-x.top:443 was resolved.',
+          '* IPv4: 88.218.79.95',
+          '*   Trying 88.218.79.95:443...',
+        ],
+        note: 'Note there is no IPv6 record — a single A record, nothing else.',
+      },
+      {
+        label: 'TLS handshake',
+        ms: '234.3 ms',
+        lines: [
+          '* TLSv1.3 (OUT), TLS handshake, Client hello (1):',
+          '* TLSv1.3 (IN), TLS handshake, Server hello (2):',
+          '* TLSv1.3 (IN), TLS handshake, Certificate (11):',
+          '* TLSv1.3 (IN), TLS handshake, Finished (20):',
+          '* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / x25519 / RSASSA-PSS',
+          '* ALPN: server accepted h2',
+        ],
+        note: 'One round trip does it — TLS 1.3 needs 1-RTT, which is exactly where it beats 1.2.',
+      },
+      {
+        label: 'Request',
+        ms: '',
+        lines: [
+          '* using HTTP/2',
+          '* [HTTP/2] [1] OPENED stream for https://blog.awin-x.top/',
+          '> GET / HTTP/2',
+          '> Host: blog.awin-x.top',
+        ],
+        note: 'In HTTP/2 a request is a stream — many can be open at once on one connection.',
+      },
+      {
+        label: 'Response',
+        ms: '278.0 ms → TTFB',
+        lines: [
+          '< HTTP/2 200',
+          '< server: nginx/1.18.0 (Ubuntu)',
+          '< content-type: text/html',
+          '< content-length: 15122',
+          '< strict-transport-security: max-age=31536000',
+          '< x-content-type-options: nosniff',
+        ],
+        note: 'The server took under 300 ms — normal for a static file on a 981 MB box.',
+      },
+      {
+        label: 'Transfer',
+        ms: '229.5 ms',
+        lines: ['< content-length: 15122', '* Connection #0 to host blog.awin-x.top left intact'],
+        note: '1.07 s in total, and only about a quarter of it is "the server". The rest is round trips.',
+      },
+    ];
+---
+
+<section class="ladder" aria-label={zh ? '一次请求的阶梯' : 'The ladder of one request'}>
+  <div class="ladder__bar" role="img" aria-label={zh ? '各阶段耗时占比' : 'Phase timings'}>
+    {phases.map((p) => (
+      <span class="ladder__seg" data-phase={p.key} style={`flex-grow:${p.ms}`} title={`${p.label} ${p.ms} ms`}></span>
+    ))}
+  </div>
+  <p class="ladder__legend">
+    {phases.map((p) => (
+      <span><i data-phase={p.key}></i>{p.label} <b>{p.ms} ms</b></span>
+    ))}
+  </p>
+
+  <ol class="ladder__steps">
+    {steps.map((s, i) => (
+      <li class="ladder__step" style={`--i:${i}`}>
+        <div class="ladder__rail" aria-hidden="true"></div>
+        <div class="ladder__body">
+          <p class="ladder__head">
+            <span class="ladder__n">{i + 1}</span>
+            <span class="ladder__label">{s.label}</span>
+            {s.ms && <span class="ladder__ms">{s.ms}</span>}
+          </p>
+          <pre class="ladder__code" data-language="console"><code>{s.lines.join('\n')}</code></pre>
+          <p class="ladder__note">{s.note}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .ladder {
+    margin: 2rem 0;
+  }
+
+  /* Stacked timing bar */
+  .ladder__bar {
+    display: flex;
+    height: 0.6rem;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .ladder__seg {
+    min-width: 6px;
+  }
+  .ladder__seg[data-phase='dns'] {
+    background: #64748b;
+  }
+  .ladder__seg[data-phase='tcp'] {
+    background: #0ea5e9;
+  }
+  .ladder__seg[data-phase='tls'] {
+    background: #8b5cf6;
+  }
+  .ladder__seg[data-phase='server'] {
+    background: var(--accent);
+  }
+  .ladder__seg[data-phase='transfer'] {
+    background: #f59e0b;
+  }
+  .ladder__legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.3rem 0.9rem;
+    margin: 0.7rem 0 0;
+    font-size: 0.78rem;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+  }
+  @media (min-width: 40rem) {
+    .ladder__legend {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .ladder__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .ladder__legend i {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .ladder__legend i[data-phase='dns'] {
+    background: #64748b;
+  }
+  .ladder__legend i[data-phase='tcp'] {
+    background: #0ea5e9;
+  }
+  .ladder__legend i[data-phase='tls'] {
+    background: #8b5cf6;
+  }
+  .ladder__legend i[data-phase='server'] {
+    background: var(--accent);
+  }
+  .ladder__legend i[data-phase='transfer'] {
+    background: #f59e0b;
+  }
+  .ladder__legend b {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  /* Steps */
+  .ladder__steps {
+    position: relative;
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+  }
+  /* One continuous spine behind the dots, so it never breaks between steps. */
+  .ladder__steps::before {
+    content: '';
+    position: absolute;
+    left: calc(0.8rem - 1px);
+    top: 0.6rem;
+    bottom: 1.5rem;
+    width: 2px;
+    background: var(--fg-faint); /* reads as a structural spine, not a hairline */
+    border-radius: 2px;
+  }
+  .ladder__step {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: 0.9rem;
+    padding-bottom: 1.4rem;
+    position: relative;
+  }
+  .ladder__rail {
+    position: relative;
+    justify-self: center;
+    width: 2px;
+  }
+  .ladder__rail::before {
+    content: '';
+    position: absolute;
+    top: 0.55rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+  /* The spine is drawn once on .ladder__steps::before, so nothing to fade here. */
+  .ladder__body {
+    min-width: 0;
+  }
+  .ladder__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0 0 0.45rem;
+  }
+  .ladder__n {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--fg-faint);
+  }
+  .ladder__label {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .ladder__ms {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--mark);
+    white-space: nowrap;
+  }
+  .ladder__code {
+    margin: 0 0 0.45rem !important;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: 0.7rem 0.85rem !important;
+    border-radius: var(--radius-sm);
+    /* Wrap rather than clip — a long TLS line must stay readable. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow-x: visible;
+    /* Hanging indent so a wrapped continuation reads as one line, not a new entry. */
+    padding-left: calc(0.85rem + 1.2em) !important;
+    text-indent: -1.2em;
+  }
+  .ladder__note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+
+  /* Scroll-driven reveal — no JavaScript. Browsers without support simply see
+     the full content, which is the point: the content does not depend on it. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .ladder__step .ladder__body {
+        animation: ladder-in linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 35%;
+      }
+      .ladder__rail::before {
+        animation: ladder-dot linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 35%;
+      }
+    }
+  }
+  @keyframes ladder-in {
+    from {
+      opacity: 0.3;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ladder-dot {
+    from {
+      transform: translateX(-50%) scale(0.4);
+      opacity: 0.3;
+    }
+    to {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .ladder__step {
+      grid-template-columns: 1rem 1fr;
+      gap: 0.6rem;
+    }
+  }
+</style>

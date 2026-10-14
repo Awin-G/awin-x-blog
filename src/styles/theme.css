@@ -484,6 +484,7 @@ html:lang(zh) h2 {
   text-transform: none;
   letter-spacing: 0.08em;
   font-size: 0.7rem;
+  color: var(--fg-muted); /* AA on the code header strip */
 }
 .codeblock__copy {
   min-width: 0;
