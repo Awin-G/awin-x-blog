@@ -1,0 +1,471 @@
+---
+/**
+ * TCP congestion-control lab — a small discrete-time model of a single sender
+ * over a bottleneck link, plotted live on a canvas.
+ *
+ * It is a TOY model, and the article says so: per-RTT steps, a Reno-style
+ * additive-increase/multiplicative-decrease (or a CUBIC-ish cubic increase),
+ * a finite bottleneck buffer, and losses when the buffer overflows. It is not a
+ * packet-level simulator — but it reproduces the two things worth seeing: the
+ * sawtooth, and bufferbloat.
+ */
+interface Props {
+  lang?: string;
+}
+const zh = (Astro.props.lang ?? 'en') === 'zh';
+
+const L = zh
+  ? {
+      title: 'TCP 拥塞控制实验室',
+      cc: '算法',
+      reno: 'Reno（加性增/乘性减）',
+      cubic: '类 CUBIC（三次增长）',
+      rtt: '往返时延 RTT (ms)',
+      capacity: '瓶颈带宽 (段/RTT)',
+      buffer: '瓶颈缓冲区 (段)',
+      loss: '固有丢包率 (%)',
+      play: '运行',
+      pause: '暂停',
+      reset: '重置',
+      cwnd: 'cwnd（拥塞窗口）',
+      queue: '瓶颈队列',
+      readout: '当前',
+      throughput: '吞吐',
+      queueNow: '队列',
+      hint: '默认状态下队列就是满的。把缓冲区调小，它会排空；把 RTT 调大，锯齿会被拉长。',
+      caption: 'cwnd 随时间（上），瓶颈队列随时间（下）',
+    }
+  : {
+      title: 'TCP congestion-control lab',
+      cc: 'Algorithm',
+      reno: 'Reno (AIMD)',
+      cubic: 'CUBIC-ish (cubic growth)',
+      rtt: 'Round-trip time (ms)',
+      capacity: 'Bottleneck capacity (segments/RTT)',
+      buffer: 'Bottleneck buffer (segments)',
+      loss: 'Base loss rate (%)',
+      play: 'Run',
+      pause: 'Pause',
+      reset: 'Reset',
+      cwnd: 'cwnd (congestion window)',
+      queue: 'Bottleneck queue',
+      readout: 'Now',
+      throughput: 'throughput',
+      queueNow: 'queue',
+      hint: 'The default already has a full queue. Turn the buffer down and it drains; turn the RTT up and the sawtooth stretches out.',
+      caption: 'cwnd over time (top), bottleneck queue over time (bottom)',
+    };
+---
+
+<div class="cc" data-cc data-labels={JSON.stringify(L)}>
+  <div class="cc__head">
+    <span class="cc__title">{L.title}</span>
+    <span class="cc__buttons">
+      <button type="button" class="cc__btn" data-toggle>{L.pause}</button>
+      <button type="button" class="cc__btn" data-reset>{L.reset}</button>
+    </span>
+  </div>
+
+  <canvas data-canvas width="760" height="360" aria-label={L.caption}></canvas>
+  <p class="cc__caption">{L.caption}</p>
+
+  <div class="cc__legend">
+    <span><i class="cc__sw cc__sw--cwnd"></i>{L.cwnd}</span>
+    <span><i class="cc__sw cc__sw--queue"></i>{L.queue}</span>
+  </div>
+
+  <div class="cc__controls">
+    <label>
+      <span>{L.cc}</span>
+      <select data-p="cc">
+        <option value="reno">{L.reno}</option>
+        <option value="cubic">{L.cubic}</option>
+      </select>
+    </label>
+    <label>
+      <span>{L.rtt} <b data-v="rtt"></b></span>
+      <input type="range" data-p="rtt" min="10" max="400" step="10" value="80" />
+    </label>
+    <label>
+      <span>{L.capacity} <b data-v="capacity"></b></span>
+      <input type="range" data-p="capacity" min="4" max="120" step="2" value="20" />
+    </label>
+    <label>
+      <span>{L.buffer} <b data-v="buffer"></b></span>
+      <input type="range" data-p="buffer" min="0" max="200" step="5" value="60" />
+    </label>
+    <label>
+      <span>{L.loss} <b data-v="loss"></b></span>
+      <input type="range" data-p="loss" min="0" max="2" step="0.05" value="0" />
+    </label>
+  </div>
+
+  <dl class="cc__readout">
+    <div><dt>{L.throughput}</dt><dd data-r="tp">—</dd></div>
+    <div><dt>{L.queueNow}</dt><dd data-r="q">—</dd></div>
+  </dl>
+
+  <p class="cc__hint">{L.hint}</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-cc]').forEach((root) => {
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+    const ctx = canvas.getContext('2d')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]')!;
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]')!;
+    const L = JSON.parse(root.dataset.labels || '{}');
+
+    const P = { cc: 'reno', rtt: 80, capacity: 20, buffer: 60, loss: 0 };
+    const N = 220; // history length in RTTs
+    let cwnd = 2;
+    let ssthresh = 1e9;
+    let queue = 0;
+    let cubicK = 0;
+    let cubicWmax = 0;
+    const hist: { c: number; q: number }[] = [];
+    let running = true;
+
+    function step() {
+      const cap = P.capacity;
+      const buf = P.buffer;
+      const sent = cwnd;
+      // The bottleneck serves capacity; whatever exceeds it queues.
+      const arriving = sent + queue;
+      const served = Math.min(arriving, cap);
+      const overflow = Math.max(0, arriving - served - buf);
+      queue = Math.max(0, Math.min(buf, arriving - served));
+
+      const lossP = P.loss / 100;
+      const lost = overflow > 0 || Math.random() < lossP * cwnd;
+
+      if (lost) {
+        ssthresh = Math.max(2, cwnd / 2);
+        if (P.cc === 'reno') {
+          cwnd = ssthresh;
+        } else {
+          cubicWmax = cwnd;
+          cwnd = Math.max(2, cwnd * 0.7);
+          cubicK = 0;
+        }
+      } else if (cwnd < ssthresh) {
+        cwnd = Math.min(cwnd * 2, 4096); // slow start
+      } else if (P.cc === 'reno') {
+        cwnd = Math.min(cwnd + 1, 4096); // additive increase
+      } else {
+        // CUBIC-ish: W(t) = Wmax + C*(t-K)^3
+        cubicK += 1 / Math.max(1, cwnd);
+        const t = cubicK;
+        const target = cubicWmax + 0.4 * Math.pow(t, 3) * 10;
+        cwnd = Math.min(Math.max(cwnd + (target - cwnd) * 0.08, cwnd + 0.2), 4096);
+      }
+
+      hist.push({ c: cwnd, q: queue });
+      if (hist.length > N) hist.shift();
+    }
+
+    function draw() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const padL = 54;
+      const padR = 12;
+      const padT = 16;
+      const gap = 34;
+      const usableH = h - padT - 22; // leave room for the time label
+      const cwndH = (usableH - gap) * 0.62;
+      const queueH = (usableH - gap) * 0.38;
+      const plotW = w - padL - padR;
+      const maxC = Math.max(10, P.capacity * 1.15, ...hist.map((p) => p.c)) * 1.08;
+      const maxQ = Math.max(5, P.buffer, ...hist.map((p) => p.q)) * 1.1;
+
+      const css = getComputedStyle(root);
+      const ink = css.getPropertyValue('--fg').trim() || '#1a1d1b';
+      const faint = css.getPropertyValue('--fg-faint').trim() || '#8b948f';
+      const muted = css.getPropertyValue('--fg-muted').trim() || '#565f5c';
+      const accent = css.getPropertyValue('--accent').trim() || '#0f766e';
+      const bg = css.getPropertyValue('--bg-elev').trim() || '#fff';
+
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = '11px ui-monospace, monospace';
+
+      const xAt = (i: number) => padL + (i / (N - 1)) * plotW;
+
+      // ---- cwnd panel
+      const cy0 = padT;
+      const cy1 = padT + cwndH;
+      ctx.strokeStyle = faint;
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.moveTo(padL, cy1);
+      ctx.lineTo(w - padR, cy1);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = muted;
+      ctx.font = '12px ui-monospace, monospace';
+      ctx.fillText('cwnd', 4, cy0 + 10);
+      ctx.font = '11px ui-monospace, monospace';
+      ctx.fillStyle = faint;
+      ctx.fillText('max ' + Math.round(maxC), 4, cy0 + 26);
+      ctx.fillText('0', 4, cy1);
+
+      // the capacity ceiling, labelled so it ties back to the slider
+      const capY = cy1 - (P.capacity / maxC) * cwndH;
+      ctx.strokeStyle = faint;
+      ctx.setLineDash([4, 4]);
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(padL, capY);
+      ctx.lineTo(w - padR, capY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = muted;
+      ctx.textAlign = 'right';
+      ctx.fillText('capacity ' + P.capacity, w - padR - 6, capY - 5);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      hist.forEach((p, i) => {
+        const y = cy1 - (p.c / maxC) * cwndH;
+        if (i === 0) ctx.moveTo(xAt(i), y);
+        else ctx.lineTo(xAt(i), y);
+      });
+      ctx.stroke();
+      ctx.lineWidth = 1;
+
+      // ---- queue panel
+      const qy0 = cy1 + gap;
+      const qy1 = qy0 + queueH;
+      ctx.strokeStyle = faint;
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.moveTo(padL, qy1);
+      ctx.lineTo(w - padR, qy1);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = muted;
+      ctx.font = '12px ui-monospace, monospace';
+      ctx.fillText('queue', 4, qy0 + 10);
+      ctx.font = '11px ui-monospace, monospace';
+      ctx.fillStyle = faint;
+      ctx.fillText('max ' + Math.round(maxQ), 4, qy0 + 26);
+      ctx.fillText('0', 4, qy1);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(xAt(0), qy1);
+      hist.forEach((p, i) => ctx.lineTo(xAt(i), qy1 - (p.q / maxQ) * queueH));
+      ctx.lineTo(xAt(Math.max(hist.length - 1, 0)), qy1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // stroke the top edge, so a zero queue still reads as a panel
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      hist.forEach((p, i) => {
+        const y = qy1 - (p.q / maxQ) * queueH;
+        if (i === 0) ctx.moveTo(xAt(i), y);
+        else ctx.lineTo(xAt(i), y);
+      });
+      ctx.stroke();
+      ctx.lineWidth = 1;
+
+      ctx.fillStyle = faint;
+      ctx.fillText('time →', w - padR - 46, h - 4);
+
+      // Throughput is the mean of what the bottleneck actually served over the
+      // window — not the last instantaneous window, which would disagree with
+      // the plot the reader is looking at.
+      const tp = hist.length
+        ? hist.reduce((s, p) => s + Math.min(p.c, P.capacity), 0) / hist.length
+        : 0;
+      root.querySelector('[data-r="tp"]')!.textContent = tp.toFixed(1) + ' seg/RTT';
+      root.querySelector('[data-r="q"]')!.textContent =
+        (hist.length ? hist[hist.length - 1].q : 0).toFixed(0) + ' seg';
+    }
+
+    let last = 0;
+    const frame = (ts: number) => {
+      // one simulated RTT every `rtt` ms of wall time, capped so it stays watchable
+      const interval = Math.max(24, Math.min(P.rtt, 240));
+      if (running && ts - last >= interval) {
+        last = ts;
+        step();
+        draw();
+      }
+      requestAnimationFrame(frame);
+    };
+
+    root.querySelectorAll<HTMLElement>('[data-p]').forEach((el) => {
+      const key = el.dataset.p as keyof typeof P;
+      el.addEventListener('input', () => {
+        const v = (el as HTMLInputElement | HTMLSelectElement).value;
+        (P as any)[key] = key === 'cc' ? v : Number(v);
+        const b = root.querySelector(`[data-v="${key}"]`);
+        if (b) b.textContent = String(v);
+        if (key === 'cc' || key === 'capacity' || key === 'buffer') {
+          cwnd = 2;
+          ssthresh = 1e9;
+          queue = 0;
+          hist.length = 0;
+          draw();
+        }
+      });
+      const b = root.querySelector(`[data-v="${key}"]`);
+      if (b) b.textContent = String((P as any)[key]);
+    });
+
+    toggle.addEventListener('click', () => {
+      running = !running;
+      toggle.textContent = running ? L.pause : L.play;
+    });
+    reset.addEventListener('click', () => {
+      cwnd = 2;
+      ssthresh = 1e9;
+      queue = 0;
+      hist.length = 0;
+      draw();
+    });
+
+    // seed a little history so the first paint is not empty
+    for (let i = 0; i < N; i++) step();
+    draw();
+    requestAnimationFrame(frame);
+  });
+</script>
+
+<style>
+  .cc {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+  }
+  .cc__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .cc__title {
+    font-weight: 700;
+  }
+  .cc__buttons {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .cc__btn {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .cc__btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .cc canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 760 / 360;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+  }
+  .cc__caption {
+    margin: 0.45rem 0 0.6rem;
+    font-size: 0.76rem;
+    color: var(--fg-faint);
+  }
+  .cc__legend {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.76rem;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+  }
+  .cc__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .cc__sw {
+    width: 0.8rem;
+    height: 3px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .cc__sw--cwnd {
+    background: var(--accent);
+  }
+  .cc__sw--queue {
+    background: #f59e0b;
+  }
+  .cc__controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem 1.2rem;
+  }
+  .cc__controls label {
+    display: block;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .cc__controls label b {
+    font-family: var(--font-mono);
+    color: var(--fg);
+  }
+  .cc__controls input[type='range'],
+  .cc__controls select {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+  .cc__readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.6rem;
+    margin: 1rem 0 0;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--rule);
+  }
+  .cc__readout div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+  .cc__readout dt {
+    font-size: 0.78rem;
+    color: var(--fg-faint);
+  }
+  .cc__readout dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+  .cc__hint {
+    margin: 0.9rem 0 0;
+    font-size: 0.82rem;
+    color: var(--fg-faint);
+  }
+  @media (max-width: 34rem) {
+    .cc__controls {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

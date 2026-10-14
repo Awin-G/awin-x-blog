@@ -1,0 +1,66 @@
+---
+title: "A full buffer looks exactly like a slow link, and that is the whole problem"
+description: "Everyone assumes a bigger network buffer is safer. Run this simulation and watch a large buffer turn a fast link into a link that feels slow — while the throughput number stays exactly the same."
+pubDate: 2027-02-24
+lang: en
+translationKey: congestion-lab
+tags: [networking, linux]
+featured: false
+keywords:
+  - TCP congestion control
+  - bufferbloat
+  - cwnd
+  - AIMD
+  - queueing delay
+---
+
+import CongestionLab from '@/components/CongestionLab.astro';
+
+The lab below opens with the link saturated. The queue is a tall plateau that never drains, and the throughput readout sits at the bottleneck's capacity.
+
+Now drag the buffer slider down to zero. The queue drains flat, and the throughput readout does not move at all.
+
+That is the whole problem. A full buffer and a slow link produce the same experience — a stalled video call, a laggy SSH session, a page that hangs — but only one of them shows up in a throughput graph. The other one is invisible in every metric people normally look at.
+
+<CongestionLab lang="en" />
+
+## Throughput and latency are decided by different things
+
+Watch the top panel. The sawtooth is `cwnd`, the sender's congestion window: it grows until something is lost, then halves, then grows again. That is additive-increase/multiplicative-decrease, and it is why a TCP transfer's rate is never a fixed number — it is a guess that keeps correcting itself.
+
+The dashed line is the bottleneck's capacity. Notice that the sawtooth spends most of its time *above* that line. The link is not carrying more data when cwnd is high — it is carrying the same data and putting the rest in a queue. `cwnd` above capacity is not extra throughput; it is standing inventory.
+
+So the two numbers come from different places:
+
+- **Throughput** is capped by the bottleneck. Nothing the sender does can exceed it, and a bigger window does not buy more.
+- **Latency** is set by how much is queued. A bigger window puts more in the queue, and the queue is exactly the delay a packet waits through.
+
+## The buffer is the knob that trades latency for nothing
+
+Set the buffer to 0 and the queue panel goes flat. Losses come from the bottleneck itself, the sawtooth is regular, and the delay stays near the base RTT.
+
+Now push the buffer up. The queue rises and *stays* up. The link is still serving at capacity — the throughput readout will not change — but every packet now waits behind a few dozen others. Add that to the RTT and you have the number a user actually feels. This is bufferbloat: a buffer sized to absorb bursts, kept full by a sender that keeps increasing its window because nothing is being dropped.
+
+The reason it is a trap is that the fix looks like the cause. The buffer was added to prevent loss, loss is what signals congestion, and removing the signal removes the only thing telling the sender to back off. That is why the modern answer is not a smaller buffer alone — it is an *active* one, dropping or marking packets before the queue is full so the signal arrives while there is still room to react.
+
+## RTT is the clock the whole loop runs on
+
+Drag the RTT slider and watch the sawtooth stretch horizontally. Nothing about the algorithm changed; the loop simply takes longer to complete a cycle. This is the part that surprises people about long-distance links: the same congestion-control code, the same loss rate, and a transfer that behaves completely differently because the feedback takes 200 ms instead of 20.
+
+The amount of data a flow can have in flight is bounded by `cwnd`, and `cwnd` only grows once per round trip. So on a high-latency path, a single flow cannot fill a fast link no matter how large the window gets *quickly* — it takes many round trips to ramp up, and any loss sends it back to the start. That is a bandwidth-delay product problem, not a congestion-control bug, and it is why one long-distance TCP connection often loses to several parallel ones.
+
+## What this model does not do
+
+I want to be plain about the limits, because a toy that looks convincing is worse than no toy.
+
+It steps once per round trip, not once per packet. There is no per-packet timing, no delayed ACKs, no fast retransmit, no SACK, no pacing, no receiver window — so it cannot reproduce real throughput numbers, and I would not trust it to. The loss model is a base probability plus buffer overflow, which is enough to shape the sawtooth but not to model a real AQM. And the "CUBIC-ish" mode is cubic-*ish*: a real CUBIC implementation has a different window growth function and its own fast-recovery behaviour.
+
+What it does reproduce honestly is the geometry: window grows, capacity caps throughput, queue becomes delay. Those three relationships hold in real networks, and they are the ones worth having in your head when a link is "slow" but nothing is saturated.
+
+If you want the real mechanics — how `cwnd` interacts with the receiver window, and where the kernel's socket buffers actually live — that is a different article, and I wrote it: [TCP windows and socket buffers](/posts/tcp-window-and-socket-buffers/) and [TCP congestion control](/posts/tcp-congestion-control/).
+
+## The measurement to make first
+
+Before blaming the link, measure the delay under load, not the throughput under load. A link at full throughput with a queue that stays empty is fast. A link at full throughput with a queue that stays full is the same speed and a much worse product — and it will never show up in a speed test, because a speed test measures exactly the thing that did not change.
+
+The queue is the number nobody graphs, and it is the one the user is experiencing.
