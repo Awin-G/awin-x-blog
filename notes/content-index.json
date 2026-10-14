@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T06:14:29.830Z",
+  "generatedAt": "2026-10-14T08:13:10.504Z",
   "count": {
-    "en": 236,
-    "zh": 236
+    "en": 242,
+    "zh": 242
   },
   "en": [
     {
@@ -414,6 +414,24 @@
         "health check",
         "Consul KV",
         "DNS interface"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "container-healthchecks-and-restart-policies",
+      "title": "Docker healthchecks: healthy is not the same as running",
+      "description": "What a Docker healthcheck actually measures, with real runs: starting → healthy → unhealthy transitions read from docker inspect, why an unhealthy container never restarts itself, what each restart policy does after a crash and after docker stop, crash-loop backoff, and compose service_healthy.",
+      "pubDate": "2027-02-10",
+      "translationKey": "container-healthchecks-and-restart-policies",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Docker healthcheck",
+        "container health",
+        "restart policy",
+        "service_healthy",
+        "start-period"
       ]
     },
     {
@@ -1320,6 +1338,26 @@
     },
     {
       "lang": "en",
+      "slug": "go-generics",
+      "title": "Go Generics in Practice: When They Help and When They Don't",
+      "description": "A practical tour of Go generics — type parameters, constraints, generic types, and a real benchmark against interface{}.",
+      "pubDate": "2027-02-08",
+      "translationKey": "go-generics",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go generics",
+        "type parameters",
+        "constraints",
+        "comparable",
+        "type inference",
+        "cmp.Ordered",
+        "interface{} vs generics"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "go-pprof-profiling",
       "title": "Go pprof: a real Go profiling run, from cpuprofile to heap profile",
       "description": "A hands-on Go profiling walkthrough with real pprof output: import net/http/pprof, capture a cpuprofile and a memory profile, read -top and -list, and tell alloc_space from inuse_space — then fix a 5.6 GB-per-request allocation hotspot using only the profiles.",
@@ -1845,6 +1883,25 @@
     },
     {
       "lang": "en",
+      "slug": "kafka-consumer-groups-and-lag",
+      "title": "Kafka consumer groups and lag: the number that tells you you're falling behind",
+      "description": "A Kafka consumer group splits partitions across its consumers and commits offsets; consumer lag is the gap between committed offset and log end. Real output from a throwaway KRaft broker: lag growing, a live rebalance, and an offset reset.",
+      "pubDate": "2027-02-09",
+      "translationKey": "kafka-consumer-groups-and-lag",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "Kafka consumer group",
+        "consumer lag",
+        "kafka-consumer-groups",
+        "rebalance",
+        "offsets"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "kafka-in-practice",
       "title": "Kafka in practice: it's a log, not a queue (and that changes everything)",
       "description": "Kafka is not a queue — it is an append-only, partitioned log with consumer offsets, and that one difference unlocks replay and independent consumers. I ran a throwaway single-broker KRaft cluster and pasted the real topic, consumer-group, and log-compaction output.",
@@ -1921,6 +1978,24 @@
         "capsh",
         "cap-drop",
         "setcap"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "linux-inotify-and-file-watching",
+      "title": "inotify: how Linux tells you a file changed",
+      "description": "A hands-on tour of inotify, the Linux kernel's file-change event API: real inotifywait and inotifywatch output, a Python ctypes reader, and a reproduced event-queue overflow.",
+      "pubDate": "2027-02-08",
+      "translationKey": "linux-inotify-and-file-watching",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "inotify",
+        "watch files Linux",
+        "inotifywait",
+        "file change events",
+        "max_user_watches"
       ]
     },
     {
@@ -2567,6 +2642,25 @@
         "collector pipeline",
         "receivers processors exporters",
         "tail sampling"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "opentelemetry-metrics-and-exemplars",
+      "title": "OpenTelemetry metrics and exemplars: from a spike to the trace that caused it",
+      "description": "Counters, gauges, and histograms; what an OTLP histogram becomes in Prometheus (_bucket/_sum/_count); why delta temporality silently freezes a counter; and exemplars — a metric sample carrying a trace_id. Real collector and PromQL output.",
+      "pubDate": "2027-02-10",
+      "translationKey": "opentelemetry-metrics-and-exemplars",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "OpenTelemetry metrics",
+        "exemplars",
+        "histogram vs summary",
+        "prometheusremotewrite",
+        "delta temporality"
       ]
     },
     {
@@ -3923,6 +4017,25 @@
     },
     {
       "lang": "en",
+      "slug": "systemd-creds-encrypted-secrets",
+      "title": "systemd-creds: pass secrets to services without putting them on disk",
+      "description": "systemd-creds encrypts a secret to the host (or TPM) so only systemd can decrypt it at service start. LoadCredentialEncrypted= hands it to the service via a tmpfs $CREDENTIALS_DIRECTORY — no plaintext on disk, no env var in /proc. Real output, honest limits.",
+      "pubDate": "2027-02-09",
+      "translationKey": "systemd-creds-encrypted-secrets",
+      "tags": [
+        "systemd",
+        "security"
+      ],
+      "keywords": [
+        "systemd-creds",
+        "LoadCredential",
+        "service secrets",
+        "CREDENTIALS_DIRECTORY",
+        "TPM"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "systemd-hardening",
       "title": "systemd hardening: sandboxing your daemons with systemd-analyze security",
       "description": "How to sandbox systemd services without breaking them: the directives that matter (NoNewPrivileges, ProtectSystem=strict, PrivateTmp, SystemCallFilter, CapabilityBoundingSet, dynamic user), an incremental workflow measured with systemd-analyze security, and how to test and roll a unit back.",
@@ -5036,6 +5149,25 @@
     },
     {
       "lang": "zh",
+      "slug": "container-healthchecks-and-restart-policies",
+      "title": "Docker 健康检查：健康状态不等于在运行",
+      "description": "Docker healthcheck 到底在检查什么——全程真实运行：从 docker inspect 读出 starting → healthy → unhealthy 的状态迁移，为什么不健康的容器不会自己重启，各重启策略在崩溃和 docker stop 之后的真实表现，崩溃循环的退避，以及 compose 的 service_healthy。",
+      "pubDate": "2027-02-10",
+      "translationKey": "container-healthchecks-and-restart-policies",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Docker 健康检查",
+        "healthcheck",
+        "容器健康",
+        "重启策略 restart policy",
+        "service_healthy",
+        "start-period"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "container-image-layers-and-digests",
       "title": "容器镜像层与摘要：镜像里面到底是什么",
       "description": "容器镜像是一个有序的文件系统层栈加上一个配置文件。了解 Dockerfile 如何映射到层、层的顺序为何影响缓存复用，以及标签与摘要的区别。",
@@ -5942,6 +6074,26 @@
     },
     {
       "lang": "zh",
+      "slug": "go-generics",
+      "title": "Go 泛型实践：何时有用，何时多余",
+      "description": "Go 泛型实战——类型参数、约束、泛型类型，以及与 interface{} 的真实性能对比基准测试。",
+      "pubDate": "2027-02-08",
+      "translationKey": "go-generics",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go 泛型",
+        "类型参数",
+        "约束",
+        "comparable",
+        "类型推断",
+        "cmp.Ordered",
+        "interface{} vs 泛型"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "go-pprof-profiling",
       "title": "Go pprof：一次真实的 Go profiling，从 cpuprofile 到 heap profile",
       "description": "一份带真实 pprof 输出的 Go profiling 实操笔记：引入 net/http/pprof，采集 cpuprofile 与内存 profile，读 -top 和 -list，分清 alloc_space 与 inuse_space——然后用 profile 修掉一次 5.6 GB/请求的分配热点和一次手写字符串查找。",
@@ -6470,6 +6622,25 @@
     },
     {
       "lang": "zh",
+      "slug": "kafka-consumer-groups-and-lag",
+      "title": "Kafka 消费者组与 lag：那个告诉你正在落后的数字",
+      "description": "Kafka 消费者组把 topic 的分区分给组内各消费者，各自提交 offset；consumer lag 就是已提交 offset 与日志末尾之间的差。我用一个一次性单 broker KRaft 集群跑出真实输出：lag 增长、一次真实的 rebalance，以及重置 offset。",
+      "pubDate": "2027-02-09",
+      "translationKey": "kafka-consumer-groups-and-lag",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "Kafka 消费者组",
+        "consumer lag",
+        "kafka-consumer-groups",
+        "rebalance",
+        "offset"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "kafka-in-practice",
       "title": "Kafka 实战：它是日志，不是队列（而这改变了一切）",
       "description": "Kafka 不是队列——它是一个只追加、可分区的日志，配上消费者 offset，而这一个差别解锁了重放与多组彼此独立的消费者。我用一个一次性、单 broker、KRaft 模式的集群跑了真实的 topic 创建、消费者组 offset、rebalance 与日志压实，输出原样贴出，并诚实交代它什么时候是过度设计。",
@@ -6546,6 +6717,24 @@
         "capsh",
         "cap-drop",
         "setcap"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "linux-inotify-and-file-watching",
+      "title": "inotify：Linux 是如何告诉你文件变了",
+      "description": "一篇动手实践向的 inotify 指南：真实的 inotifywait 与 inotifywatch 输出、用 Python ctypes 读事件队列，并真实复现一次事件队列溢出。",
+      "pubDate": "2027-02-08",
+      "translationKey": "linux-inotify-and-file-watching",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "inotify",
+        "Linux 文件监控",
+        "inotifywait",
+        "文件变更事件",
+        "max_user_watches"
       ]
     },
     {
@@ -7193,6 +7382,25 @@
         "collector pipeline",
         "receivers processors exporters",
         "tail sampling"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "opentelemetry-metrics-and-exemplars",
+      "title": "OpenTelemetry 指标与 exemplar：从一次毛刺追到引发它的那条 trace",
+      "description": "计数器、仪表、直方图各自何时该用；OTLP 直方图在 Prometheus 里变成什么（_bucket/_sum/_count）；delta 时间性如何悄悄冻住计数器；以及 exemplar——一条携带 trace_id 的指标样本。附真实的 collector 与 PromQL 输出。",
+      "pubDate": "2027-02-10",
+      "translationKey": "opentelemetry-metrics-and-exemplars",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "OpenTelemetry 指标",
+        "exemplar",
+        "histogram 与 summary",
+        "prometheusremotewrite",
+        "delta 时间性"
       ]
     },
     {
@@ -8545,6 +8753,25 @@
         "journald",
         "日志级别",
         "correlation id"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "systemd-creds-encrypted-secrets",
+      "title": "systemd-creds：把密钥交给服务，而不落到磁盘上",
+      "description": "systemd-creds 把密钥加密绑定到本机（或 TPM），只有 systemd 才能在服务启动时解密。LoadCredentialEncrypted= 通过私有 tmpfs 的 $CREDENTIALS_DIRECTORY 把明文交给服务——明文不上磁盘、不进环境变量、不进 /proc。真实输出，诚实标注局限。",
+      "pubDate": "2027-02-09",
+      "translationKey": "systemd-creds-encrypted-secrets",
+      "tags": [
+        "systemd",
+        "security"
+      ],
+      "keywords": [
+        "systemd-creds",
+        "LoadCredential",
+        "服务密钥",
+        "CREDENTIALS_DIRECTORY",
+        "TPM"
       ]
     },
     {
