@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T08:13:10.504Z",
+  "generatedAt": "2026-10-14T09:33:55.979Z",
   "count": {
-    "en": 242,
-    "zh": 242
+    "en": 248,
+    "zh": 248
   },
   "en": [
     {
@@ -263,6 +263,26 @@
     },
     {
       "lang": "en",
+      "slug": "c-pointer-arithmetic-and-ub",
+      "title": "Undefined behaviour in C: what the sanitizers catch, and why it matters",
+      "description": "A hands-on tour of undefined behaviour in C: real AddressSanitizer and UBSan reports for out-of-bounds reads, use-after-free, signed overflow, bad shifts, null derefs and strict aliasing, each paired with a fix.",
+      "pubDate": "2027-02-12",
+      "translationKey": "c-pointer-arithmetic-and-ub",
+      "tags": [
+        "c"
+      ],
+      "keywords": [
+        "undefined behaviour C",
+        "AddressSanitizer",
+        "UBSan",
+        "out-of-bounds",
+        "use-after-free",
+        "strict aliasing",
+        "gcc warnings"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "caddy-vs-nginx",
       "title": "Caddy vs nginx as a reverse proxy: which do I actually reach for?",
       "description": "A hands-on Caddy vs nginx comparison for reverse proxy work: the same job written in both, real curl -I output, HTTP/3 and compression, TLS certificate handling (automatic HTTPS vs certbot), config-size and ergonomics, and a decision list.",
@@ -279,6 +299,25 @@
         "nginx reverse proxy",
         "automatic HTTPS",
         "ACME"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "can-bus-and-virtual-can",
+      "title": "CAN bus on Linux with vcan: embedded networking you can test without hardware",
+      "description": "Set up a CAN bus on Linux with SocketCAN and a virtual vcan0 interface: real frames, real arbitration rules, candump, cansend, cansniffer, CAN-FD, and the path to real hardware.",
+      "pubDate": "2027-02-11",
+      "translationKey": "can-bus-and-virtual-can",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "CAN bus",
+        "SocketCAN",
+        "candump",
+        "vcan",
+        "arbitration"
       ]
     },
     {
@@ -904,6 +943,25 @@
     },
     {
       "lang": "en",
+      "slug": "embedded-c-without-an-rtos",
+      "title": "Embedded C Without an RTOS: Making the Superloop Reliable",
+      "description": "A superloop is fine for many devices, but one slow task starves the others. Real measurements of jitter and drift, plus the fixes that don't need an RTOS: fixed-timestep schedulers, state machines, and watchdogs.",
+      "pubDate": "2027-02-12",
+      "translationKey": "embedded-c-without-an-rtos",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "superloop",
+        "embedded C without RTOS",
+        "fixed timestep scheduler",
+        "task jitter",
+        "watchdog"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "encrypted-dns",
       "title": "Encrypted DNS explained: DoT, DoH, and what they do (and don't) protect",
       "description": "A practical look at encrypted DNS: what plain DNS leaks and to whom, how DNS over TLS and DNS over HTTPS differ, what DoQ adds, what encryption protects (query content) and what it never hides (SNI, destination IPs, your resolver), the operator tradeoffs, and concrete Unbound and systemd-resolved setups.",
@@ -941,6 +999,25 @@
         "full disk encryption",
         "threat model",
         "TPM"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "endianness-in-practice",
+      "title": "Endianness in practice: why the bytes come out backwards",
+      "description": "Byte order explained with real programs: dumping a 32-bit integer on x86, htonl and network byte order, the raw-struct-over-a-socket bug, Modbus registers, and how to detect and byte-swap endianness.",
+      "pubDate": "2027-02-13",
+      "translationKey": "endianness-in-practice",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "endianness",
+        "little vs big endian",
+        "htonl",
+        "network byte order",
+        "byte swap"
       ]
     },
     {
@@ -983,6 +1060,24 @@
         "embedded overlay network",
         "EasyTier wire protocol",
         "ESP-IDF C"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "esp32-freertos-tasks",
+      "title": "FreeRTOS tasks and queues, reproduced on my laptop",
+      "description": "I cloned the FreeRTOS kernel, compiled its POSIX port with gcc, and ran five real experiments on Linux — preemptive scheduling, vTaskDelay vs busy-waiting, queues, mutex priority inversion, stack high-water marks — then mapped every concept to ESP-IDF on the ESP32.",
+      "pubDate": "2027-02-21",
+      "translationKey": "esp32-freertos-tasks",
+      "tags": [
+        "embedded"
+      ],
+      "keywords": [
+        "FreeRTOS tasks",
+        "FreeRTOS queue",
+        "task priority",
+        "priority inversion",
+        "vTaskDelay"
       ]
     },
     {
@@ -2207,6 +2302,26 @@
         "JSON-RPC",
         "AI tools",
         "function calling"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "memory-alignment-and-padding-in-c",
+      "title": "Struct Padding and Alignment in C, Measured",
+      "description": "Why C structs have holes: real sizeof/offsetof numbers, _Alignof, packed structs with a UBSan misaligned-load report, memcpy serialization garbage, and a false-sharing speedup measured on x86-64.",
+      "pubDate": "2027-02-13",
+      "translationKey": "memory-alignment-and-padding-in-c",
+      "tags": [
+        "c"
+      ],
+      "keywords": [
+        "struct padding",
+        "memory alignment C",
+        "sizeof offsetof",
+        "false sharing",
+        "packed struct",
+        "cache line",
+        "serialization"
       ]
     },
     {
@@ -4994,6 +5109,26 @@
     },
     {
       "lang": "zh",
+      "slug": "c-pointer-arithmetic-and-ub",
+      "title": "C 语言里的未定义行为：sanitizer 能抓到什么，以及它为什么重要",
+      "description": "一次关于 C 语言未定义行为的实操：用真实的 AddressSanitizer 与 UBSan 报告逐一看越界读、use-after-free、有符号溢出、非法移位、空指针解引用和严格别名，并给出对应的修法。",
+      "pubDate": "2027-02-12",
+      "translationKey": "c-pointer-arithmetic-and-ub",
+      "tags": [
+        "c"
+      ],
+      "keywords": [
+        "未定义行为 C",
+        "AddressSanitizer",
+        "UBSan",
+        "数组越界",
+        "use-after-free",
+        "严格别名",
+        "gcc 警告"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "caddy-vs-nginx",
       "title": "反向代理选 Caddy 还是 nginx：我到底会用哪个？",
       "description": "一份动手验证的 Caddy vs nginx 反向代理对比：同一个任务分别用两边写，真实的 curl -I 输出，HTTP/3 与压缩，TLS 证书处理（automatic HTTPS 对比 certbot），配置体量与易用性，以及一份决策清单。",
@@ -5010,6 +5145,25 @@
         "nginx 反向代理",
         "automatic HTTPS",
         "ACME"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "can-bus-and-virtual-can",
+      "title": "Linux 上用 vcan 跑 CAN 总线：不用硬件就能学的嵌入式组网",
+      "description": "在 Linux 上用 SocketCAN 和虚拟 vcan0 接口搭起一条 CAN 总线：真实帧、真实的仲裁规则、candump、cansend、cansniffer、CAN-FD，以及通往真实硬件的路径。",
+      "pubDate": "2027-02-11",
+      "translationKey": "can-bus-and-virtual-can",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "CAN 总线",
+        "SocketCAN",
+        "vcan",
+        "candump",
+        "CAN 仲裁"
       ]
     },
     {
@@ -5640,6 +5794,25 @@
     },
     {
       "lang": "zh",
+      "slug": "embedded-c-without-an-rtos",
+      "title": "无 RTOS 的嵌入式 C：让超级循环更可靠",
+      "description": "超级循环对许多设备来说够用，但一个慢任务会拖垮所有其他任务。用真实测量展示抖动和漂移，以及无需 RTOS 的修复方案：固定时间片调度器、状态机和看门狗。",
+      "pubDate": "2027-02-12",
+      "translationKey": "embedded-c-without-an-rtos",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "superloop",
+        "embedded C without RTOS",
+        "fixed timestep scheduler",
+        "task jitter",
+        "watchdog"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "encrypted-dns",
       "title": "加密 DNS 详解：DoT、DoH 究竟保护了什么（又没有保护什么）",
       "description": "一篇务实的加密 DNS 指南：明文 DNS 会泄露什么、泄露给谁；DNS over TLS 与 DNS over HTTPS 有何区别；DoQ 能带来什么；加密究竟保护了查询内容，又永远藏不住 SNI、目标 IP 和你所使用的解析器；运营者要面对的那些取舍；以及 Unbound 与 systemd-resolved 的具体配置。",
@@ -5677,6 +5850,25 @@
         "全盘加密",
         "威胁模型",
         "TPM"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "endianness-in-practice",
+      "title": "实践中的字节序：为什么字节是反着的",
+      "description": "用真实程序把字节序讲透：在 x86 上打印 32 位整数的字节、htonl 与网络字节序、直接发送结构体过 socket 的经典 bug、Modbus 寄存器，以及如何检测字节序并做字节交换。",
+      "pubDate": "2027-02-13",
+      "translationKey": "endianness-in-practice",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "字节序",
+        "大小端",
+        "htonl",
+        "网络字节序",
+        "字节交换"
       ]
     },
     {
@@ -5719,6 +5911,24 @@
         "嵌入式 overlay 网络",
         "EasyTier 线协议",
         "ESP-IDF C"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "esp32-freertos-tasks",
+      "title": "FreeRTOS 任务与队列：在笔记本上真实复现",
+      "description": "在 Linux 上克隆 FreeRTOS 内核、用 gcc 编译其 POSIX 端口，跑了五组真实实验——抢占式调度、vTaskDelay 对比忙等、队列、互斥量优先级反转、栈高水位标记——再把每个概念映射到 ESP32 上的 ESP-IDF。",
+      "pubDate": "2027-02-21",
+      "translationKey": "esp32-freertos-tasks",
+      "tags": [
+        "embedded"
+      ],
+      "keywords": [
+        "FreeRTOS 任务",
+        "FreeRTOS 队列",
+        "任务优先级",
+        "优先级反转",
+        "vTaskDelay"
       ]
     },
     {
@@ -6946,6 +7156,26 @@
         "JSON-RPC",
         "AI tools",
         "function calling"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "memory-alignment-and-padding-in-c",
+      "title": "C 语言结构体填充与对齐：实测",
+      "description": "为什么 C 结构体里存在空洞：真实的 sizeof/offsetof 数字、_Alignof、带 UBSan 未对齐加载报告的 packed 结构体、memcpy 序列化垃圾字节，以及在 x86-64 上实测的伪共享加速。",
+      "pubDate": "2027-02-13",
+      "translationKey": "memory-alignment-and-padding-in-c",
+      "tags": [
+        "c"
+      ],
+      "keywords": [
+        "struct padding",
+        "memory alignment C",
+        "sizeof offsetof",
+        "false sharing",
+        "packed struct",
+        "cache line",
+        "serialization"
       ]
     },
     {
