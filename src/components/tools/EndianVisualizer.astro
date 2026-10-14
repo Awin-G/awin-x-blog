@@ -1,0 +1,275 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        mode: '模式',
+        integer: '整数',
+        float: '浮点数',
+        width: '位宽',
+        value: '值',
+        placeholder: '整数：0x12345678 / 305419896　浮点：3.14',
+        little: '小端字节序（x86 / ARM 默认）',
+        big: '大端字节序（网络字节序）',
+        fields: 'IEEE-754 字段分解',
+        sign: '符号位',
+        exp: '指数',
+        mantissa: '尾数',
+        hint: '全部在浏览器本地计算，不上传任何数据。注意：这里演示的是「同一个值在不同字节序下的字节排列」。',
+        samples: '示例',
+        invalid: '无法解析该值',
+      }
+    : {
+        mode: 'Mode',
+        integer: 'Integer',
+        float: 'Float',
+        width: 'Width',
+        value: 'Value',
+        placeholder: 'int: 0x12345678 / 305419896   float: 3.14',
+        little: 'Little-endian (x86 / ARM default)',
+        big: 'Big-endian (network byte order)',
+        fields: 'IEEE-754 field breakdown',
+        sign: 'Sign',
+        exp: 'Exponent',
+        mantissa: 'Mantissa',
+        hint: 'Computed locally in your browser. This shows how the SAME value is laid out in bytes under each byte order.',
+        samples: 'Try',
+        invalid: 'could not parse that value',
+      };
+---
+
+<div class="tool endian" data-endian>
+  <div class="endian__controls">
+    <div>
+      <label for="endian-mode">{L.mode}</label>
+      <select id="endian-mode" data-mode>
+        <option value="int">{L.integer}</option>
+        <option value="float">{L.float}</option>
+      </select>
+    </div>
+    <div>
+      <label for="endian-width">{L.width}</label>
+      <select id="endian-width" data-width>
+        <option value="16">16</option>
+        <option value="32" selected>32</option>
+        <option value="64">64</option>
+      </select>
+    </div>
+  </div>
+
+  <label for="endian-in">{L.value}</label>
+  <input id="endian-in" type="text" autocomplete="off" spellcheck="false" placeholder={L.placeholder} value="0x12345678" />
+  <p class="endian__status" data-status aria-live="polite"></p>
+
+  <div class="endian__out">
+    <div class="endian__row"><span class="endian__k">{L.big}</span><output data-out="be">—</output></div>
+    <div class="endian__row"><span class="endian__k">{L.little}</span><output data-out="le">—</output></div>
+    <div class="endian__row" data-fields-row hidden><span class="endian__k">{L.fields}</span><output data-out="fields">—</output></div>
+  </div>
+
+  <p class="endian__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="endian__chip" data-sample="0x12345678">0x12345678</button>
+    <button type="button" class="endian__chip" data-sample="0xdeadbeef">0xdeadbeef</button>
+    <button type="button" class="endian__chip" data-sample="3.14">3.14</button>
+    <button type="button" class="endian__chip" data-sample="1000000">1000000</button>
+  </p>
+</div>
+
+<script>
+  const MASK = (bits: number) => (1n << BigInt(bits)) - 1n;
+
+  function parseIntVal(raw: string, bits: number): bigint | null {
+    let s = raw.trim().replace(/[_\s]/g, '').toLowerCase();
+    if (!s) return null;
+    let neg = false;
+    if (s.startsWith('-')) {
+      neg = true;
+      s = s.slice(1);
+    }
+    let v: bigint;
+    try {
+      if (s.startsWith('0x')) v = BigInt(s);
+      else if (s.startsWith('0b')) v = BigInt(s);
+      else if (s.startsWith('0o')) v = BigInt(s);
+      else if (/^[0-9]+$/.test(s)) v = BigInt(s);
+      else return null;
+    } catch {
+      return null;
+    }
+    if (neg) v = BigInt.asUintN(bits, -v);
+    if (v < 0n || v > MASK(bits)) return null;
+    return v;
+  }
+
+  function bytesOf(v: bigint, bits: number, little: boolean): number[] {
+    const out: number[] = [];
+    for (let i = 0; i < bits / 8; i++) {
+      const shift = BigInt((little ? i : bits / 8 - 1 - i) * 8);
+      out.push(Number((v >> shift) & 0xffn));
+    }
+    return out;
+  }
+
+  const hex = (b: number) => b.toString(16).padStart(2, '0');
+
+  document.querySelectorAll<HTMLElement>('[data-endian]').forEach((root) => {
+    const modeSel = root.querySelector<HTMLSelectElement>('[data-mode]')!;
+    const widthSel = root.querySelector<HTMLSelectElement>('[data-width]')!;
+    const input = root.querySelector<HTMLInputElement>('#endian-in')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const fieldsRow = root.querySelector<HTMLElement>('[data-fields-row]')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    function render() {
+      const bits = Number(widthSel.value);
+      const isFloat = modeSel.value === 'float';
+      fieldsRow.hidden = !isFloat;
+      out('fields').textContent = '—';
+
+      if (isFloat) {
+        const num = Number(input.value.trim());
+        if (!Number.isFinite(num)) {
+          status.textContent = 'invalid';
+          status.dataset.state = 'bad';
+          out('be').textContent = '—';
+          out('le').textContent = '—';
+          return;
+        }
+        const buf = new ArrayBuffer(bits / 8);
+        const dv = new DataView(buf);
+        if (bits === 32) dv.setFloat32(0, num);
+        else dv.setFloat64(0, num);
+        const bytes = Array.from({ length: bits / 8 }, (_, i) => dv.getUint8(i));
+        const be = [...bytes].reverse();
+        out('be').textContent = be.map(hex).join(' ');
+        out('le').textContent = bytes.map(hex).join(' ');
+        // field breakdown
+        let sign: number, expBits: number, mantBits: number;
+        if (bits === 32) {
+          const u = dv.getUint32(0);
+          sign = (u >>> 31) & 1;
+          expBits = (u >>> 23) & 0xff;
+          mantBits = u & 0x7fffff;
+          out('fields').textContent = `sign=${sign}  exp=0x${expBits.toString(16)} (${expBits - 127})  mantissa=0x${mantBits.toString(16).padStart(6, '0')}`;
+        } else {
+          const hi = dv.getUint32(0);
+          const lo = dv.getUint32(4);
+          sign = (hi >>> 31) & 1;
+          expBits = (hi >>> 20) & 0x7ff;
+          const mantHi = hi & 0xfffff;
+          out('fields').textContent = `sign=${sign}  exp=0x${expBits.toString(16)} (${expBits - 1023})  mantissa=0x${mantHi.toString(16).padStart(5, '0')}${lo.toString(16).padStart(8, '0')}`;
+        }
+        status.textContent = 'valid';
+        status.dataset.state = 'ok';
+        return;
+      }
+
+      const v = parseIntVal(input.value, bits);
+      if (v === null) {
+        status.textContent = 'invalid';
+        status.dataset.state = 'bad';
+        out('be').textContent = '—';
+        out('le').textContent = '—';
+        return;
+      }
+      status.textContent = 'valid';
+      status.dataset.state = 'ok';
+      out('be').textContent = bytesOf(v, bits, false).map(hex).join(' ');
+      out('le').textContent = bytesOf(v, bits, true).map(hex).join(' ');
+    }
+
+    modeSel.addEventListener('change', render);
+    widthSel.addEventListener('change', render);
+    input.addEventListener('input', render);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const s = b.dataset.sample!;
+        if (s.includes('.')) {
+          modeSel.value = 'float';
+          widthSel.value = '32';
+        } else {
+          modeSel.value = 'int';
+          if (s === '0xdeadbeef') widthSel.value = '32';
+        }
+        input.value = s;
+        render();
+      }),
+    );
+    render();
+  });
+</script>
+
+<style>
+  .endian__controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-bottom: 0.9rem;
+  }
+  .endian__out {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .endian__row {
+    display: grid;
+    grid-template-columns: minmax(13rem, 17rem) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.92rem;
+  }
+  .endian__k {
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .endian__row output {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    word-break: break-all;
+  }
+  .endian__status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .endian__status[data-state='ok'] {
+    color: var(--accent);
+  }
+  .endian__status[data-state='bad'] {
+    color: #d9534f;
+  }
+  .endian__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .endian__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .endian__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (max-width: 34rem) {
+    .endian__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

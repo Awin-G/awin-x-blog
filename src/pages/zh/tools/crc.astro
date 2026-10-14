@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CrcCalculator from '@/components/tools/CrcCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="crc"
+  title="CRC 校验计算器"
+  description="对文本或十六进制字节计算 CRC-32、CRC-32C、CRC-16/MODBUS、CRC-16/CCITT-FALSE、CRC-16/XMODEM 与 CRC-8。全部在浏览器本地运行。"
+>
+  <CrcCalculator lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>CRC-32 / CRC-32C</strong> —— zip/gzip 与 iSCSI/ext4 分别使用的校验。</li>
+      <li><strong>CRC-16/MODBUS</strong> —— 附加在 Modbus RTU 帧末尾的那个，线上是小端。</li>
+      <li><strong>CRC-16/CCITT-FALSE、XMODEM、CRC-8</strong> —— 嵌入式协议里的常客。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/modbus-tcp-and-rs485/')}>Modbus TCP 与 RTU</a>、
+      <a href={localePath('zh', '/posts/decoding-a-serial-protocol/')}>解码一个串口协议</a>。
+    </p>
+  </div>
+</ToolShell>

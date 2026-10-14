@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CrcCalculator from '@/components/tools/CrcCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="crc"
+  title="CRC calculator"
+  description="Compute CRC-32, CRC-32C, CRC-16/MODBUS, CRC-16/CCITT-FALSE, CRC-16/XMODEM and CRC-8 over text or hex bytes. Runs entirely in your browser."
+>
+  <CrcCalculator lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>CRC-32 / CRC-32C</strong> — the checksums used by zip/gzip and by iSCSI/ext4 respectively.</li>
+      <li><strong>CRC-16/MODBUS</strong> — the one appended to Modbus RTU frames, little-endian on the wire.</li>
+      <li><strong>CRC-16/CCITT-FALSE, XMODEM, CRC-8</strong> — the usual suspects in embedded protocols.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/modbus-tcp-and-rs485/')}>Modbus TCP and RTU</a>,
+      and <a href={localePath('en', '/posts/decoding-a-serial-protocol/')}>decoding a serial protocol</a>.
+    </p>
+  </div>
+</ToolShell>

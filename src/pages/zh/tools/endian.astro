@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import EndianVisualizer from '@/components/tools/EndianVisualizer.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="endian"
+  title="字节序可视化"
+  description="查看同一个整数或浮点数在小端与大端下的字节排布，并分解 IEEE-754 的符号位/指数/尾数。全部在浏览器本地运行。"
+>
+  <EndianVisualizer lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>字节序</strong> —— 同一个值在小端（x86/ARM 默认）与大端（网络字节序）下的字节排列。</li>
+      <li><strong>IEEE-754 字段</strong> —— 浮点数的符号位、带偏置的指数与尾数，能直观看到为什么 <code>0.1</code> 不精确。</li>
+      <li><strong>位宽</strong> —— 16/32/64 位整数，以及 32/64 位浮点。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/endianness-in-practice/')}>实践中的字节序</a>、
+      <a href={localePath('zh', '/posts/memory-alignment-and-padding-in-c/')}>结构体填充与对齐</a>。
+    </p>
+  </div>
+</ToolShell>

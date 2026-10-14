@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import EndianVisualizer from '@/components/tools/EndianVisualizer.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="endian"
+  title="Endianness / byte-order visualizer"
+  description="See how the same integer or float is laid out in bytes under little-endian and big-endian, with the IEEE-754 sign/exponent/mantissa breakdown. Runs entirely in your browser."
+>
+  <EndianVisualizer lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Byte order</strong> — the identical value written little-endian (x86/ARM default) and big-endian (network byte order).</li>
+      <li><strong>IEEE-754 fields</strong> — for floats, the sign bit, biased exponent and mantissa, so you can see why <code>0.1</code> is not exact.</li>
+      <li><strong>Widths</strong> — 16/32/64-bit integers and 32/64-bit floats.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/endianness-in-practice/')}>endianness in practice</a>,
+      and <a href={localePath('en', '/posts/memory-alignment-and-padding-in-c/')}>struct padding and alignment</a>.
+    </p>
+  </div>
+</ToolShell>

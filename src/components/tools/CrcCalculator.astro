@@ -1,0 +1,210 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        input: '输入数据（文本，或用 0x / 空格分隔的十六进制字节）',
+        placeholder: '例如 01 03 00 0A 00 02　或　hello world',
+        asHex: '按十六进制字节解析',
+        results: '计算结果',
+        hint: '全部在浏览器本地计算。参数：CRC-32 = IEEE 802.3；CRC-16/MODBUS 就是工业设备上常用的那个。',
+        samples: '示例',
+      }
+    : {
+        input: 'Input (text, or hex bytes separated by 0x / spaces)',
+        placeholder: 'e.g. 01 03 00 0A 00 02  or  hello world',
+        asHex: 'Parse as hex bytes',
+        results: 'Results',
+        hint: 'Computed locally. Params: CRC-32 = IEEE 802.3; CRC-16/MODBUS is the one used on industrial devices.',
+        samples: 'Try',
+      };
+---
+
+<div class="tool crc" data-crc>
+  <label for="crc-in">{L.input}</label>
+  <input id="crc-in" type="text" autocomplete="off" spellcheck="false" placeholder={L.placeholder} value="01 03 00 0A 00 02" />
+  <label class="crc__check">
+    <input type="checkbox" data-ashex checked /> {L.asHex}
+  </label>
+
+  <p class="crc__label">{L.results}</p>
+  <div class="crc__out">
+    <div class="crc__row"><span class="crc__k">CRC-32</span><output data-out="crc32">—</output></div>
+    <div class="crc__row"><span class="crc__k">CRC-32C</span><output data-out="crc32c">—</output></div>
+    <div class="crc__row"><span class="crc__k">CRC-16/MODBUS</span><output data-out="modbus">—</output></div>
+    <div class="crc__row"><span class="crc__k">CRC-16/CCITT-FALSE</span><output data-out="ccitt">—</output></div>
+    <div class="crc__row"><span class="crc__k">CRC-16/XMODEM</span><output data-out="xmodem">—</output></div>
+    <div class="crc__row"><span class="crc__k">CRC-8</span><output data-out="crc8">—</output></div>
+  </div>
+
+  <p class="crc__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="crc__chip" data-sample="01 03 00 0A 00 02" data-hex="1">Modbus</button>
+    <button type="button" class="crc__chip" data-sample="hello world" data-hex="0">text</button>
+    <button type="button" class="crc__chip" data-sample="31 32 33 34 35 36 37 38 39" data-hex="1">123456789</button>
+  </p>
+</div>
+
+<script>
+  type Params = { width: number; poly: number; init: number; refin: boolean; xorout: number };
+
+  function reflect(v: number, width: number): number {
+    let r = 0;
+    for (let i = 0; i < width; i++) {
+      r = (r << 1) | ((v >>> i) & 1);
+    }
+    return width === 32 ? r >>> 0 : r & ((1 << width) - 1);
+  }
+
+  function crc(data: number[], p: Params): number {
+    const width = p.width;
+    const is32 = width === 32;
+    const mask = is32 ? 0xffffffff : (1 << width) - 1;
+    const topBit = 1 << (width - 1);
+    // >>> 0 keeps 32-bit values unsigned (JS bitwise ops are signed 32-bit).
+    let c = p.init >>> 0;
+    for (const byte of data) {
+      const b = p.refin ? reflect(byte, 8) : byte;
+      c = (c ^ (b << (width - 8))) >>> 0;
+      for (let i = 0; i < 8; i++) {
+        if (c & topBit) {
+          c = ((c << 1) ^ p.poly) >>> 0;
+        } else {
+          c = (c << 1) >>> 0;
+        }
+        if (!is32) c &= mask;
+      }
+    }
+    if (p.refin) c = reflect(c, width) >>> 0;
+    return (c ^ p.xorout) >>> 0;
+  }
+
+  const hexPad = (v: number, width: number) => v.toString(16).padStart(width / 4, '0');
+
+  const ALGOS: Record<string, Params> = {
+    crc32: { width: 32, poly: 0x04c11db7, init: 0xffffffff, refin: true, xorout: 0xffffffff },
+    crc32c: { width: 32, poly: 0x1edc6f41, init: 0xffffffff, refin: true, xorout: 0xffffffff },
+    modbus: { width: 16, poly: 0x8005, init: 0xffff, refin: true, xorout: 0x0000 },
+    ccitt: { width: 16, poly: 0x1021, init: 0xffff, refin: false, xorout: 0x0000 },
+    xmodem: { width: 16, poly: 0x1021, init: 0x0000, refin: false, xorout: 0x0000 },
+    crc8: { width: 8, poly: 0x07, init: 0x00, refin: false, xorout: 0x00 },
+  };
+
+  function bytesFromText(s: string): number[] {
+    return Array.from(new TextEncoder().encode(s));
+  }
+  function bytesFromHex(s: string): number[] | null {
+    const cleaned = s.trim().replace(/0x/gi, ' ').replace(/[^0-9a-fA-F]/g, ' ').trim();
+    if (!cleaned) return [];
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    const out: number[] = [];
+    for (const p of parts) {
+      if (p.length > 2 || !/^[0-9a-fA-F]{1,2}$/.test(p)) return null;
+      out.push(parseInt(p, 16));
+    }
+    return out;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-crc]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('#crc-in')!;
+    const asHex = root.querySelector<HTMLInputElement>('[data-ashex]')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    function render() {
+      const bytes = asHex.checked ? bytesFromHex(input.value) : bytesFromText(input.value);
+      if (bytes === null) {
+        for (const k of Object.keys(ALGOS)) out(k).textContent = '—';
+        return;
+      }
+      for (const [k, p] of Object.entries(ALGOS)) {
+        out(k).textContent = '0x' + hexPad(crc(bytes, p), p.width);
+      }
+    }
+
+    input.addEventListener('input', render);
+    asHex.addEventListener('change', render);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        input.value = b.dataset.sample!;
+        asHex.checked = b.dataset.hex === '1';
+        render();
+      }),
+    );
+    render();
+  });
+</script>
+
+<style>
+  .crc__check {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    font-weight: 500;
+  }
+  .crc__check input {
+    width: auto;
+  }
+  .crc__label {
+    margin: 1.2rem 0 0.4rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .crc__out {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .crc__row {
+    display: grid;
+    grid-template-columns: minmax(11rem, 15rem) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.92rem;
+  }
+  .crc__k {
+    color: var(--fg-muted);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+  .crc__row output {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+  }
+  .crc__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .crc__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .crc__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (max-width: 34rem) {
+    .crc__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

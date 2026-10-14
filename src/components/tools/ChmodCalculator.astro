@@ -1,0 +1,268 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        owner: '属主 (u)',
+        group: '属组 (g)',
+        other: '其他 (o)',
+        read: '读 r',
+        write: '写 w',
+        exec: '执行 x',
+        special: '特殊位',
+        setuid: 'setuid (4)',
+        setgid: 'setgid (2)',
+        sticky: 'sticky (1)',
+        octal: '八进制',
+        symbolic: '符号形式',
+        command: '对应的命令',
+        hint: '勾选或直接输入八进制数，两边实时联动。',
+        samples: '示例',
+      }
+    : {
+        owner: 'Owner (u)',
+        group: 'Group (g)',
+        other: 'Other (o)',
+        read: 'read r',
+        write: 'write w',
+        exec: 'execute x',
+        special: 'Special bits',
+        setuid: 'setuid (4)',
+        setgid: 'setgid (2)',
+        sticky: 'sticky (1)',
+        octal: 'Octal',
+        symbolic: 'Symbolic',
+        command: 'Equivalent command',
+        hint: 'Tick the boxes or type the octal — both stay in sync.',
+        samples: 'Try',
+      };
+---
+
+<div class="tool chmod" data-chmod>
+  <div class="chmod__grid" role="group" aria-label="permissions">
+    <span></span>
+    <span class="chmod__h">{L.read}</span>
+    <span class="chmod__h">{L.write}</span>
+    <span class="chmod__h">{L.exec}</span>
+
+    <span class="chmod__h chmod__h--row">{L.owner}</span>
+    <label><input type="checkbox" data-p="u.r" checked /></label>
+    <label><input type="checkbox" data-p="u.w" checked /></label>
+    <label><input type="checkbox" data-p="u.x" checked /></label>
+
+    <span class="chmod__h chmod__h--row">{L.group}</span>
+    <label><input type="checkbox" data-p="g.r" checked /></label>
+    <label><input type="checkbox" data-p="g.w" /></label>
+    <label><input type="checkbox" data-p="g.x" checked /></label>
+
+    <span class="chmod__h chmod__h--row">{L.other}</span>
+    <label><input type="checkbox" data-p="o.r" checked /></label>
+    <label><input type="checkbox" data-p="o.w" /></label>
+    <label><input type="checkbox" data-p="o.x" checked /></label>
+  </div>
+
+  <p class="chmod__label">{L.special}</p>
+  <div class="chmod__special">
+    <label><input type="checkbox" data-p="setuid" /> {L.setuid}</label>
+    <label><input type="checkbox" data-p="setgid" /> {L.setgid}</label>
+    <label><input type="checkbox" data-p="sticky" /> {L.sticky}</label>
+  </div>
+
+  <div class="chmod__out">
+    <div class="chmod__row">
+      <span class="chmod__k">{L.octal}</span>
+      <input class="chmod__oct" data-octal type="text" inputmode="numeric" autocomplete="off" value="755" />
+    </div>
+    <div class="chmod__row"><span class="chmod__k">{L.symbolic}</span><output data-out="symbolic">—</output></div>
+    <div class="chmod__row"><span class="chmod__k">{L.command}</span><output data-out="command">—</output></div>
+  </div>
+
+  <p class="chmod__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="chmod__chip" data-sample="644">644</button>
+    <button type="button" class="chmod__chip" data-sample="755">755</button>
+    <button type="button" class="chmod__chip" data-sample="600">600</button>
+    <button type="button" class="chmod__chip" data-sample="1777">1777</button>
+    <button type="button" class="chmod__chip" data-sample="4755">4755</button>
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-chmod]').forEach((root) => {
+    const boxes = root.querySelectorAll<HTMLInputElement>('input[data-p]');
+    const octalIn = root.querySelector<HTMLInputElement>('[data-octal]')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    const get = (p: string) => root.querySelector<HTMLInputElement>(`input[data-p="${p}"]`)!.checked;
+
+    function state() {
+      const bit = (p: string) => (get(p) ? 1 : 0);
+      const u = bit('u.r') * 4 + bit('u.w') * 2 + bit('u.x');
+      const g = bit('g.r') * 4 + bit('g.w') * 2 + bit('g.x');
+      const o = bit('o.r') * 4 + bit('o.w') * 2 + bit('o.x');
+      const special = bit('setuid') * 4 + bit('setgid') * 2 + bit('sticky');
+      return { u, g, o, special };
+    }
+
+    function symbolic(s: { u: number; g: number; o: number; special: number }): string {
+      const tri = (n: number, specialChar?: string) =>
+        (n & 4 ? 'r' : '-') + (n & 2 ? 'w' : '-') + (n & 1 ? (specialChar || 'x') : specialChar === 's' ? 'S' : specialChar === 't' ? 'T' : '-');
+      const su = s.special & 4 ? 's' : undefined;
+      const sg = s.special & 2 ? 's' : undefined;
+      const st = s.special & 1 ? 't' : undefined;
+      return '-' + tri(s.u, su) + tri(s.g, sg) + tri(s.o, st);
+    }
+
+    function renderFromBoxes() {
+      const s = state();
+      const oct = `${s.special}${s.u}${s.g}${s.o}`;
+      octalIn.value = oct;
+      const sym = symbolic(s);
+      out('symbolic').textContent = sym;
+      out('command').textContent = `chmod ${parseInt(oct, 8).toString(8)} <file>   # ${sym}`;
+    }
+
+    function renderFromOctal() {
+      const v = octalIn.value.trim();
+      if (!/^[0-7]{3,4}$/.test(v)) return;
+      const padded = v.padStart(4, '0');
+      const special = Number(padded[0]);
+      const set = (p: string, on: boolean) => {
+        root.querySelector<HTMLInputElement>(`input[data-p="${p}"]`)!.checked = on;
+      };
+      set('setuid', !!(special & 4));
+      set('setgid', !!(special & 2));
+      set('sticky', !!(special & 1));
+      const triples = [padded[1], padded[2], padded[3]].map(Number);
+      const keys = ['u', 'g', 'o'];
+      keys.forEach((k, i) => {
+        const n = triples[i];
+        set(`${k}.r`, !!(n & 4));
+        set(`${k}.w`, !!(n & 2));
+        set(`${k}.x`, !!(n & 1));
+      });
+      const s = state();
+      const sym = symbolic(s);
+      out('symbolic').textContent = sym;
+      out('command').textContent = `chmod ${padded.replace(/^0/, '')} <file>   # ${sym}`;
+    }
+
+    boxes.forEach((b) => b.addEventListener('change', renderFromBoxes));
+    octalIn.addEventListener('input', renderFromOctal);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        octalIn.value = b.dataset.sample!;
+        renderFromOctal();
+      }),
+    );
+    renderFromBoxes();
+  });
+</script>
+
+<style>
+  .chmod__grid {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 9rem) repeat(3, 1fr);
+    gap: 0.45rem 0.75rem;
+    align-items: center;
+    font-size: 0.88rem;
+  }
+  .chmod__grid label {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+  .chmod__grid input {
+    width: auto;
+    transform: scale(1.15);
+  }
+  .chmod__h {
+    color: var(--fg-muted);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  .chmod__h--row {
+    text-align: right;
+  }
+  .chmod__label {
+    margin: 1.2rem 0 0.4rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .chmod__special {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.86rem;
+    color: var(--fg-muted);
+  }
+  .chmod__special label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-weight: 500;
+  }
+  .chmod__special input {
+    width: auto;
+  }
+  .chmod__out {
+    margin-top: 1.2rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .chmod__row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 12rem) 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    font-size: 0.92rem;
+  }
+  .chmod__k {
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .chmod__oct {
+    width: 8rem;
+    font-family: var(--font-mono);
+  }
+  .chmod__row output {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    word-break: break-all;
+  }
+  .chmod__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .chmod__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .chmod__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (max-width: 34rem) {
+    .chmod__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

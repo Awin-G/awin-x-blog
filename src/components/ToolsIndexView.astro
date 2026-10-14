@@ -24,6 +24,26 @@ const copy =
             name: 'IPv4 子网计算器',
             desc: '输入 IP/前缀，算出网络地址、广播地址、掩码、可用主机范围与地址数量，并判断地址类型。',
           },
+          {
+            slug: 'bases',
+            name: '进制转换器',
+            desc: '在二/八/十/十六进制之间转换，查看 64 位排布与各字宽下的有符号值，并可逐位翻转。',
+          },
+          {
+            slug: 'endian',
+            name: '字节序可视化',
+            desc: '同一个整数或浮点数在小端/大端下的字节排布，附 IEEE-754 字段分解。',
+          },
+          {
+            slug: 'crc',
+            name: 'CRC 校验计算器',
+            desc: '对文本或十六进制字节计算 CRC-32、CRC-32C、CRC-16/MODBUS、CCITT、XMODEM 与 CRC-8。',
+          },
+          {
+            slug: 'chmod',
+            name: 'chmod 权限计算器',
+            desc: '八进制 ⇄ 符号权限，含 setuid/setgid/sticky，并给出对应的 chmod 命令。',
+          },
         ],
         note: '更多工具会陆续加入——如果你想要某个特定工具，欢迎来信。',
       }
@@ -41,6 +61,26 @@ const copy =
             slug: 'subnet',
             name: 'IPv4 subnet calculator',
             desc: 'Enter an IP/prefix to get the network, broadcast, netmask, usable host range and host count — plus the address type.',
+          },
+          {
+            slug: 'bases',
+            name: 'Number base converter',
+            desc: 'Convert between binary, octal, decimal and hex, see the 64-bit layout and the signed value at each width, and toggle individual bits.',
+          },
+          {
+            slug: 'endian',
+            name: 'Endianness visualizer',
+            desc: 'See the same integer or float laid out in bytes under little- and big-endian, with the IEEE-754 field breakdown.',
+          },
+          {
+            slug: 'crc',
+            name: 'CRC calculator',
+            desc: 'CRC-32, CRC-32C, CRC-16/MODBUS, CCITT, XMODEM and CRC-8 over text or hex bytes.',
+          },
+          {
+            slug: 'chmod',
+            name: 'chmod calculator',
+            desc: 'Octal ⇄ symbolic file modes, including setuid/setgid/sticky, with the equivalent command.',
           },
         ],
         note: 'More tools are coming. If there is one you wish existed, get in touch.',

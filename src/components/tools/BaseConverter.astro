@@ -1,0 +1,258 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        input: '输入一个整数（自动识别 0x / 0b / 0o 前缀，可用下划线分隔）',
+        placeholder: '例如 0xdeadbeef、0b1010_1010、48879',
+        binary: '二进制（64 位，按 4 位分组）',
+        octal: '八进制',
+        decimal: '十进制',
+        hex: '十六进制',
+        signed: '按位宽解释（有符号）',
+        bits: '按位编辑（点一下翻转该位）',
+        valid: '有效',
+        invalid: '无法解析为整数',
+        hint: '全部在浏览器本地计算，不上传任何数据。',
+        samples: '示例',
+        overflow: '超出 64 位',
+      }
+    : {
+        input: 'Enter an integer (0x / 0b / 0o prefixes auto-detected; underscores allowed)',
+        placeholder: 'e.g. 0xdeadbeef, 0b1010_1010, 48879',
+        binary: 'Binary (64-bit, grouped by 4)',
+        octal: 'Octal',
+        decimal: 'Decimal',
+        hex: 'Hexadecimal',
+        signed: 'Interpretation by width (signed)',
+        bits: 'Edit bit by bit (click to toggle)',
+        valid: 'valid',
+        invalid: 'not an integer',
+        hint: 'Computed locally in your browser — nothing is sent anywhere.',
+        samples: 'Try',
+        overflow: 'exceeds 64 bits',
+      };
+---
+
+<div class="tool bases" data-bases>
+  <label for="bases-in">{L.input}</label>
+  <input id="bases-in" type="text" autocomplete="off" spellcheck="false" placeholder={L.placeholder} value="0xdeadbeef" />
+  <p class="bases__status" data-status aria-live="polite"></p>
+
+  <div class="bases__out">
+    <div class="bases__row"><span class="bases__k">{L.binary}</span><output data-out="bin">—</output></div>
+    <div class="bases__row"><span class="bases__k">{L.octal}</span><output data-out="oct">—</output></div>
+    <div class="bases__row"><span class="bases__k">{L.decimal}</span><output data-out="dec">—</output></div>
+    <div class="bases__row"><span class="bases__k">{L.hex}</span><output data-out="hex">—</output></div>
+    <div class="bases__row"><span class="bases__k">{L.signed}</span><output data-out="signed">—</output></div>
+  </div>
+
+  <p class="bases__bits-label">{L.bits}</p>
+  <div class="bases__bits" data-bits aria-label={L.bits}></div>
+
+  <p class="bases__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="bases__chip" data-sample="0xdeadbeef">0xdeadbeef</button>
+    <button type="button" class="bases__chip" data-sample="0b10101010">0b10101010</button>
+    <button type="button" class="bases__chip" data-sample="48879">48879</button>
+    <button type="button" class="bases__chip" data-sample="0xffffffff">0xffffffff</button>
+  </p>
+</div>
+
+<script>
+  const MASK64 = (1n << 64n) - 1n;
+
+  function parseValue(raw: string): bigint | null {
+    let s = raw.trim().replace(/[_\s]/g, '').toLowerCase();
+    if (!s) return null;
+    let neg = false;
+    if (s.startsWith('-')) {
+      neg = true;
+      s = s.slice(1);
+    } else if (s.startsWith('+')) {
+      s = s.slice(1);
+    }
+    let v: bigint;
+    try {
+      if (s.startsWith('0x')) v = BigInt(s);
+      else if (s.startsWith('0b')) v = BigInt(s);
+      else if (s.startsWith('0o')) v = BigInt(s);
+      else if (/^[0-9]+$/.test(s)) v = BigInt(s);
+      else return null;
+    } catch {
+      return null;
+    }
+    if (neg) v = -v;
+    if (v > MASK64 || v < -MASK64) return null;
+    return v;
+  }
+
+  const bin64 = (v: bigint) => (v & MASK64).toString(2).padStart(64, '0');
+
+  document.querySelectorAll<HTMLElement>('[data-bases]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('#bases-in')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const bits = root.querySelector<HTMLElement>('[data-bits]')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+    const validText = (root.closest('[data-labels]')?.getAttribute('data-valid') as string) || 'valid';
+    const invalidText = (root.closest('[data-labels]')?.getAttribute('data-invalid') as string) || 'invalid';
+    void validText;
+    void invalidText;
+
+    // build 64 bit buttons once
+    const cells: HTMLButtonElement[] = [];
+    for (let i = 63; i >= 0; i--) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bases__bit';
+      b.dataset.bit = String(i);
+      b.textContent = '0';
+      b.addEventListener('click', () => {
+        const cur = parseValue(input.value);
+        if (cur === null) return;
+        const v = (cur & MASK64) ^ (1n << BigInt(i));
+        input.value = '0x' + v.toString(16);
+        render();
+      });
+      bits.appendChild(b);
+      cells.push(b);
+    }
+
+    function render() {
+      const v = parseValue(input.value);
+      if (v === null) {
+        status.textContent = input.value.trim() ? 'invalid' : '';
+        status.dataset.state = 'bad';
+        for (const k of ['bin', 'oct', 'dec', 'hex', 'signed']) out(k).textContent = '—';
+        for (const c of cells) c.textContent = '0';
+        return;
+      }
+      status.textContent = 'valid';
+      status.dataset.state = 'ok';
+      const u = v & MASK64;
+      const bin = bin64(v);
+      out('bin').textContent = bin.replace(/(.{4})(?=.)/g, '$1 ');
+      out('oct').textContent = '0o' + u.toString(8);
+      out('dec').textContent = u.toString(10);
+      out('hex').textContent = '0x' + u.toString(16);
+      const parts = [8, 16, 32, 64].map((w) => `${w}: ${BigInt.asIntN(w, v)}`);
+      out('signed').textContent = parts.join('   ');
+      for (let i = 0; i < 64; i++) {
+        // cells[0] is bit 63
+        const bit = 63 - i;
+        const val = (u >> BigInt(bit)) & 1n;
+        cells[i].textContent = String(val);
+        cells[i].dataset.on = val ? '1' : '0';
+      }
+    }
+
+    input.addEventListener('input', render);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        input.value = b.dataset.sample!;
+        render();
+      }),
+    );
+    render();
+  });
+</script>
+
+<style>
+  .bases__out {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .bases__row {
+    display: grid;
+    grid-template-columns: minmax(11rem, 15rem) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.92rem;
+  }
+  .bases__k {
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .bases__row output {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+  .bases__status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .bases__status[data-state='ok'] {
+    color: var(--accent);
+  }
+  .bases__status[data-state='bad'] {
+    color: #d9534f;
+  }
+  .bases__bits-label {
+    margin: 1.2rem 0 0.4rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .bases__bits {
+    display: grid;
+    grid-template-columns: repeat(32, 1fr);
+    gap: 2px;
+  }
+  .bases__bit {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    line-height: 1;
+    padding: 0.2rem 0;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg-soft);
+    color: var(--fg-faint);
+    cursor: pointer;
+  }
+  .bases__bit[data-on='1'] {
+    background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+    border-color: var(--accent);
+    color: var(--accent-strong);
+    font-weight: 700;
+  }
+  .bases__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .bases__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .bases__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (max-width: 34rem) {
+    .bases__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+    .bases__bits {
+      grid-template-columns: repeat(16, 1fr);
+    }
+  }
+</style>

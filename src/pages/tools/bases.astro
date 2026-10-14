@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import BaseConverter from '@/components/tools/BaseConverter.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="bases"
+  title="Number base converter"
+  description="Convert an integer between binary, octal, decimal and hexadecimal, see the 64-bit layout, the signed value at each width, and toggle individual bits. Runs entirely in your browser."
+>
+  <BaseConverter lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Binary / octal / decimal / hex</strong> — the same value in every base, with <code>0x</code>/<code>0b</code>/<code>0o</code> prefixes auto-detected.</li>
+      <li><strong>Signed by width</strong> — how the bits read as <code>int8/16/32/64</code> (two's complement), which is where most sign bugs come from.</li>
+      <li><strong>Bit editor</strong> — click any of the 64 bits to flip it and watch the value change.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/c-pointer-arithmetic-and-ub/')}>undefined behaviour in C</a>,
+      and <a href={localePath('en', '/posts/endianness-in-practice/')}>endianness in practice</a>.
+    </p>
+  </div>
+</ToolShell>

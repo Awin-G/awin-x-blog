@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import BaseConverter from '@/components/tools/BaseConverter.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="bases"
+  title="进制转换器"
+  description="在二进制、八进制、十进制、十六进制之间转换整数，查看 64 位排布、各字宽下的有符号值，并可逐位翻转。全部在浏览器本地运行。"
+>
+  <BaseConverter lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>二/八/十/十六进制</strong> —— 同一个值在各种进制下的写法，自动识别 <code>0x</code>/<code>0b</code>/<code>0o</code> 前缀。</li>
+      <li><strong>按字宽的有符号值</strong> —— 这些位当成 <code>int8/16/32/64</code>（补码）读出来是多少，很多符号 bug 就出在这里。</li>
+      <li><strong>逐位编辑</strong> —— 点任意一位翻转它，数值实时跟着变。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/c-pointer-arithmetic-and-ub/')}>C 语言里的未定义行为</a>、
+      <a href={localePath('zh', '/posts/endianness-in-practice/')}>实践中的字节序</a>。
+    </p>
+  </div>
+</ToolShell>

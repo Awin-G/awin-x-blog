@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import ChmodCalculator from '@/components/tools/ChmodCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="chmod"
+  title="chmod calculator"
+  description="Tick read/write/execute for owner, group and other (plus setuid/setgid/sticky) and read off the octal and symbolic modes, or type an octal and see the boxes. Runs entirely in your browser."
+>
+  <ChmodCalculator lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Octal and symbolic</strong> — both forms, kept in sync as you change either.</li>
+      <li><strong>Special bits</strong> — <code>setuid</code> (4), <code>setgid</code> (2) and the sticky bit (1), and how they render as <code>s</code>/<code>S</code> and <code>t</code>/<code>T</code>.</li>
+      <li><strong>The command</strong> — the exact <code>chmod</code> line for the mode you built.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/linux-permissions/')}>Linux permissions</a>,
+      and <a href={localePath('en', '/posts/container-seccomp-hardening/')}>hardening a container</a>.
+    </p>
+  </div>
+</ToolShell>

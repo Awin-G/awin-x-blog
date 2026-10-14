@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import ChmodCalculator from '@/components/tools/ChmodCalculator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="chmod"
+  title="chmod 权限计算器"
+  description="勾选属主/属组/其他的读、写、执行（以及 setuid/setgid/sticky），读出八进制与符号权限；也可以直接输入八进制看勾选状态。全部在浏览器本地运行。"
+>
+  <ChmodCalculator lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>八进制与符号形式</strong> —— 两边实时联动。</li>
+      <li><strong>特殊位</strong> —— <code>setuid</code>(4)、<code>setgid</code>(2)、sticky(1)，以及它们显示成 <code>s</code>/<code>S</code>、<code>t</code>/<code>T</code> 的规则。</li>
+      <li><strong>对应命令</strong> —— 你拼出来的模式对应的那条 <code>chmod</code> 命令。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/linux-permissions/')}>Linux 权限</a>、
+      <a href={localePath('zh', '/posts/container-seccomp-hardening/')}>容器加固</a>。
+    </p>
+  </div>
+</ToolShell>
