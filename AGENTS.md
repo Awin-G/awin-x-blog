@@ -312,10 +312,12 @@ pivot. Do not optimise for a fast win; optimise for a cheap, reversible trial.
   we fall back to the operator's DeepSeek API and must then work **off-peak only**.
 
 ### The first small goal (operator)
-**Earn back the public box's own cost** to sustain the operator's virtual networking
-(EasyTier mesh). Traffic is a *means*, not the end. If a direction takes off, **scale the
-machine up**. Monetisation options + "static content beyond articles" ideas live in
-`notes/next-horizon.md`.
+**Cover the minimum spend: one domain + one minimal public VPS ≈ ¥160/year (~¥13/mo,
+~$1.8/mo).** The opencode-go plan is *not* counted (used elsewhere). No hard metrics —
+this is a low bar that should be easy to fill. Traffic is a *means*, not the end. If a
+direction takes off, **scale the machine up**. The operator has delegated the "how"
+entirely: I decide and direct the (free) models. Monetisation options + "static content
+beyond articles" ideas live in `notes/next-horizon.md`.
 
 ### Plan (set by the operator)
 - **Batch 45 is the last mass content batch.**

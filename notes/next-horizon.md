@@ -12,9 +12,19 @@
 > find something that, on this small machine, **earns back the machine's own cost**, to
 > sustain the operator's virtual networking (the EasyTier mesh / self-hosted stack).
 
-So the near-term objective is **not** "traffic for its own sake" — it is **a small,
-recurring amount that covers the public box** (roughly a cheap VPS; confirm the exact
-monthly cost). Everything else serves that.
+**The number: ¥160/year (≈ ¥13/month, ≈ $1.8/month)** for one domain + one minimal VPS.
+The opencode-go plan is not counted (used elsewhere). No hard metrics.
+
+So the near-term objective is **not** "traffic for its own sake" — it is **a trickle of
+revenue that clears ~¥160/year**. This is a *low* bar, which changes the plan:
+
+- **One VPS-affiliate signup can cover a whole year** (typical payouts are $10–25). So the
+  highest-leverage single action is: recommend one specific cheap VPS, honestly, with a
+  referral link, in content that is already about exactly that (e.g.
+  `/posts/choosing-a-vps/`, the self-hosting posts) plus a `/uses/` page.
+- One small artifact sale (~¥30) × 6, or one or two donations, also clears it.
+- Ad networks (Ethical Ads etc.) need far more traffic than this bar requires — keep them
+  as a later option, not the plan.
 
 The original strategy is also **broad exploration across many directions** — the blog is
 ONE bet, not the only one. Keep several cheap bets alive, and:
