@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-13T13:39:49.721Z",
+  "generatedAt": "2026-10-14T03:09:38.319Z",
   "count": {
-    "en": 212,
-    "zh": 212
+    "en": 218,
+    "zh": 218
   },
   "en": [
     {
@@ -395,6 +395,24 @@
         "health check",
         "Consul KV",
         "DNS interface"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "container-image-layers-and-digests",
+      "title": "Container Image Layers and Digests: What Is Actually Inside an Image",
+      "description": "A container image is an ordered stack of filesystem layers plus a config. Learn how Dockerfiles map to layers, why layer order matters for cache reuse, and the difference between tags and digests.",
+      "pubDate": "2027-01-29",
+      "translationKey": "container-image-layers-and-digests",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "container image layers",
+        "image digest",
+        "docker history",
+        "layer cache",
+        "docker save"
       ]
     },
     {
@@ -1228,6 +1246,24 @@
     },
     {
       "lang": "en",
+      "slug": "go-context-and-cancellation",
+      "title": "Go context: cancellation, deadlines, and not leaking goroutines",
+      "description": "A practical tour of Go's context package — WithTimeout, WithCancel, WithValue, errgroup, and the goroutine-leak pattern that bites when you ignore ctx.Done().",
+      "pubDate": "2027-01-27",
+      "translationKey": "go-context-and-cancellation",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go context",
+        "context cancellation",
+        "context.WithTimeout",
+        "goroutine leak",
+        "errgroup"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "go-for-network-tools",
       "title": "Go network tools: static binaries, goroutines, and painless cross compile",
       "description": "Why Go network tools keep winning: static single-file binaries, one-command cross compile, a net package that ships a TCP proxy and DNS client, goroutines for concurrent connections, and the concurrency pitfalls — unbounded goroutines, leaked connections, missing timeouts — that bite first.",
@@ -1439,6 +1475,25 @@
         "ETag",
         "304 Not Modified",
         "cache busting"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "http-compression-brotli-vs-gzip",
+      "title": "brotli vs gzip, measured: HTTP compression on real files, level by level",
+      "description": "brotli vs gzip, measured on real files: full gzip 1-9 and brotli 1-11 byte tables, compression-level CPU costs, nginx gzip and brotli setup, precompressed static assets, BREACH, and what not to compress.",
+      "pubDate": "2027-01-27",
+      "translationKey": "http-compression-brotli-vs-gzip",
+      "tags": [
+        "nginx",
+        "networking"
+      ],
+      "keywords": [
+        "brotli vs gzip",
+        "HTTP compression",
+        "Content-Encoding",
+        "nginx gzip",
+        "compression level"
       ]
     },
     {
@@ -1808,6 +1863,24 @@
         "setfacl",
         "umask",
         "setgid"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "linux-signals-deep-dive",
+      "title": "Linux Signals: kill vs kill -9, and the PID 1 Container Trap",
+      "description": "Linux signals are asynchronous notifications, not message queues. Learn the difference between SIGTERM and SIGKILL, how signal handlers enable graceful shutdown, why sigprocmask defers delivery, and the PID 1 container trap where your app must handle SIGTERM itself.",
+      "pubDate": "2027-01-28",
+      "translationKey": "linux-signals-deep-dive",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "Linux signals",
+        "SIGTERM vs SIGKILL",
+        "signal handler",
+        "PID 1 container",
+        "graceful shutdown"
       ]
     },
     {
@@ -3604,6 +3677,25 @@
     },
     {
       "lang": "en",
+      "slug": "systemd-service-watchdog",
+      "title": "systemd watchdog: restarting what hangs, not just what crashes",
+      "description": "Restart=on-failure only catches processes that exit. This shows how WatchdogSec plus sd_notify heartbeats catch the ones that hang instead, with real systemd journal output, StartLimitBurst crash-loop protection, and Type=notify readiness.",
+      "pubDate": "2027-01-29",
+      "translationKey": "systemd-service-watchdog",
+      "tags": [
+        "systemd",
+        "linux"
+      ],
+      "keywords": [
+        "systemd watchdog",
+        "Restart=on-failure",
+        "WatchdogSec",
+        "sd_notify",
+        "StartLimitBurst"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "systemd-socket-activation",
       "title": "systemd socket activation: start a service on the first connection, not at boot",
       "description": "systemd socket activation, made concrete: systemd owns the listening socket (ListenStream), starts your service on the first connection, and passes the fd via sd_listen_fds. Real systemctl --user output, the .socket/.service pair, systemd-socket-activate, and the honest tradeoffs.",
@@ -3716,6 +3808,25 @@
         "io.Copy",
         "goroutine leak",
         "half-close"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "tcp-window-and-socket-buffers",
+      "title": "TCP window scaling and socket buffers: why your transfer is slow on a long link",
+      "description": "Why a 500 Mbit/s link delivers 14 Mbit/s: the receive window, TCP window scaling, the bandwidth-delay product, and how socket buffers and autotuning set your real ceiling — measured with real iperf3, tcpdump, netem, and ss -ti output.",
+      "pubDate": "2027-01-28",
+      "translationKey": "tcp-window-and-socket-buffers",
+      "tags": [
+        "networking",
+        "linux"
+      ],
+      "keywords": [
+        "TCP window scaling",
+        "bandwidth-delay product",
+        "socket buffer",
+        "ss -ti",
+        "tcp_rmem"
       ]
     },
     {
@@ -4564,6 +4675,24 @@
     },
     {
       "lang": "zh",
+      "slug": "container-image-layers-and-digests",
+      "title": "容器镜像层与摘要：镜像里面到底是什么",
+      "description": "容器镜像是一个有序的文件系统层栈加上一个配置文件。了解 Dockerfile 如何映射到层、层的顺序为何影响缓存复用，以及标签与摘要的区别。",
+      "pubDate": "2027-01-29",
+      "translationKey": "container-image-layers-and-digests",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "容器镜像层",
+        "镜像摘要",
+        "docker history",
+        "层缓存",
+        "docker save"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "container-image-signing",
       "title": "容器供应链完整性：用 cosign 签名镜像，以及标签为什么会骗人",
       "description": "标签会说谎，摘要不会。一篇动手向的容器供应链完整性指南：构建一个极简镜像、按镜像摘要用 cosign 签名、部署前用 cosign verify 拦截，亲眼看着被悄悄挪走的标签验证失败（退出码 10），再附加 SBOM 与来源证明，并把签名做成部署门禁——全部真实终端输出，也说清单人运维者做到哪一步就够。",
@@ -5397,6 +5526,24 @@
     },
     {
       "lang": "zh",
+      "slug": "go-context-and-cancellation",
+      "title": "Go context 包：取消、截止日期与避免 goroutine 泄漏",
+      "description": "Go context 包的实战梳理——WithTimeout、WithCancel、WithValue、errgroup，以及忽略 ctx.Done() 时悄悄发生的 goroutine 泄漏。",
+      "pubDate": "2027-01-27",
+      "translationKey": "go-context-and-cancellation",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go context",
+        "context 取消",
+        "context.WithTimeout",
+        "goroutine 泄漏",
+        "errgroup"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "go-for-network-tools",
       "title": "Go 写小型网络工具：静态二进制、goroutine 与一键交叉编译",
       "description": "为什么 Go 网络工具总能胜出：单文件静态二进制、一条命令交叉编译、自带 TCP 代理与 DNS 客户端的 net 包、用 goroutine 处理并发连接，以及最先咬到你的并发陷阱——无上限的 goroutine、连接泄漏、缺失的超时。",
@@ -5610,6 +5757,25 @@
         "ETag",
         "304 Not Modified",
         "缓存击穿"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "http-compression-brotli-vs-gzip",
+      "title": "实测 brotli 与 gzip：真实文件上的 HTTP 压缩对比，逐压缩级别",
+      "description": "在真实文件上实测 brotli 与 gzip：完整的 gzip 1-9 与 brotli 1-11 字节数对照表、压缩级别的 CPU 开销、nginx gzip 与 brotli 模块配置、构建期预压缩静态资源、BREACH 风险，以及哪些内容不该压缩。",
+      "pubDate": "2027-01-27",
+      "translationKey": "http-compression-brotli-vs-gzip",
+      "tags": [
+        "nginx",
+        "networking"
+      ],
+      "keywords": [
+        "brotli 与 gzip 对比",
+        "HTTP 压缩",
+        "Content-Encoding",
+        "nginx gzip",
+        "压缩级别"
       ]
     },
     {
@@ -5980,6 +6146,24 @@
         "setfacl",
         "umask",
         "setgid"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "linux-signals-deep-dive",
+      "title": "Linux 信号：kill 与 kill -9 的区别，以及 PID 1 容器陷阱",
+      "description": "Linux 信号是异步通知，而不是消息队列。了解 SIGTERM 与 SIGKILL 的区别、信号处理器如何实现优雅关闭、sigprocmask 如何延迟信号投递，以及 PID 1 容器陷阱——你的应用必须自己处理 SIGTERM。",
+      "pubDate": "2027-01-28",
+      "translationKey": "linux-signals-deep-dive",
+      "tags": [
+        "linux"
+      ],
+      "keywords": [
+        "Linux 信号",
+        "SIGTERM vs SIGKILL",
+        "信号处理器",
+        "PID 1 容器",
+        "优雅关闭"
       ]
     },
     {
@@ -7777,6 +7961,25 @@
     },
     {
       "lang": "zh",
+      "slug": "systemd-service-watchdog",
+      "title": "systemd 看门狗：重启挂死的服务，而不只是会崩溃的服务",
+      "description": "Restart=on-failure 只能处理真正退出的进程，挂死的进程系统完全无感知。本文用真实的 systemd journal 输出演示如何用 WatchdogSec 加 sd_notify 心跳捕获卡死的服务，并覆盖 StartLimitBurst 崩溃循环保护与 Type=notify 就绪语义。",
+      "pubDate": "2027-01-29",
+      "translationKey": "systemd-service-watchdog",
+      "tags": [
+        "systemd",
+        "linux"
+      ],
+      "keywords": [
+        "systemd 看门狗",
+        "Restart=on-failure",
+        "WatchdogSec",
+        "sd_notify",
+        "StartLimitBurst"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "systemd-socket-activation",
       "title": "systemd socket 激活：在第一个连接时才启动服务，而非开机",
       "description": "把 systemd socket 激活讲透：由 systemd 持有监听 socket（ListenStream），在第一个连接到来时才启动服务，并通过 sd_listen_fds 把 fd 传给它。全部是 systemctl --user 的真实输出，含 .socket/.service 配对、systemd-socket-activate 演示，以及诚实的取舍。",
@@ -7889,6 +8092,25 @@
         "io.Copy",
         "goroutine leak",
         "half-close"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "tcp-window-and-socket-buffers",
+      "title": "TCP 窗口缩放与套接字缓冲区：为什么长链路上传输慢",
+      "description": "为什么 500 Mbit/s 的链路只跑出 14 Mbit/s：接收窗口、TCP 窗口缩放、带宽延迟积，以及套接字缓冲区与自动调优如何决定真实上限——全部用真实的 iperf3、tcpdump、netem 与 ss -ti 输出说话。",
+      "pubDate": "2027-01-28",
+      "translationKey": "tcp-window-and-socket-buffers",
+      "tags": [
+        "networking",
+        "linux"
+      ],
+      "keywords": [
+        "TCP 窗口缩放",
+        "带宽延迟积",
+        "套接字缓冲区",
+        "ss -ti",
+        "tcp_rmem"
       ]
     },
     {
