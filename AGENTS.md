@@ -249,6 +249,15 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   file writes fail silently mid-screenshot and produce blank/garbage PNGs. Sweep old
   scratch dirs before long work (`rm -rf` everything but the current session's dirs).
   Some Docker-created dirs are root-owned and need the container user to remove.
+- **`--window-size` cannot go below 500px in headless Chromium.** Asking for
+  `--window-size=390,1000` still lays the page out at **500px**; the screenshot is then
+  cropped to 390, so content looks "clipped at the right edge" and you will chase a
+  phantom mobile-overflow bug (this happened, and a vision subagent confirmed the phantom
+  at length). For a true narrow viewport render the page in
+  `<iframe width="390" scrolling="no">` and measure/screenshot that. Decide layout
+  questions with `documentElement.scrollWidth` vs `innerWidth` (and Range rects for text
+  extents) inside that iframe — never with pixel inference alone. Injecting a probe script
+  into a copy of the built page also works for the direct context.
 - **Vision**: this agent is text-only; use the `vision` skill / vision subagents to read
   images (per the injected vision note, the chosen model is `deepseek/deepseek-flash`).
 
