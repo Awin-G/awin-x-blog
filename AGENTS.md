@@ -5,11 +5,12 @@
 > the thing that survives. **Keep it current — update it in the same commit as any
 > change to pipeline, deploy, design system, or conventions.**
 >
-> Last updated: 2026-10-14 (batch 45 shipped — the last mass content batch; content
-> production paused for a ~2-month observation window. Content index + dedup wired into
-> the gate; "engineering notebook" design layer shipped and vision-verified; DotLens3D
-> article written by the vision model; deploy OOM fixed with swap + incremental OG cache;
-> operator message board is `留言.md`; first goal = cover ~¥160/yr, see §15).
+> Last updated: 2026-10-15 (five "different in kind" pieces shipped — the Open Ledger,
+> the request ladder, the wire-protocol explorer, the bead-lens WebGL lab, and the TCP
+> congestion lab. Content index + dedup wired into the gate; "engineering notebook" design
+> layer vision-verified; home page now leads with a highlights block; README rewritten for
+> the public GitHub mirror. Deploy OOM fixed with swap + incremental OG cache; operator
+> message board is `留言.md`; first goal = cover ~¥160/yr, see §15).
 
 ---
 
@@ -243,6 +244,11 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 - **Security demos must be harmless** — print-only payloads, never a real
   destructive command, even in a scratch dir (one subagent's `shell=True` demo
   actually ran an `rm -rf` and deleted its own scratch repo).
+- **`/tmp` is a 5.8 GB tmpfs and it fills up.** `/tmp/opencode/work/*` accumulates one
+  scratch dir per article/experiment and is never auto-cleaned; when it hits the quota,
+  file writes fail silently mid-screenshot and produce blank/garbage PNGs. Sweep old
+  scratch dirs before long work (`rm -rf` everything but the current session's dirs).
+  Some Docker-created dirs are root-owned and need the container user to remove.
 - **Vision**: this agent is text-only; use the `vision` skill / vision subagents to read
   images (per the injected vision note, the chosen model is `deepseek/deepseek-flash`).
 
@@ -250,10 +256,19 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **261 articles / 522 posts / 601 pages** (the 260-article mass phase ended at batch 45;
+- **265 articles / 530 posts / 609 pages** (the 260-article mass phase ended at batch 45;
   the 261st is the Open Ledger piece). Batches 1–45 shipped. Content dates run into 2027.
   **Mass content production is paused** — new work must be *different in kind* (see
   `notes/explore/SYNTHESIS.md`); the ~2-month observation window runs to ~2026-12-15.
+- **Five "different in kind" pieces shipped (2026-10-15), all vision-verified:**
+  `/open/` (the Open Ledger, build-time-computed numbers + a defect log); `request-ladder`
+  (a real `curl -v` as a zero-JS CSS `animation-timeline: view()` timeline); `wire-protocol-bytes`
+  (real EasyTier frames from ESPTier's own C encoder as a click-any-byte explorer);
+  `bead-lens-lab` (DotLens3D's ray-tracing shader ported to WebGL2, interactive);
+  `congestion-lab` (a 2D-canvas TCP congestion/bufferbloat simulation).
+  All are `.mdx` articles importing an Astro component — the pipeline needed no changes.
+  Interactive articles are the current shape; the home page has a "Start with these"
+  highlights block pointing at them.
 - **The Open Ledger (first "different in kind" bet, 2026-10-15)**: `/open/` is a live
   audit page whose numbers are computed from the repo at build time (files, pairs, words,
   code blocks, the near-duplicate distribution, a real defect log), plus the companion
