@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T04:25:23.449Z",
+  "generatedAt": "2026-10-14T05:19:23.102Z",
   "count": {
-    "en": 224,
-    "zh": 224
+    "en": 230,
+    "zh": 230
   },
   "en": [
     {
@@ -337,6 +337,25 @@
         "memory.max",
         "CPU throttling",
         "OOMKilled"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "cgroups-v2-io-limits",
+      "title": "cgroup v2 io.max: capping disk throughput per container",
+      "description": "Real fio numbers on a Docker 29 host: how the cgroup v2 io controller caps per-container disk throughput, what --device-write-bps actually writes, io.max vs io.weight, and why buffered dd lies.",
+      "pubDate": "2027-02-02",
+      "translationKey": "cgroups-v2-io-limits",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "cgroup v2 io.max",
+        "container I/O limits",
+        "device-write-bps",
+        "io.weight",
+        "PSI"
       ]
     },
     {
@@ -1207,6 +1226,24 @@
     },
     {
       "lang": "en",
+      "slug": "git-hooks-and-local-ci",
+      "title": "Git Hooks: A Local CI You Can Version-Control",
+      "description": "Git hooks are scripts that run at key points in the git lifecycle. Learn how pre-commit, commit-msg, and pre-push hooks work, why core.hooksPath solves the cloning problem, and how server-side hooks enforce what client hooks only suggest.",
+      "pubDate": "2027-02-02",
+      "translationKey": "git-hooks-and-local-ci",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "git hooks",
+        "pre-commit hook",
+        "core.hooksPath",
+        "commit-msg",
+        "pre-push"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "git-internals",
       "title": "Git internals: objects, refs, and packfiles (git is a tiny database)",
       "description": "A hands-on tour of Git internals: blobs, trees, commits, and tags as one content-addressed store, refs and HEAD, and how git gc packs loose objects. Real git cat-file, ls-tree, and verify-pack output.",
@@ -1536,6 +1573,25 @@
     },
     {
       "lang": "en",
+      "slug": "http-security-headers-and-csp",
+      "title": "Content-Security-Policy and security headers that actually do something",
+      "description": "A deep-dive into Content-Security-Policy (CSP): how to run a real before/after header diff in throwaway nginx containers, how CSP nonces and hashes beat 'unsafe-inline', how frame-ancestors stops clickjacking, how Report-Only mode lets you test without breaking your site, and a copy-paste starting set for a static site.",
+      "pubDate": "2027-02-04",
+      "translationKey": "http-security-headers-and-csp",
+      "tags": [
+        "security",
+        "nginx"
+      ],
+      "keywords": [
+        "Content-Security-Policy",
+        "security headers",
+        "CSP nonce",
+        "HSTS",
+        "Report-Only"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "http2-vs-http11",
       "title": "HTTP/2 vs HTTP/1.1: what actually changed (and what didn't)",
       "description": "A hands-on HTTP/2 vs HTTP/1.1 comparison: real curl and nghttp2 output from a throwaway nginx showing HTTP/2 multiplexing, HPACK header compression, the nginx http2 config, why TCP head-of-line blocking still needs QUIC, and honest localhost vs high-latency measurements.",
@@ -1631,6 +1687,25 @@
         "prefix delegation",
         "SLAAC",
         "dual stack"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "ipv6-firewalling-with-nftables",
+      "title": "IPv6 firewalling with nftables: one inet ruleset for both families",
+      "description": "A hands-on IPv6 firewall lab: one nftables inet table for both address families, the ICMPv6 rules IPv6 cannot live without, link-local and multicast allowances, default-deny input, real allowed/blocked test output, and the ip6tables comparison.",
+      "pubDate": "2027-02-04",
+      "translationKey": "ipv6-firewalling-with-nftables",
+      "tags": [
+        "networking",
+        "security"
+      ],
+      "keywords": [
+        "IPv6 firewall",
+        "nftables inet",
+        "ICMPv6",
+        "ip6tables vs nftables",
+        "default deny"
       ]
     },
     {
@@ -2415,6 +2490,25 @@
         "inspect certificate",
         "verify certificate chain",
         "x509"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "opentelemetry-collector-pipelines",
+      "title": "The OpenTelemetry Collector: Your Pipeline Between App and Backend",
+      "description": "How the OpenTelemetry Collector decouples apps from backends via receivers, processors, and exporters — with real OTLP output from a throwaway container.",
+      "pubDate": "2027-02-03",
+      "translationKey": "opentelemetry-collector-pipelines",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "OpenTelemetry Collector",
+        "OTLP",
+        "collector pipeline",
+        "receivers processors exporters",
+        "tail sampling"
       ]
     },
     {
@@ -3315,6 +3409,25 @@
         "GoAccess",
         "cookie-less analytics",
         "privacy-friendly analytics"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "self-hosted-container-registry",
+      "title": "A self-hosted container registry: private docker push on your own box",
+      "description": "Run your own self-hosted container registry with registry:2: real docker push and pull output, the v2 API by hand (catalog, tags, manifests), htpasswd auth, TLS, and garbage collection.",
+      "pubDate": "2027-02-03",
+      "translationKey": "self-hosted-container-registry",
+      "tags": [
+        "self-hosting",
+        "devops"
+      ],
+      "keywords": [
+        "self-hosted container registry",
+        "docker push",
+        "registry:2",
+        "v2 API",
+        "htpasswd"
       ]
     },
     {
@@ -4732,6 +4845,25 @@
     },
     {
       "lang": "zh",
+      "slug": "cgroups-v2-io-limits",
+      "title": "cgroup v2 io.max：限制单个容器的磁盘吞吐量",
+      "description": "在一台 Docker 29 主机上实测：cgroup v2 的 io 控制器如何按容器限制磁盘吞吐量，--device-write-bps 到底写了什么，io.max 与 io.weight 的区别，以及为什么用 dd 测出来的数字是假的。",
+      "pubDate": "2027-02-02",
+      "translationKey": "cgroups-v2-io-limits",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "cgroup v2 io.max",
+        "容器 I/O 限制",
+        "device-write-bps",
+        "io.weight",
+        "PSI"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "choosing-a-vps",
       "title": "2026 年如何选 VPS：真正重要的东西（以及不重要的）",
       "description": "价格页之外，一台小型自托管服务器真正该看的 VPS 配置：内存优先于 CPU、磁盘 IO、网络上限、IPv4/IPv6、快照、延迟；哪些营销数字会说谎；便宜与高价的真实取舍；KVM 与 OpenVZ；端口 25 与滥用政策；以及一份决策清单。",
@@ -5602,6 +5734,24 @@
     },
     {
       "lang": "zh",
+      "slug": "git-hooks-and-local-ci",
+      "title": "Git Hooks：你可以纳入版本控制的本地 CI",
+      "description": "Git hooks 是在 git 生命周期关键节点自动执行的脚本。本文介绍 pre-commit、commit-msg 和 pre-push hook 的用法，core.hooksPath 如何解决克隆问题，以及服务端 hook 如何执行客户端 hook 无法强制的规则。",
+      "pubDate": "2027-02-02",
+      "translationKey": "git-hooks-and-local-ci",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "git hooks",
+        "pre-commit hook",
+        "core.hooksPath",
+        "commit-msg",
+        "pre-push"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "git-internals",
       "title": "Git 内部原理：对象、引用与 packfile（git 是个小型数据库）",
       "description": "动手拆解 Git 内部原理：blob、tree、commit 与 tag 组成一个内容寻址的对象库，引用与 HEAD 只是指向提交的文件，再看 git gc 如何把松散对象打包。附带真实的 git cat-file、ls-tree、verify-pack 输出。",
@@ -5933,6 +6083,25 @@
     },
     {
       "lang": "zh",
+      "slug": "http-security-headers-and-csp",
+      "title": "Content-Security-Policy 与真正管用的安全响应头",
+      "description": "深入 Content-Security-Policy（CSP）：在一次性 nginx 容器中跑真实的响应头前后对比、CSP nonce 与哈希如何取代 'unsafe-inline'、frame-ancestors 如何阻止点击劫持、Report-Only 模式如何让你在不弄坏站点的前提下测试，以及一份静态站点的可直接复制起步配置。",
+      "pubDate": "2027-02-04",
+      "translationKey": "http-security-headers-and-csp",
+      "tags": [
+        "security",
+        "nginx"
+      ],
+      "keywords": [
+        "Content-Security-Policy",
+        "安全响应头",
+        "CSP nonce",
+        "HSTS",
+        "Report-Only"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "http2-vs-http11",
       "title": "HTTP/2 与 HTTP/1.1：到底改变了什么（以及什么没变）",
       "description": "一次动手对比 HTTP/2 与 HTTP/1.1：用一次性 nginx 容器跑出真实 curl 与 nghttp2 输出，讲清 HTTP/2 多路复用、HPACK 头压缩、nginx http2 配置、TCP 队头阻塞为何要靠 QUIC，以及在本地与高延迟链路上分别量到的诚实数字。",
@@ -6028,6 +6197,25 @@
         "前缀委派",
         "SLAAC",
         "双栈"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "ipv6-firewalling-with-nftables",
+      "title": "用 nftables 做 IPv6 防火墙：一张 inet 表同时管两个协议族",
+      "description": "一次真机 IPv6 防火墙实验：用一张 nftables inet 表同时给 IPv4 和 IPv6 设防，讲清 IPv6 离不开的 ICMPv6/NDP 规则、链路本地与多播放行、默认拒绝的 input 链，附真实放行与拦截的测试输出、计数器，以及和 ip6tables 的对比。",
+      "pubDate": "2027-02-04",
+      "translationKey": "ipv6-firewalling-with-nftables",
+      "tags": [
+        "networking",
+        "security"
+      ],
+      "keywords": [
+        "IPv6 防火墙",
+        "nftables inet",
+        "ICMPv6",
+        "ip6tables 与 nftables",
+        "默认拒绝"
       ]
     },
     {
@@ -6814,6 +7002,25 @@
         "检查证书",
         "验证证书链",
         "x509"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "opentelemetry-collector-pipelines",
+      "title": "OpenTelemetry Collector：应用与后端之间的管道",
+      "description": "OpenTelemetry Collector 如何通过 receivers、processors、exporters 将应用与后端解耦——附真实 OTLP 容器输出。",
+      "pubDate": "2027-02-03",
+      "translationKey": "opentelemetry-collector-pipelines",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "OpenTelemetry Collector",
+        "OTLP",
+        "collector pipeline",
+        "receivers processors exporters",
+        "tail sampling"
       ]
     },
     {
@@ -7714,6 +7921,25 @@
         "GoAccess",
         "无 Cookie 统计",
         "隐私友好统计"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "self-hosted-container-registry",
+      "title": "自建容器镜像仓库：把 docker push 留在自己的机器上",
+      "description": "用 registry:2 自建容器镜像仓库：真实的 docker push/docker pull 输出、裸手调 v2 API（catalog、tags、manifest）、htpasswd 认证、TLS 与垃圾回收，以及什么时候託管仓库才是更划算的选择。",
+      "pubDate": "2027-02-03",
+      "translationKey": "self-hosted-container-registry",
+      "tags": [
+        "self-hosting",
+        "devops"
+      ],
+      "keywords": [
+        "自建容器镜像仓库",
+        "docker push",
+        "registry:2",
+        "v2 API",
+        "htpasswd"
       ]
     },
     {
