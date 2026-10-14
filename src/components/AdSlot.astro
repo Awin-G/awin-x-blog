@@ -1,34 +1,37 @@
 ---
+import { ADSENSE_CLIENT } from '@/consts';
+
 /**
- * Off-by-default ad slot.
+ * Manual Google AdSense unit.
  *
- * Nothing is rendered and no script is loaded until `AD.enabled` is true AND a
- * network `src` is set — so this costs zero bytes and zero CLS today. When (if)
- * it is switched on, keep it TEXT-ONLY and developer-oriented (Ethical Ads /
- * Carbon): the "engineering notebook" design does not survive display ads.
+ * With **Auto ads** enabled in the AdSense dashboard you do not need this at all —
+ * the `adsbygoogle.js` script in <head> is enough. This component is for placing a
+ * unit deliberately: create a display unit in the dashboard, paste its numeric slot
+ * id into UNIT_SLOT, and drop `<AdSlot />` where it belongs.
  *
- * Usage:  <AdSlot slot="in-article" />
+ * While UNIT_SLOT is empty this renders nothing (zero bytes, zero CLS).
  */
 interface Props {
-  /** Placement id passed to the network. */
-  slot?: string;
+  /** `auto` (responsive) | `horizontal` | `rectangle` | `vertical`. */
+  format?: string;
 }
-const AD = {
-  enabled: false,
-  // e.g. 'https://media.ethicalads.io/media/client/ethicalads.min.js'
-  src: '',
-  label: 'ad',
-};
-const show = AD.enabled && AD.src !== '';
+const UNIT_SLOT = ''; // e.g. '1234567890'
+const show = UNIT_SLOT !== '';
 ---
 
 {
   show && (
     <aside class="adslot" aria-label="Advertisement">
-      <span class="adslot__label">{AD.label}</span>
-      <div class="adslot__body" data-ea-publisher="" data-ea-type="text" data-ea-manual="true" data-slot={Astro.props.slot}>
-        {/* The network script fills this. */}
-      </div>
+      <span class="adslot__label">ad</span>
+      <ins
+        class="adsbygoogle adslot__unit"
+        style="display:block"
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={UNIT_SLOT}
+        data-ad-format={Astro.props.format ?? 'auto'}
+        data-full-width-responsive="true"
+      />
+      <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
   )
 }

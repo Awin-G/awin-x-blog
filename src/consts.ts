@@ -30,6 +30,9 @@ export const SITE = {
   },
 } as const;
 
+/** Google AdSense publisher id (the `client` query param of the adsbygoogle script). */
+export const ADSENSE_CLIENT = 'ca-pub-4702033324942872';
+
 export type Lang = 'en' | 'zh';
 
 export const LOCALES: Lang[] = ['en', 'zh'];

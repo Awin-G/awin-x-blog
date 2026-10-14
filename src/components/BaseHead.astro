@@ -6,6 +6,7 @@ import {
   OG_LOCALE,
   HREFLANG,
   LOCALES,
+  ADSENSE_CLIENT,
   type Lang,
 } from '@/consts';
 
@@ -115,6 +116,14 @@ const xDefault = altMap[DEFAULT_LOCALE] ?? altMap[lang];
 <!-- Search console verification -->
 {SITE.verification.google && <meta name="google-site-verification" content={SITE.verification.google} />}
 {SITE.verification.bing && <meta name="msvalidate.01" content={SITE.verification.bing} />}
+
+<!-- Google AdSense. Third-party ads, so the site sets Google cookies; see the
+     disclosure on /support/. Loaded async so it never blocks first paint. -->
+<script
+  is:inline
+  async
+  src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+  crossorigin="anonymous"></script>
 
 {jsonLd.map((obj) => (
   <script type="application/ld+json" set:html={JSON.stringify(obj)} />
