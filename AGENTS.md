@@ -5,7 +5,7 @@
 > the thing that survives. **Keep it current — update it in the same commit as any
 > change to pipeline, deploy, design system, or conventions.**
 >
-> Last updated: 2026-10-14 (batch 40 shipped; content index + dedup/similarity system
+> Last updated: 2026-10-14 (batch 41 shipped; content index + dedup/similarity system
 > in the content gate; "engineering notebook" design layer shipped and vision-verified;
 > DotLens3D article written by the vision model; deploy OOM fixed with swap +
 > incremental OG cache; operator message board is `留言.md`).
@@ -237,7 +237,7 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **230 articles / 460 posts / 519 pages** (after batch 40). Batches 1–40 shipped.
+- **236 articles / 472 posts / 531 pages** (after batch 41). Batches 1–41 shipped.
   Content dates run into 2027.
 - **Design layer shipped** (`theme.css`, the "engineering notebook" pass) — verified with
   a headless-Chromium screenshot → vision-subagent loop (measure ~78 CPL, AA contrast,
