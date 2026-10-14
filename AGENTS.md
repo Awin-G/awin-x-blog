@@ -274,3 +274,7 @@ When something durable is learned, add it here in the same commit:
 pipeline/deploy changes, new conventions, new gotchas, model/tooling changes, design
 decisions, current counts, security items. Keep it **dense and factual**; delete stale
 lines rather than letting them rot. This is the memory that survives context loss.
+
+**Talking to the operator:** do **not** report work in chat — the operator will miss it.
+Write anything worth sharing (progress, findings, requests) to **`留言.md`** at the repo
+root, newest entry on top. Keep only genuinely operator-actionable items there.
