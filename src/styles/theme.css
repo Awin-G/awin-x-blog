@@ -207,6 +207,33 @@ html:lang(zh) .eyebrow {
   font-weight: 500;
 }
 
+/* ---------- Header nav on phones ------------------------------------------
+   Eight links in a nowrap flex row gave the nav a 492px minimum width, which
+   made the *document* 631px wide inside a 390px phone viewport — so every page
+   scrolled sideways. Measured with an iframe probe: docScrollWidth 631 vs
+   innerWidth 390, and the only offenders were nav.nav and its links; the
+   article column (.prose) was 343px and fit fine. Let the nav wrap instead. */
+@media (max-width: 44rem) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    row-gap: 0.3rem;
+    padding-block: 0.5rem;
+  }
+  .nav {
+    flex-wrap: wrap;
+    margin-inline-start: 0;
+    width: 100%;
+    gap: 0.1rem;
+  }
+  .nav a {
+    padding: 0.32rem 0.5rem;
+    font-size: 0.88rem;
+  }
+  .lang-toggle {
+    margin-inline-start: 0.2rem;
+  }
+}
+
 /* ---------- 5. Reading progress ------------------------------------------ */
 .progress {
   position: fixed;
@@ -420,6 +447,16 @@ h3:hover > .heading-anchor,
 /* ---------- 9. Hero: subtle graph-paper backdrop ------------------------- */
 .hero {
   position: relative;
+}
+
+/* The hero is `<section class="wrap hero">`, but `.hero`'s
+   `padding: clamp(...) 0 1rem` shorthand zeroes the horizontal padding `.wrap`
+   had just set (same specificity, later in the cascade). Measured before the
+   fix: heroH1.left=156 vs sectionH2.left=188 at 1400px — the hero sat 32px left
+   of every other section — and heroH1.left=0 at 390px, i.e. hero text flush
+   against the phone's screen edge. Restore the inline padding `.wrap` uses. */
+.hero {
+  padding-inline: clamp(1rem, 4vw, 2rem);
 }
 .hero::before {
   content: '';
