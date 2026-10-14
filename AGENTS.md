@@ -288,3 +288,39 @@ root, newest entry on top. Keep only genuinely operator-actionable items there.
 **orchestrator only**. Drafting subagents must **never** create, edit, or overwrite
 either one (a subagent once clobbered `留言.md` with its own status) — their only
 outputs are their two article files.
+
+---
+
+## 15. Resources, budget, and the long-horizon plan
+
+**Operator's principle (2026-10-14): slow, cheap experimentation is welcome.** Static
+output has ~zero runtime cost, so we can afford to try things over months, measure, and
+pivot. Do not optimise for a fast win; optimise for a cheap, reversible trial.
+
+### Machines
+| Name | What | Use it for |
+|---|---|---|
+| **TOWER** | public box, Ubuntu, **981 MB RAM** | serving the static site; light scheduled jobs only — **never** builds |
+| **BOOK** | local dev box, Arch | all building, Docker labs, experiments |
+| **EARTH** | big storage, Arch, mostly-on but not guaranteed | archives/datasets; jobs must be idempotent + resumable |
+| **MAGIK** | Ryzen 7735H, 32 GB, RTX 4060, Arch, **on request** | GPU bursts: generated imagery, embeddings, heavy precompute |
+
+### Model budget
+- Drafting → the free `opencode-go` `*-free` ids (rotate them). Never the host `ollama`.
+- Me (the orchestrator) → limited but rarely exhausted.
+- **Advanced models: use sparingly** — a single session can drain the budget, after which
+  we fall back to the operator's DeepSeek API and must then work **off-peak only**.
+
+### The first small goal (operator)
+**Earn back the public box's own cost** to sustain the operator's virtual networking
+(EasyTier mesh). Traffic is a *means*, not the end. If a direction takes off, **scale the
+machine up**. Monetisation options + "static content beyond articles" ideas live in
+`notes/next-horizon.md`.
+
+### Plan (set by the operator)
+- **Batch 45 is the last mass content batch.**
+- Then **observe ~2 months** (to ~2026-12-15) on real analytics + GSC data.
+- If the effect is poor, **change direction** — the blog is not the only possible output.
+- Candidate directions and concrete "static content beyond articles" ideas live in
+  **`notes/next-horizon.md`** (tools, data products, generated visuals, ZH-first).
+- Set a reminder to **review analytics ~2026-12-15** and decide.
