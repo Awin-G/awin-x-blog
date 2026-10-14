@@ -55,7 +55,9 @@ src/
   content/blog/{en,zh}/*.md     # 1 file per article per language
   layouts/{BaseLayout,PostLayout}.astro
   components/                   # Header, Footer, PostCard, HomeView, tools/*, …
-  pages/                        # routes: /, /posts, /tags, /tools, /about, /start, 404
+  components/{SupportView,UsesView,SearchView,AdSlot}.astro  # monetisation + search
+  pages/                        # routes: /, /posts, /tags, /tools, /about, /start,
+                                #   /uses, /support, /search, 404 (each mirrored in /zh/)
   styles/global.css             # base theme (954 lines)
   styles/theme.css              # "engineering notebook" override layer (see §9)
   lib/{posts,tags}.ts           # post helpers, tag descriptions
@@ -245,6 +247,12 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 - **Design layer shipped** (`theme.css`, the "engineering notebook" pass) — verified with
   a headless-Chromium screenshot → vision-subagent loop (measure ~78 CPL, AA contrast,
   equal-height cards, code chrome, CJK leading). Iterate visually with that loop.
+- **Monetisation + search shipped**: `/support/` + `/uses/` (bilingual; affiliate slots are
+  empty → they render as plain text, so there are no broken links yet), an off-by-default
+  `AdSlot` (zero bytes until enabled), and client-side full-text search (Pagefind) at
+  `/search/` + `/zh/search/` (index generated in `postbuild`). Fill `SUPPORT` in
+  `SupportView.astro` and the `href`s in `UsesView.astro` once the affiliate/donation
+  accounts exist.
 - `notes/content-strategy.md` holds the topic backlog (v1 + v2) and channel strategy.
 - `notes/hn-queue.md` = ranked HN submissions with ready titles/first comments
   (posting is manual: the operator's HN account is under probation).
