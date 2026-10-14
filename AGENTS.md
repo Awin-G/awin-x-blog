@@ -250,10 +250,15 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **260 articles / 520 posts / 579 pages** (after batch 45 — **the last mass content
-  batch**). Batches 1–45 shipped. Content dates run into 2027.
-  **Content production is now paused**; next is revenue plumbing + tools + a ~2-month
-  observation window (see `notes/next-horizon.md`).
+- **261 articles / 522 posts / 601 pages** (the 260-article mass phase ended at batch 45;
+  the 261st is the Open Ledger piece). Batches 1–45 shipped. Content dates run into 2027.
+  **Mass content production is paused** — new work must be *different in kind* (see
+  `notes/explore/SYNTHESIS.md`); the ~2-month observation window runs to ~2026-12-15.
+- **The Open Ledger (first "different in kind" bet, 2026-10-15)**: `/open/` is a live
+  audit page whose numbers are computed from the repo at build time (files, pairs, words,
+  code blocks, the near-duplicate distribution, a real defect log), plus the companion
+  article `the-open-ledger` written to the new rules. Exploration reports and the writing
+  rules live in `notes/explore/` (start with `SYNTHESIS.md`).
 - **Design layer shipped** (`theme.css`, the "engineering notebook" pass) — verified with
   a headless-Chromium screenshot → vision-subagent loop (measure ~78 CPL, AA contrast,
   equal-height cards, code chrome, CJK leading). Iterate visually with that loop.
