@@ -15,6 +15,21 @@ const featured = posts.filter((p) => p.data.featured);
 const latest = (featured.length >= 3 ? featured : posts).slice(0, 6);
 const tags = (await tagsOf(lang)).slice(0, 14);
 
+const highlights =
+  lang === 'zh'
+    ? [
+        { href: localePath('zh', '/posts/request-ladder/'), title: '一次请求的 1.07 秒', desc: '把真实的 curl -v 做成滚动时间线：DNS、TCP、TLS、服务器各占多少，一眼看清。', kind: '交互' },
+        { href: localePath('zh', '/posts/wire-protocol-bytes/'), title: '逐字节看一个真实协议', desc: '点任意字节，看它属于哪个字段——以及那个「撒谎」的长度字段为什么是承重的。', kind: '交互' },
+        { href: localePath('zh', '/posts/bead-lens-lab/'), title: '玻璃珠透镜实验室', desc: '真实 GPU 光追移植进浏览器：拧旋钮，看摩尔纹放大与视差怎么出现。', kind: '可玩' },
+        { href: localePath('zh', '/open/'), title: '开源账本', desc: '这个站的真实数据：字数、代码块、重复分布，以及它出错时的缺陷日志。', kind: '数据' },
+      ]
+    : [
+        { href: localePath('en', '/posts/request-ladder/'), title: 'The 1.07 seconds of one request', desc: 'A real curl -v as a scroll-driven timeline: how much of it is DNS, TCP, TLS, and the server.', kind: 'interactive' },
+        { href: localePath('en', '/posts/wire-protocol-bytes/'), title: 'A real protocol, byte by byte', desc: 'Click any byte to see which field owns it — and why the length field that "lies" is load-bearing.', kind: 'interactive' },
+        { href: localePath('en', '/posts/bead-lens-lab/'), title: 'The bead-lens optics lab', desc: 'A real GPU ray tracer ported to the browser: turn the knobs and watch moiré magnification appear.', kind: 'playable' },
+        { href: localePath('en', '/open/'), title: 'The open ledger', desc: 'This site’s real numbers — words, code blocks, duplicate distribution — and its defect log.', kind: 'data' },
+      ];
+
 const alternates: Partial<Record<Lang, string>> = {
   en: localePath('en', '/'),
   zh: localePath('zh', '/'),
@@ -57,6 +72,22 @@ const jsonLd: Record<string, unknown>[] = [
       <a class="btn btn--primary" href={localePath(lang, '/posts/')}>{t(lang, 'home.hero.cta')}</a>
       <a class="btn btn--ghost" href={localePath(lang, '/about/')}>{t(lang, 'home.hero.ctaAlt')}</a>
     </div>
+  </section>
+
+  <section class="wrap">
+    <div class="section-head">
+      <h2>{lang === 'zh' ? '先看这几个' : 'Start with these'}</h2>
+      <a href={localePath(lang, '/start/')}>{lang === 'zh' ? '全部入口' : 'All entry points'} →</a>
+    </div>
+    <ul class="post-list post-list--2col">
+      {highlights.map((h) => (
+        <li class="card">
+          <h3 class="card__title"><a href={h.href}>{h.title}</a></h3>
+          <p class="card__desc">{h.desc}</p>
+          <div class="card__meta"><span class="chip">{h.kind}</span></div>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <section class="wrap">
