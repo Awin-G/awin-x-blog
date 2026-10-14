@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T03:09:38.319Z",
+  "generatedAt": "2026-10-14T04:25:23.449Z",
   "count": {
-    "en": 218,
-    "zh": 218
+    "en": 224,
+    "zh": 224
   },
   "en": [
     {
@@ -1885,6 +1885,26 @@
     },
     {
       "lang": "en",
+      "slug": "linux-swap-and-zram",
+      "title": "Linux swap and zram: what they are, and when they save you",
+      "description": "What Linux swap actually is (and why it is not RAM), what vm.swappiness really controls, how to read memory pressure from vmstat si/so, pswpin/pswpout and /proc/pressure, and when zram beats a disk swapfile — real output, plus a 400 MiB allocation test under a Docker cgroup limit.",
+      "pubDate": "2027-02-01",
+      "translationKey": "linux-swap-and-zram",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "Linux swap",
+        "zram",
+        "vm.swappiness",
+        "memory pressure",
+        "swapfile",
+        "pswpin"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "llm-cost-control",
       "title": "LLM cost control: where the money actually goes",
       "description": "I ran a stdlib token estimator over this blog's own 4 MB corpus and a simulated agent loop. The real numbers: what drives LLM cost, why context window cost dominates agentic work, and the levers — trimming, summarising, prompt caching, routing — that actually move the bill.",
@@ -2765,6 +2785,25 @@
     },
     {
       "lang": "en",
+      "slug": "prometheus-recording-rules",
+      "title": "Prometheus Recording Rules and Federation: Pre-computing What You Ask for Often",
+      "description": "Recording rules pre-compute expensive PromQL into new metrics on an interval. Federation pulls aggregated series from many Prometheus instances into one. Real output from a live setup with promtool, /api/v1/rules, and /federate.",
+      "pubDate": "2027-02-01",
+      "translationKey": "prometheus-recording-rules",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "Prometheus recording rules",
+        "rule_files",
+        "Prometheus federation",
+        "promtool",
+        "PromQL"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "prompt-injection-for-operators",
       "title": "Prompt injection for people who run agents, not models",
       "description": "A practical operator's threat model for prompt injection and AI agent security: indirect prompt injection, the confused deputy, data exfiltration via tool use, and the defenses that actually help — least privilege, allowlisting, egress controls, human approval, and monitoring.",
@@ -3502,6 +3541,25 @@
     },
     {
       "lang": "en",
+      "slug": "sqlite-json1-and-generated-columns",
+      "title": "SQLite JSON: Querying JSON in a Single File (and When to Normalize)",
+      "description": "SQLite's JSON1 extension lets you query, filter, and index JSON stored in a TEXT column — json_extract, ->>, json_each, and the generated-column trick that makes it fast.",
+      "pubDate": "2027-01-31",
+      "translationKey": "sqlite-json1-and-generated-columns",
+      "tags": [
+        "devops",
+        "python"
+      ],
+      "keywords": [
+        "SQLite JSON",
+        "json_extract",
+        "generated column",
+        "json_each",
+        "index a JSON field"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "sqlite-vacuum-and-integrity",
       "title": "SQLite VACUUM, integrity_check, and a database file that won't shrink",
       "description": "A SQLite file that grows and never shrinks is the freelist. See real before/after numbers for page_count, freelist_count, VACUUM, auto_vacuum, incremental_vacuum, VACUUM INTO, and integrity_check vs quick_check.",
@@ -3654,6 +3712,25 @@
         "systemd-analyze security",
         "service sandboxing",
         "NoNewPrivileges"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "systemd-networkd-vs-networkmanager",
+      "title": "systemd-networkd vs NetworkManager: which one should configure your network?",
+      "description": "A hands-on comparison of systemd-networkd and NetworkManager with real output: .network files vs nmcli connection profiles, the same static IP configured both ways, how each feeds systemd-resolved, and why running both is a bad idea.",
+      "pubDate": "2027-01-30",
+      "translationKey": "systemd-networkd-vs-networkmanager",
+      "tags": [
+        "networking",
+        "systemd"
+      ],
+      "keywords": [
+        "systemd-networkd",
+        "NetworkManager",
+        "Linux network configuration",
+        ".network file",
+        "nmcli"
       ]
     },
     {
@@ -3889,6 +3966,25 @@
     },
     {
       "lang": "en",
+      "slug": "tls-ocsp-stapling",
+      "title": "TLS OCSP stapling: certificate revocation without the privacy leak",
+      "description": "How certificate revocation works: CRLs, OCSP queries and their privacy cost, ssl_stapling in nginx verified with s_client -status against a real Docker lab, Must-Staple, and why Let's Encrypt killing OCSP in 2025 changed everything.",
+      "pubDate": "2027-01-31",
+      "translationKey": "tls-ocsp-stapling",
+      "tags": [
+        "security",
+        "networking"
+      ],
+      "keywords": [
+        "OCSP stapling",
+        "certificate revocation",
+        "ssl_stapling",
+        "CRL",
+        "Must-Staple"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "tls-session-resumption",
       "title": "TLS session resumption: full handshake vs resumed, and TLS 1.3 0-RTT",
       "description": "What a full TLS handshake really costs in round trips and bytes, how session IDs and session tickets (TLS 1.2) and PSK tickets (TLS 1.3) let a reconnecting client skip most of the work, how to see it with openssl s_client -sess_out/-sess_in, nginx ssl_session_cache tuning, and the TLS 1.3 0-RTT replay tradeoff.",
@@ -3904,6 +4000,25 @@
         "TLS 1.3 0-RTT",
         "openssl s_client",
         "PSK"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "tmux-and-session-management",
+      "title": "tmux in practice: sessions that outlive your SSH connection",
+      "description": "A practical guide to tmux sessions, windows, and panes: how a terminal multiplexer keeps your work alive across dropped SSH connections, how to script reproducible layouts, and how send-keys and capture-pane enable real automation.",
+      "pubDate": "2027-01-30",
+      "translationKey": "tmux-and-session-management",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "tmux",
+        "tmux sessions",
+        "terminal multiplexer",
+        "tmux scripting",
+        "detach attach"
       ]
     },
     {
@@ -6168,6 +6283,26 @@
     },
     {
       "lang": "zh",
+      "slug": "linux-swap-and-zram",
+      "title": "Linux swap 与 zram：它们是什么，什么时候能救命",
+      "description": "Linux swap 到底是什么（以及为什么它不是内存）、vm.swappiness 真正控制的是什么、如何用 vmstat 的 si/so、pswpin/pswpout 和 /proc/pressure 观察内存压力，以及什么时候 zram 比磁盘 swapfile 更好——全部真实输出，另加一次 Docker cgroup 限制下 400 MiB 分配实验。",
+      "pubDate": "2027-02-01",
+      "translationKey": "linux-swap-and-zram",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "Linux swap",
+        "zram",
+        "vm.swappiness",
+        "内存压力",
+        "swapfile",
+        "pswpin"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "llm-cost-control",
       "title": "LLM 成本控制：钱到底花在了哪里",
       "description": "我用一个纯标准库的 token 估算脚本，跑过这个博客自己 4MB 的语料和一个模拟的 agent loop。真实数字说话：LLM 成本由什么驱动、为什么上下文窗口成本主导 agent 负载，以及真正能压低账单的杠杆——裁剪、摘要、prompt 缓存、路由。",
@@ -7049,6 +7184,25 @@
     },
     {
       "lang": "zh",
+      "slug": "prometheus-recording-rules",
+      "title": "Prometheus 记录规则与联邦：把频繁查询提前算好",
+      "description": "记录规则按固定间隔预计算 PromQL 并存储为新指标；联邦通过 /federate 从多个本地 Prometheus 拉取聚合序列。使用 promtool、/api/v1/rules 和 /federate 的实时输出演示。",
+      "pubDate": "2027-02-01",
+      "translationKey": "prometheus-recording-rules",
+      "tags": [
+        "devops",
+        "self-hosting"
+      ],
+      "keywords": [
+        "Prometheus 记录规则",
+        "rule_files",
+        "Prometheus 联邦",
+        "promtool",
+        "PromQL"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "prompt-injection-for-operators",
       "title": "给运行 agent 的人看的 prompt injection：一份运营者的威胁模型",
       "description": "一份写给 agent 运营者的 prompt injection 与 AI agent 安全威胁模型：间接 prompt injection、confused deputy、通过 tool use 的数据外泄，以及真正有效的防御——最小权限、白名单、出站管控、人工审批与监控。",
@@ -7786,6 +7940,25 @@
     },
     {
       "lang": "zh",
+      "slug": "sqlite-json1-and-generated-columns",
+      "title": "SQLite JSON：在单文件中查询 JSON（以及何时该规范化）",
+      "description": "SQLite 的 JSON1 扩展让你可以对存储在 TEXT 列中的 JSON 进行查询、过滤和索引——json_extract、->>、json_each，以及让查询更快的生成列技巧。",
+      "pubDate": "2027-01-31",
+      "translationKey": "sqlite-json1-and-generated-columns",
+      "tags": [
+        "devops",
+        "python"
+      ],
+      "keywords": [
+        "SQLite JSON",
+        "json_extract",
+        "生成列",
+        "json_each",
+        "JSON 字段索引"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "sqlite-vacuum-and-integrity",
       "title": "SQLite VACUUM、integrity_check，以及一个不会变小的数据库文件",
       "description": "删了 99% 的行，SQLite 文件却没变小？那是 freelist 在作怪。用真实的 page_count、freelist_count、VACUUM、auto_vacuum、incremental_vacuum、VACUUM INTO 和 integrity_check 前后的数字说清楚。",
@@ -7938,6 +8111,27 @@
         "systemd-analyze security",
         "服务沙箱",
         "NoNewPrivileges"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "systemd-networkd-vs-networkmanager",
+      "title": "systemd-networkd 与 NetworkManager：谁来配置你的网络？",
+      "description": "一篇带真实输出的 systemd-networkd 与 NetworkManager 对比：.network 声明式文件对比 nmcli 连接配置文件、同一份静态 IP 的两种写法、各自如何供 DNS 给 systemd-resolved，以及为什么两个一起跑是坏主意。",
+      "pubDate": "2027-01-30",
+      "translationKey": "systemd-networkd-vs-networkmanager",
+      "tags": [
+        "networking",
+        "systemd"
+      ],
+      "keywords": [
+        "systemd-networkd",
+        "NetworkManager",
+        "Linux 网络配置",
+        ".network 文件",
+        "nmcli",
+        "netplan",
+        "systemd-resolved"
       ]
     },
     {
@@ -8173,6 +8367,25 @@
     },
     {
       "lang": "zh",
+      "slug": "tls-ocsp-stapling",
+      "title": "TLS OCSP 装订：不泄露隐私的证书吊销检查",
+      "description": "证书吊销是怎么回事：CRL、OCSP 各自的问题与隐私代价，用 ssl_stapling 在真实 Docker 实验里配置 nginx 并以 s_client -status 验证，Must-Staple 的兴亡，以及 Let's Encrypt 2025 年关停 OCSP 如何改变了一切。",
+      "pubDate": "2027-01-31",
+      "translationKey": "tls-ocsp-stapling",
+      "tags": [
+        "security",
+        "networking"
+      ],
+      "keywords": [
+        "OCSP 装订",
+        "证书吊销",
+        "ssl_stapling",
+        "CRL",
+        "Must-Staple"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "tls-session-resumption",
       "title": "TLS 会话恢复：完整握手 vs 恢复会话，以及 TLS 1.3 0-RTT",
       "description": "完整 TLS 握手到底要花多少往返和字节；TLS 1.2 的会话 ID 与会话票据、TLS 1.3 的 PSK 票据如何让重连客户端跳过大部分工作；用 openssl s_client -sess_out/-sess_in 亲眼验证；nginx ssl_session_cache 调优；以及 TLS 1.3 0-RTT 的重放代价。",
@@ -8188,6 +8401,35 @@
         "TLS 1.3 0-RTT",
         "openssl s_client",
         "PSK"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "tmux-and-session-management",
+      "title": "tmux 实战：比 SSH 连接更持久的会话",
+      "description": "tmux 会话、窗口与面板的实用指南：终端复用器如何在 SSH 断线后保持你的工作现场，如何脚本化生成可复现的布局，以及 send-keys 和 capture-pane 如何实现真正的自动化。",
+      "pubDate": "2027-01-30",
+      "translationKey": "tmux-and-session-management",
+      "tags": [
+        "linux",
+        "devops"
+      ],
+      "keywords": [
+        "tmux",
+        "tmux 会话",
+        "终端复用器",
+        "tmux 脚本",
+        "断开与重连",
+        "send-keys",
+        "tmux.conf",
+        "send-keys",
+        "tmux.conf",
+        "send-keys",
+        "tmux.conf",
+        "send-keys",
+        "tmux.conf",
+        "send-keys",
+        "tmux.conf"
       ]
     },
     {
