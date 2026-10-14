@@ -1,0 +1,625 @@
+---
+/**
+ * Bead-lens optics lab — a WebGL2 port of DotLens3D's real fragment-shader ray
+ * tracer (GLSL 330 core -> GLSL ES 3.00). One primary ray per pixel is traced
+ * backwards from a pinhole camera through a glass-bead array onto an image plane
+ * behind it, which is what produces moiré magnification and parallax depth.
+ *
+ * Everything runs in the browser: no server, no upload, no external assets. The
+ * source image is a procedurally drawn zone plate.
+ */
+interface Props {
+  lang?: string;
+}
+const zh = (Astro.props.lang ?? 'en') === 'zh';
+
+const L = zh
+  ? {
+      title: '玻璃珠透镜实验室',
+      mode: '光学模式',
+      ideal: '理想球透镜',
+      refract: '逐面折射',
+      form: '珠形',
+      hemi: '半球',
+      sphere: '整球',
+      diameter: '珠径 (mm)',
+      index: '折射率 n',
+      distance: '像距 d (mm)',
+      scale: '图像缩放',
+      hint: '拖动旋转视角，滚轮缩放。改参数看摩尔纹与视差怎么变。',
+      readout: '推导量',
+      focal: '焦距 f',
+      mag: '放大率 |M|',
+      span: '单珠取样跨度',
+      reset: '重置',
+      unsupported: '你的浏览器不支持 WebGL2，这里无法渲染——但下面的文字说明依然成立。',
+    }
+  : {
+      title: 'Bead-lens optics lab',
+      mode: 'Optical mode',
+      ideal: 'Ideal ball lens',
+      refract: 'Per-surface refraction',
+      form: 'Bead form',
+      hemi: 'Hemisphere',
+      sphere: 'Full sphere',
+      diameter: 'Bead diameter (mm)',
+      index: 'Refractive index n',
+      distance: 'Image distance d (mm)',
+      scale: 'Image scale',
+      hint: 'Drag to orbit, scroll to zoom. Change a parameter and watch the moiré and the parallax move.',
+      readout: 'Derived',
+      focal: 'Focal length f',
+      mag: 'Magnification |M|',
+      span: 'Per-bead sample span',
+      reset: 'Reset',
+      unsupported: 'Your browser does not support WebGL2, so this cannot render — the explanation below still holds.',
+    };
+---
+
+<div class="lab" data-lab>
+  <div class="lab__head">
+    <span class="lab__title">{L.title}</span>
+    <button type="button" class="lab__reset" data-reset>{L.reset}</button>
+  </div>
+
+  <div class="lab__stage">
+    <canvas data-canvas width="720" height="440" aria-label={L.title}></canvas>
+    <p class="lab__unsupported" data-unsupported hidden>{L.unsupported}</p>
+  </div>
+
+  <p class="lab__hint">{L.hint}</p>
+
+  <div class="lab__controls">
+    <label>
+      <span>{L.mode}</span>
+      <select data-p="mode">
+        <option value="0">{L.ideal}</option>
+        <option value="1">{L.refract}</option>
+      </select>
+    </label>
+    <label>
+      <span>{L.form}</span>
+      <select data-p="form">
+        <option value="0">{L.hemi}</option>
+        <option value="1">{L.sphere}</option>
+      </select>
+    </label>
+    <label>
+      <span>{L.diameter} <b data-v="diameter"></b></span>
+      <input type="range" data-p="diameter" min="0.5" max="6" step="0.1" value="2" />
+    </label>
+    <label>
+      <span>{L.index} <b data-v="index"></b></span>
+      <input type="range" data-p="index" min="1.3" max="2" step="0.01" value="1.5" />
+    </label>
+    <label>
+      <span>{L.distance} <b data-v="distance"></b></span>
+      <input type="range" data-p="distance" min="0.6" max="12" step="0.1" value="2" />
+    </label>
+    <label>
+      <span>{L.scale} <b data-v="scale"></b></span>
+      <input type="range" data-p="scale" min="0.3" max="3" step="0.05" value="1" />
+    </label>
+  </div>
+
+  <dl class="lab__readout">
+    <div><dt>{L.focal}</dt><dd data-r="f">—</dd></div>
+    <div><dt>{L.mag}</dt><dd data-r="M">—</dd></div>
+    <div><dt>{L.span}</dt><dd data-r="span">—</dd></div>
+  </dl>
+</div>
+
+<script>
+  const VERT = `#version 300 es
+  in vec2 a_pos;
+  out vec2 v_uv;
+  void main() {
+    v_uv = a_pos * 0.5 + 0.5;
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+  }`;
+
+  // Ported from DotLens3D app/render/shaders/raytrace.frag (#version 330 core).
+  const FRAG = `#version 300 es
+  precision highp float;
+  precision highp int;
+  in vec2 v_uv;
+  out vec4 fragColor;
+
+  uniform vec3  u_cam_pos;
+  uniform vec3  u_cam_right;
+  uniform vec3  u_cam_up;
+  uniform vec3  u_cam_fwd;
+  uniform float u_tan_half_fov;
+  uniform float u_aspect;
+  uniform float u_image_distance;
+  uniform vec2  u_img_offset;
+  uniform vec2  u_img_size;
+  uniform vec3  u_bg;
+  uniform sampler2D u_image;
+  uniform float u_R;
+  uniform vec2  u_pitch;
+  uniform vec2  u_arr_size;
+  uniform float u_f;
+  uniform float u_n;
+  uniform int   u_form;
+  uniform int   u_max_bounces;
+  uniform int   u_mode;
+  uniform int   u_gap_mode;
+
+  const float EPS = 1e-4;
+
+  vec3 samplePlane(vec3 origin, vec3 dir, float planeZ) {
+    vec3 col = u_bg;
+    if (abs(dir.z) < 1e-6) return col;
+    float t = (planeZ - origin.z) / dir.z;
+    if (t <= 0.0) return col;
+    vec3 P = origin + t * dir;
+    vec2 l = vec2(P.x - u_img_offset.x + u_img_size.x * 0.5,
+                  P.y - u_img_offset.y + u_img_size.y * 0.5);
+    if (l.x >= 0.0 && l.x < u_img_size.x && l.y >= 0.0 && l.y < u_img_size.y) {
+      col = texture(u_image, vec2(l.x / u_img_size.x, l.y / u_img_size.y)).rgb;
+    }
+    return col;
+  }
+
+  bool beadHit(vec3 dir, out vec2 center, out float dist) {
+    center = vec2(0.0);
+    dist = 1e9;
+    if (abs(dir.z) < 1e-6) return false;
+    float t = (0.0 - u_cam_pos.z) / dir.z;
+    if (t <= 0.0) return false;
+    vec3 P = u_cam_pos + t * dir;
+    if (abs(P.x) > u_arr_size.x * 0.5 || abs(P.y) > u_arr_size.y * 0.5) return false;
+
+    float jf = floor((P.y + u_arr_size.y * 0.5) / u_pitch.y);
+    float best = 1e9;
+    vec2 bestc = vec2(0.0);
+    for (int dj = -1; dj <= 1; ++dj) {
+      float jj = jf + float(dj);
+      float i = floor((P.x + u_arr_size.x * 0.5) / u_pitch.x);
+      for (int di = -1; di <= 1; ++di) {
+        vec2 c = vec2(-u_arr_size.x * 0.5 + (i + float(di)) * u_pitch.x + u_pitch.x * 0.5,
+                      -u_arr_size.y * 0.5 + jj * u_pitch.y + u_pitch.y * 0.5);
+        float dd = distance(P.xy, c);
+        if (dd < best) { best = dd; bestc = c; }
+      }
+    }
+    center = bestc;
+    dist = best;
+    return true;
+  }
+
+  float iSphereNear(vec3 ro, vec3 rd, vec3 ce, float ra) {
+    vec3 oc = ro - ce;
+    float b = dot(oc, rd);
+    float c = dot(oc, oc) - ra * ra;
+    float disc = b * b - c;
+    if (disc < 0.0) return -1.0;
+    float s = sqrt(disc);
+    float t = -b - s;
+    if (t > 0.0) return t;
+    t = -b + s;
+    return t > 0.0 ? t : -1.0;
+  }
+
+  float iSphereFar(vec3 ro, vec3 rd, vec3 ce, float ra) {
+    vec3 oc = ro - ce;
+    float b = dot(oc, rd);
+    float c = dot(oc, oc) - ra * ra;
+    float disc = b * b - c;
+    if (disc < 0.0) return -1.0;
+    float t = -b + sqrt(disc);
+    return t > 0.0 ? t : -1.0;
+  }
+
+  bool refractDir(vec3 I, vec3 N, float eta, out vec3 T) {
+    vec3 n = N;
+    float cosi = dot(n, I);
+    if (cosi > 0.0) { n = -n; cosi = -cosi; }
+    float k = 1.0 - eta * eta * (1.0 - cosi * cosi);
+    if (k < 0.0) { T = vec3(0.0); return false; }
+    T = normalize(eta * I - (eta * cosi + sqrt(k)) * n);
+    return true;
+  }
+
+  bool traceBead(vec3 ro, vec3 rd, vec2 center, out vec3 col) {
+    col = u_bg;
+    vec3 C = vec3(center, 0.0);
+    float t = iSphereNear(ro, rd, C, u_R);
+    if (t < 0.0) return false;
+    vec3 P = ro + t * rd;
+    if (u_form == 0 && P.z < 0.0) return false;
+
+    vec3 Nsurf = normalize(P - C);
+    vec3 T;
+    if (!refractDir(rd, Nsurf, 1.0 / u_n, T)) return false;
+    vec3 pos = P + T * EPS;
+    vec3 dir = T;
+
+    for (int b = 0; b < 8; ++b) {
+      if (b >= u_max_bounces) break;
+      float bestT = 1e9;
+      vec3 Nx = vec3(0.0, 0.0, 1.0);
+
+      if (u_form == 0 && dir.z < -1e-6) {
+        float tp = (0.0 - pos.z) / dir.z;
+        if (tp > EPS) {
+          vec3 Xp = pos + tp * dir;
+          vec2 dxy = Xp.xy - center;
+          if (dot(dxy, dxy) <= u_R * u_R) { bestT = tp; Nx = vec3(0.0, 0.0, -1.0); }
+        }
+      }
+      float ts = iSphereFar(pos, dir, C, u_R);
+      if (ts > EPS && ts < bestT) {
+        bestT = ts;
+        Nx = normalize(pos + ts * dir - C);
+      }
+      if (bestT >= 1e9) return false;
+
+      vec3 X = pos + bestT * dir;
+      if (refractDir(dir, Nx, u_n, T)) {
+        col = samplePlane(X, T, -u_image_distance);
+        return true;
+      }
+      vec3 n = Nx;
+      if (dot(n, dir) > 0.0) n = -n;
+      dir = reflect(dir, n);
+      pos = X + dir * EPS;
+    }
+    col = u_bg;
+    return true;
+  }
+
+  void main() {
+    vec2 ndc = v_uv * 2.0 - 1.0;
+    vec3 dir = normalize(
+      u_cam_fwd
+      + ndc.x * u_aspect * u_tan_half_fov * u_cam_right
+      + ndc.y * u_tan_half_fov * u_cam_up
+    );
+
+    vec2 center;
+    float dist;
+    bool inArray = beadHit(dir, center, dist);
+    bool onBead = inArray && dist < u_R;
+    vec3 col;
+
+    if (onBead && u_mode == 0 && u_f > 0.0) {
+      float t0 = (0.0 - u_cam_pos.z) / dir.z;
+      vec3 P0 = u_cam_pos + t0 * dir;
+      vec2 h = P0.xy - center;
+      float invz = 1.0 / (-dir.z);
+      vec2 alpha = dir.xy * invz;
+      vec2 alpha2 = alpha - h / u_f;
+      vec3 dir2 = normalize(vec3(alpha2 * (-dir.z), dir.z));
+      col = samplePlane(P0, dir2, -u_image_distance);
+    } else if (onBead && u_mode == 1) {
+      if (!traceBead(u_cam_pos, dir, center, col)) {
+        col = samplePlane(u_cam_pos, dir, -u_image_distance);
+      }
+    } else if (inArray && u_gap_mode == 1) {
+      col = u_bg;
+    } else {
+      col = samplePlane(u_cam_pos, dir, -u_image_distance);
+    }
+    fragColor = vec4(col, 1.0);
+  }`;
+
+  function compile(gl: WebGL2RenderingContext, type: number, src: string) {
+    const s = gl.createShader(type)!;
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  function zonePlate(size: number) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d')!;
+    const img = ctx.createImageData(size, size);
+    const cx = size / 2;
+    const cy = size / 2;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const dx = x - cx;
+        const dy = y - cy;
+        const r2 = dx * dx + dy * dy;
+        const i = (y * size + x) * 4;
+        img.data[i] = 128 + 127 * Math.cos(r2 * 0.012);
+        img.data[i + 1] = 128 + 127 * Math.cos(r2 * 0.012 + 2.1);
+        img.data[i + 2] = 128 + 127 * Math.cos(r2 * 0.012 + 4.2);
+        img.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return c;
+  }
+
+  const norm = (v: number[]) => {
+    const n = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0] / n, v[1] / n, v[2] / n];
+  };
+  const cross = (a: number[], b: number[]) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+
+  document.querySelectorAll<HTMLElement>('[data-lab]').forEach((root) => {
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+    const gl = canvas.getContext('webgl2', { antialias: true, preserveDrawingBuffer: false });
+    if (!gl) {
+      root.querySelector<HTMLElement>('[data-unsupported]')!.hidden = false;
+      canvas.style.display = 'none';
+      return;
+    }
+    const vs = compile(gl, gl.VERTEX_SHADER, VERT);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return;
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, zonePlate(512));
+    gl.uniform1i(gl.getUniformLocation(prog, 'u_image'), 0);
+
+    const U = (n: string) => gl.getUniformLocation(prog, n);
+    const state: Record<string, number> = { mode: 0, form: 0, diameter: 2, index: 1.5, distance: 2, scale: 1 };
+    let yaw = 0.35;
+    let pitch = 0.28;
+    let camDist = 300;
+
+    const readouts = (f: number, M: number, span: number) => {
+      root.querySelector('[data-r="f"]')!.textContent = `${f.toFixed(2)} mm`;
+      root.querySelector('[data-r="M"]')!.textContent = Math.abs(M).toFixed(2) + '×';
+      root.querySelector('[data-r="span"]')!.textContent = `${span.toFixed(3)} mm`;
+    };
+
+    function render() {
+      const D = state.diameter;
+      const R = D / 2;
+      const n = state.index;
+      const d = state.distance;
+      const p = D + 1.0; // spacing 1 mm
+      const cols = 48;
+      const rows = 48;
+      const arrW = cols * p;
+      const arrH = rows * p;
+      const f = (n * R) / (2 * (n - 1));
+      const M = f / (d - f);
+      const span = 2 * R * Math.abs(1 - d / f);
+
+      const aspect = canvas.width / canvas.height;
+      const margin = 1.18;
+      const tanV = ((arrH / 2) * margin) / camDist;
+      const tanH = ((arrW / 2) * margin) / (camDist * aspect);
+      const fov = 2 * Math.atan(Math.max(tanV, tanH));
+
+      const cp = Math.cos(pitch);
+      const sp = Math.sin(pitch);
+      const cy = Math.cos(yaw);
+      const sy = Math.sin(yaw);
+      const pos = [camDist * cp * sy, camDist * sp, camDist * cp * cy];
+      const fwd = norm([-pos[0], -pos[1], -pos[2]]);
+      const right = norm(cross(fwd, [0, 1, 0]));
+      const up = norm(cross(right, fwd));
+
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform3fv(U('u_cam_pos'), pos);
+      gl.uniform3fv(U('u_cam_right'), right);
+      gl.uniform3fv(U('u_cam_up'), up);
+      gl.uniform3fv(U('u_cam_fwd'), fwd);
+      gl.uniform1f(U('u_tan_half_fov'), Math.tan(fov / 2));
+      gl.uniform1f(U('u_aspect'), aspect);
+      gl.uniform1f(U('u_image_distance'), d);
+      gl.uniform2f(U('u_img_offset'), 0, 0);
+      gl.uniform2f(U('u_img_size'), arrW * state.scale, arrH * state.scale);
+      gl.uniform3f(U('u_bg'), 0.02, 0.02, 0.03);
+      gl.uniform1f(U('u_R'), R);
+      gl.uniform2f(U('u_pitch'), p, p);
+      gl.uniform2f(U('u_arr_size'), arrW, arrH);
+      gl.uniform1f(U('u_f'), f);
+      gl.uniform1f(U('u_n'), n);
+      gl.uniform1i(U('u_form'), state.form);
+      gl.uniform1i(U('u_max_bounces'), 4);
+      gl.uniform1i(U('u_mode'), state.mode);
+      gl.uniform1i(U('u_gap_mode'), 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      readouts(f, M, span);
+    }
+
+    root.querySelectorAll<HTMLElement>('[data-p]').forEach((el) => {
+      const key = el.dataset.p!;
+      el.addEventListener('input', () => {
+        state[key] = Number((el as HTMLInputElement | HTMLSelectElement).value);
+        const b = root.querySelector(`[data-v="${key}"]`);
+        if (b) b.textContent = String(state[key]);
+        render();
+      });
+      const b = root.querySelector(`[data-v="${key}"]`);
+      if (b) b.textContent = String(state[key]);
+    });
+
+    let dragging = false;
+    let lx = 0;
+    let ly = 0;
+    canvas.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      lx = e.clientX;
+      ly = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      yaw += (e.clientX - lx) * 0.006;
+      pitch = Math.max(-1.35, Math.min(1.35, pitch + (e.clientY - ly) * 0.006));
+      lx = e.clientX;
+      ly = e.clientY;
+      render();
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      dragging = false;
+      canvas.releasePointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      camDist = Math.max(40, Math.min(1500, camDist * (1 + Math.sign(e.deltaY) * 0.08)));
+      render();
+    }, { passive: false });
+
+    root.querySelector('[data-reset]')!.addEventListener('click', () => {
+      Object.assign(state, { mode: 0, form: 0, diameter: 2, index: 1.5, distance: 2, scale: 1 });
+      yaw = 0.35;
+      pitch = 0.28;
+      camDist = 300;
+      root.querySelectorAll<HTMLInputElement>('[data-p]').forEach((el) => {
+        const key = el.dataset.p!;
+        el.value = String(state[key]);
+        const b = root.querySelector(`[data-v="${key}"]`);
+        if (b) b.textContent = String(state[key]);
+      });
+      render();
+    });
+
+    render();
+  });
+</script>
+
+<style>
+  .lab {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+  }
+  .lab__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .lab__title {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .lab__reset {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .lab__reset:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .lab__stage {
+    position: relative;
+    background: #05070a;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .lab canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 720 / 440;
+    height: auto;
+    touch-action: none;
+    cursor: grab;
+  }
+  .lab canvas:active {
+    cursor: grabbing;
+  }
+  .lab__unsupported {
+    margin: 0;
+    padding: 2rem 1rem;
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+  }
+  .lab__hint {
+    margin: 0.7rem 0 0.9rem;
+    font-size: 0.82rem;
+    color: var(--fg-faint);
+  }
+  .lab__controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem 1.2rem;
+  }
+  .lab__controls label {
+    display: block;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .lab__controls label b {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .lab__controls input[type='range'] {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+  .lab__controls select {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+  .lab__readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.6rem;
+    margin: 1rem 0 0;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--rule);
+  }
+  .lab__readout div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+  .lab__readout dt {
+    font-size: 0.78rem;
+    color: var(--fg-faint);
+  }
+  .lab__readout dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    color: var(--fg);
+    font-weight: 600;
+  }
+  @media (max-width: 34rem) {
+    .lab__controls {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

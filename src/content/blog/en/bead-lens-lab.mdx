@@ -1,0 +1,74 @@
+---
+title: "A bead is a lens, and 2,304 of them make a flat print look three-dimensional"
+description: "Those glass-bead pictures are not a printing trick: each bead is a tiny ball lens that samples a sliver of the image behind it and magnifies it. I ported a real GPU ray tracer of the effect to the browser so you can turn the knobs yourself."
+pubDate: 2027-02-23
+lang: en
+translationKey: bead-lens-lab
+tags: [embedded, meta]
+featured: false
+keywords:
+  - glass bead lens
+  - ball lens
+  - moiré magnification
+  - ray tracing
+  - lenticular
+---
+
+import BeadLensLab from '@/components/BeadLensLab.astro';
+
+A single bead in that array is looking at less than a millimetre of the picture behind it.
+
+With the default numbers — a 2 mm bead, glass at n = 1.5, the image 2 mm behind — each bead samples a window **0.667 mm wide** and blows it up **3×**. It cannot see the whole image. It sees a sliver, enlarged, and the next bead over sees a slightly different sliver.
+
+That is the entire trick, and it is not a printing effect. The beads are lenses, and the picture you see through them is a moiré of what is actually printed.
+
+<BeadLensLab lang="en" />
+
+## Each bead samples a sliver and magnifies it
+
+The optics is one formula deep. A glass sphere of radius `R` and index `n` has a focal length measured from its centre of
+
+```
+f = n·R / (2(n−1))
+```
+
+and a bead of radius 1 mm at n = 1.5 gives f = 1.5 mm. Put the image at distance `d` behind the lens plane and the usual thin-lens relation gives the magnification `|M| = f / (d − f)` — about 3× at the default `d = 2 mm`.
+
+The number that actually matters is the one the lab prints as **per-bead sample span**:
+
+```
+span = 2R · |1 − d/f|
+```
+
+At 0.667 mm, that is the width of the image a single bead is responsible for. Everything visible through the array is those slivers, magnified and repeated.
+
+## That is why a photo becomes a mosaic and a pattern becomes a moiré
+
+Drag the sliders and the same picture does two completely different things:
+
+- Set the image scale down, or the bead big, and each bead covers a large smooth area. You get **mosaic** — one flat colour per bead. Nothing is broken; a lens over a smooth surface has nothing to resolve.
+- Set the bead small, or the source to a fine pattern, and each bead's 0.667 mm window contains structure. Now neighbouring beads sample *nearly* the same structure, slightly shifted, and the repetition of the array beats against the repetition of the image. That is **moiré magnification** — a pattern far larger than either the beads or the print, and it moves as your viewpoint moves. The parallax is the depth.
+
+The zone plate in the lab is there on purpose. Its rings get finer toward the edge, so it produces that beating everywhere at once.
+
+## The GPU does this per pixel, in one shader
+
+The lab is not a video or a pre-rendered loop. It is a port of a real ray tracer: for every pixel on the canvas, a fragment shader fires one primary ray from a pinhole camera, finds the bead it hits, and either (in the ideal mode) bends the ray with a thin-lens approximation or (in the refraction mode) intersects the sphere and applies Snell's law at each surface, handling total internal reflection with a bounce cap. Then it intersects the image plane behind and samples the texture.
+
+I wrote that shader for a desktop program first and ported it here almost unchanged — the fragment shader is the same code, retargeted from `#version 330 core` to WebGL2's `#version 300 es`. The only real work was the plumbing around it: a procedural zone plate for the source image, and a camera that orbits.
+
+## The two modes are not the same picture
+
+Switch **ideal ball lens** to **per-surface refraction** and watch the edges. The paraxial mode is a shortcut — it treats each bead as a thin lens and ignores what happens to rays that miss the centre. The refraction mode intersects the actual sphere, so rays near the rim bend differently, some hit the flat back face of a hemisphere at a steep angle, and the edge of the field darkens.
+
+The two modes agreeing in the middle and disagreeing at the rim is the honest picture of what an approximation costs.
+
+## What the interactive cannot show you
+
+Two things, and I would rather say them than let the lab imply otherwise.
+
+It is a **forward** simulation: it shows what an observer sees looking through a given bead array at a given image. It does not solve the inverse problem — producing a printable image that shows a 3D object through the beads. That exists in the desktop program, and it is a different piece of work.
+
+And it is a model: single refractive index, so no dispersion and no colour fringing from the glass itself; a pinhole camera, so no depth of field; no surface reflections. What it does reproduce is the geometry, and the geometry is where the illusion lives.
+
+The one thing worth taking away is that the depth is not painted on. It falls out of a physical lens sampling a sliver of a picture, and the sliver changes when you move.
