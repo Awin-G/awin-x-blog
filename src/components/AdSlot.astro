@@ -1,0 +1,34 @@
+---
+/**
+ * Off-by-default ad slot.
+ *
+ * Nothing is rendered and no script is loaded until `AD.enabled` is true AND a
+ * network `src` is set — so this costs zero bytes and zero CLS today. When (if)
+ * it is switched on, keep it TEXT-ONLY and developer-oriented (Ethical Ads /
+ * Carbon): the "engineering notebook" design does not survive display ads.
+ *
+ * Usage:  <AdSlot slot="in-article" />
+ */
+interface Props {
+  /** Placement id passed to the network. */
+  slot?: string;
+}
+const AD = {
+  enabled: false,
+  // e.g. 'https://media.ethicalads.io/media/client/ethicalads.min.js'
+  src: '',
+  label: 'ad',
+};
+const show = AD.enabled && AD.src !== '';
+---
+
+{
+  show && (
+    <aside class="adslot" aria-label="Advertisement">
+      <span class="adslot__label">{AD.label}</span>
+      <div class="adslot__body" data-ea-publisher="" data-ea-type="text" data-ea-manual="true" data-slot={Astro.props.slot}>
+        {/* The network script fills this. */}
+      </div>
+    </aside>
+  )
+}

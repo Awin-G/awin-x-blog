@@ -1,0 +1,134 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE, localePath, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const zh = lang === 'zh';
+
+// ---------------------------------------------------------------------------
+// "What I use". Each row: name, note, href (optional), aff (true = affiliate,
+// rendered with rel="sponsored noopener" and a marker). Fill hrefs when the
+// affiliate/partner accounts exist; empty href renders as plain text.
+// ---------------------------------------------------------------------------
+type Row = { name: string; note: string; href?: string; aff?: boolean };
+
+const hosting: Row[] = [
+  {
+    name: zh ? '公网小 VPS（1 vCPU / 981 MB）' : 'Small public VPS (1 vCPU / 981 MB)',
+    note: zh
+      ? '本站在这里运行：nginx + 静态站点 + overlay 组网。够用，就是够用。'
+      : 'This site runs here: nginx + the static build + the overlay network. It is enough, and that is the point.',
+    href: '', // TODO: VPS affiliate/referral link
+    aff: true,
+  },
+  {
+    name: zh ? '域名 + DNSPod 解析' : 'Domain + DNSPod DNS',
+    note: zh ? '域名解析走腾讯 DNSPod，脚本化更新记录。' : 'DNS via Tencent DNSPod, updated by script.',
+  },
+];
+
+const hardware: Row[] = [
+  {
+    name: 'ESP32-C3',
+    note: zh
+      ? '嵌入式实验的主力：RISC-V、Wi-Fi/BLE、够便宜。'
+      : 'The workhorse for embedded experiments: RISC-V, Wi-Fi/BLE, cheap enough to break.',
+    href: '', // TODO: hardware affiliate link
+    aff: true,
+  },
+  {
+    name: zh ? '一台老笔记本（i7-8550U / 16 GB）' : 'An old laptop (i7-8550U / 16 GB)',
+    note: zh
+      ? '所有构建、Docker 实验和大部分写作都在它上面跑。'
+      : 'All builds, Docker labs and most of the writing happen on it.',
+  },
+];
+
+const software: Row[] = [
+  { name: 'Astro', note: zh ? '静态站点框架。' : 'The static site framework.', href: 'https://astro.build' },
+  { name: 'nginx', note: zh ? 'TLS 终止、静态托管、安全响应头。' : 'TLS termination, static hosting, security headers.', href: 'https://nginx.org' },
+  { name: 'Docker', note: zh ? '所有实验都在一次性容器里跑。' : 'Every experiment runs in throwaway containers.', href: 'https://www.docker.com' },
+  { name: 'Gitea', note: zh ? '自建 Git 与部署管线。' : 'Self-hosted Git and the deploy pipeline.', href: 'https://about.gitea.com' },
+  { name: 'EasyTier', note: zh ? '把几台机器连成一个 overlay。' : 'Joins the machines into one overlay.', href: 'https://github.com/EasyTier/EasyTier' },
+  { name: 'GoAccess', note: zh ? '无 Cookie 的服务端访问统计。' : 'Cookie-less, server-side analytics.', href: 'https://goaccess.io' },
+];
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', '/uses/'),
+  zh: localePath('zh', '/uses/'),
+};
+
+const sections = [
+  { title: zh ? '主机与网络' : 'Hosting & network', rows: hosting },
+  { title: zh ? '硬件' : 'Hardware', rows: hardware },
+  { title: zh ? '软件' : 'Software', rows: software },
+];
+const hasAffiliate = [...hosting, ...hardware].some((r) => r.href && r.aff);
+---
+
+<BaseLayout
+  title={zh ? '我在用什么' : 'What I use'}
+  description={
+    zh
+      ? '这台博客实际在用的主机、硬件与软件：一台小 VPS、一块 ESP32-C3、一台老笔记本，以及一套自托管工具链。'
+      : 'The hosts, hardware and software this blog actually runs on: a small VPS, an ESP32-C3, an old laptop, and a self-hosted toolchain.'
+  }
+  lang={lang}
+  path={localePath(lang, '/uses/')}
+  alternates={alternates}
+  switchHref={localePath(other, '/uses/')}
+  active="about"
+>
+  <div class="wrap wrap--narrow" style="padding-top:2.5rem">
+    <h1>{zh ? '我在用什么' : 'What I use'}</h1>
+    <p class="lead" style="margin-top:.5rem">
+      {zh
+        ? '只列我真的在用的东西。运行成本很低，这是有意为之。'
+        : 'Only things I actually use. The running cost is deliberately tiny.'}
+    </p>
+
+    <div class="prose" style="margin-top:1.5rem">
+      {sections.map((s) => (
+        <>
+          <h2>{s.title}</h2>
+          <ul>
+            {s.rows.map((r) => (
+              <li>
+                <strong>
+                  {r.href ? (
+                    <a href={r.href} rel={r.aff ? 'sponsored noopener' : 'noopener'}>
+                      {r.name}
+                      {r.aff && <span class="aff-mark" title={zh ? '返佣链接' : 'affiliate link'}>*</span>}
+                    </a>
+                  ) : (
+                    r.name
+                  )}
+                </strong>{' '}
+                — {r.note}
+              </li>
+            ))}
+          </ul>
+        </>
+      ))}
+
+      <p class="muted" style="font-size:.9rem">
+        {hasAffiliate
+          ? zh
+            ? '带 * 的链接是返佣链接：你按原价购买，我会拿到一点佣金，用来支付这台机器的开销。'
+            : 'Links marked * are affiliate links: you pay the normal price and I earn a small commission that helps cover the cost of the machine.'
+          : zh
+            ? '这里目前没有返佣链接。'
+            : 'There are no affiliate links here yet.'}
+      </p>
+
+      <p>
+        {zh ? '想知道这台机器要花多少？看 ' : 'Curious what the machine costs? See '}
+        <a href={localePath(lang, '/support/')}>{zh ? '支持这个博客' : 'Support this blog'}</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
