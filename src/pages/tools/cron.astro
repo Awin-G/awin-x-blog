@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CronExplainer from '@/components/tools/CronExplainer.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="cron"
+  title="cron expression explainer"
+  description="Turn a 5-field cron expression into plain English and the next five run times, with @daily-style shortcuts. Runs entirely in your browser."
+>
+  <CronExplainer lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Plain meaning</strong> — what the five fields (minute hour day month weekday) actually say.</li>
+      <li><strong>Next runs</strong> — the next five times it will fire, in your local timezone.</li>
+      <li><strong>Shortcuts</strong> — <code>@daily</code>, <code>@hourly</code>, <code>@weekly</code> and friends.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/systemd-timers-vs-cron/')}>systemd timers vs cron</a>,
+      and <a href={localePath('en', '/posts/systemd-timers-vs-cron/')}>scheduling on a small box</a>.
+    </p>
+  </div>
+</ToolShell>

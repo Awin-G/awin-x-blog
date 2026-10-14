@@ -257,6 +257,9 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
   CRC calculator (6 algorithms, verified against standard check values), chmod calculator.
   Each links into the matching posts. Add more when they can earn a link.
+- **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`
+  (tags + counts), generated at build time. The sitemap filter now excludes machine
+  endpoints (`/api/`, `*.xml`, `*.json`, `*.txt`) so only HTML pages are listed.
 - `notes/content-strategy.md` holds the topic backlog (v1 + v2) and channel strategy.
 - `notes/hn-queue.md` = ranked HN submissions with ready titles/first comments
   (posting is manual: the operator's HN account is under probation).

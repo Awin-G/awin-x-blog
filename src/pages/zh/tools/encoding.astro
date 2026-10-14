@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import EncodingTool from '@/components/tools/EncodingTool.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="encoding"
+  title="Base64 / URL / Hex 编解码"
+  description="对 Base64、URL 百分号编码、十六进制与 HTML 实体做编码/解码，按 UTF-8 字节处理，中文不会乱码。全部在浏览器本地运行。"
+>
+  <EncodingTool lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>Base64</strong> —— 头部字段、JWT 与 data URL 里用的那种编码。</li>
+      <li><strong>URL 百分号编码</strong> —— <code>encodeURIComponent</code> 在做什么，以及空格为什么变成 <code>%20</code>。</li>
+      <li><strong>十六进制</strong> —— 字节级 hex，对照抓包结果时很顺手。</li>
+      <li><strong>HTML 实体</strong> —— 把文本转义成 HTML 安全的形式。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/endianness-in-practice/')}>实践中的字节序</a>、
+      <a href={localePath('zh', '/posts/jwt-pitfalls/')}>JWT 的坑</a>。
+    </p>
+  </div>
+</ToolShell>

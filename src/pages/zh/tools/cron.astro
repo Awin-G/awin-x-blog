@@ -1,0 +1,27 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CronExplainer from '@/components/tools/CronExplainer.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="cron"
+  title="cron 表达式解释器"
+  description="把 5 字段的 cron 表达式翻译成人话，并算出接下来 5 次运行时间，支持 @daily 之类的简写。全部在浏览器本地运行。"
+>
+  <CronExplainer lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>这里能看到什么</h2>
+    <ul>
+      <li><strong>含义</strong> —— 五个字段（分 时 日 月 周）到底在说什么。</li>
+      <li><strong>接下来 5 次</strong> —— 按你本地时区算出的触发时间。</li>
+      <li><strong>简写</strong> —— <code>@daily</code>、<code>@hourly</code>、<code>@weekly</code> 等。</li>
+    </ul>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/systemd-timers-vs-cron/')}>systemd timer 与 cron</a>、
+      <a href={localePath('zh', '/posts/systemd-timers-vs-cron/')}>小机器上的定时任务</a>。
+    </p>
+  </div>
+</ToolShell>

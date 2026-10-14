@@ -1,0 +1,304 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+
+const L = zh
+  ? {
+      input: 'cron 表达式（5 个字段：分 时 日 月 周）',
+      placeholder: '例如 0 3 * * *　或　*/15 9-17 * * 1-5',
+      desc: '含义',
+      next: '接下来 5 次运行时间（本地时区）',
+      invalid: '无法解析该表达式',
+      hint: '全部在浏览器本地计算。周字段 0/7 都表示周日；日与周同时限定时的“或”语义也照 cron 规则处理。',
+      samples: '示例',
+      weekdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+      months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+    }
+  : {
+      input: 'cron expression (5 fields: minute hour day month weekday)',
+      placeholder: 'e.g. 0 3 * * *  or  */15 9-17 * * 1-5',
+      desc: 'Meaning',
+      next: 'Next 5 runs (local time)',
+      invalid: 'could not parse that expression',
+      hint: 'Computed locally. Weekday 0 and 7 both mean Sunday, and the OR semantics when both day-of-month and weekday are restricted follow real cron rules.',
+      samples: 'Try',
+      weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    };
+
+const labels = JSON.stringify({ weekdays: L.weekdays, months: L.months });
+---
+
+<div class="tool cron" data-cron data-labels={labels}>
+  <label for="cron-in">{L.input}</label>
+  <input id="cron-in" type="text" autocomplete="off" spellcheck="false" placeholder={L.placeholder} value="0 3 * * *" />
+  <p class="cron__status" data-status aria-live="polite"></p>
+
+  <p class="cron__label">{L.desc}</p>
+  <output class="cron__desc" data-out="desc">—</output>
+
+  <p class="cron__label">{L.next}</p>
+  <ol class="cron__next" data-out="next"></ol>
+
+  <p class="cron__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="cron__chip" data-sample="0 3 * * *">0 3 * * *</button>
+    <button type="button" class="cron__chip" data-sample="*/15 9-17 * * 1-5">*/15 9-17 * * 1-5</button>
+    <button type="button" class="cron__chip" data-sample="0 0 1 * *">0 0 1 * *</button>
+    <button type="button" class="cron__chip" data-sample="30 6 * * 1">30 6 * * 1</button>
+    <button type="button" class="cron__chip" data-sample="@daily">@daily</button>
+  </p>
+</div>
+
+<script>
+  type Names = { weekdays: string[]; months: string[] };
+
+  const NAMED: Record<string, string> = {
+    '@yearly': '0 0 1 1 *',
+    '@annually': '0 0 1 1 *',
+    '@monthly': '0 0 1 * *',
+    '@weekly': '0 0 * * 0',
+    '@daily': '0 0 * * *',
+    '@midnight': '0 0 * * *',
+    '@hourly': '0 * * * *',
+  };
+
+  function nameVal(s: string, kind: 'month' | 'dow'): number | null {
+    const u = s.toUpperCase();
+    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const dowNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    if (kind === 'month') {
+      const i = monthNames.indexOf(u);
+      return i >= 0 ? i + 1 : null;
+    }
+    const i = dowNames.indexOf(u);
+    return i >= 0 ? i : null;
+  }
+
+  function val(s: string, kind: 'num' | 'month' | 'dow'): number | null {
+    if (kind === 'num') return /^\d+$/.test(s) ? Number(s) : null;
+    if (/^\d+$/.test(s)) return Number(s);
+    return nameVal(s, kind);
+  }
+
+  function parseField(str: string, min: number, max: number, kind: 'num' | 'month' | 'dow') {
+    const set = new Set<number>();
+    const raw = str.trim();
+    for (const part of raw.split(',')) {
+      let p = part.trim().toLowerCase();
+      if (!p) return null;
+      let step = 1;
+      const slash = p.indexOf('/');
+      if (slash >= 0) {
+        step = Number(p.slice(slash + 1));
+        p = p.slice(0, slash);
+        if (!Number.isInteger(step) || step < 1) return null;
+      }
+      let lo: number | null;
+      let hi: number | null;
+      if (p === '*' || p === '') {
+        lo = min;
+        hi = max;
+      } else if (p.includes('-')) {
+        const [a, b] = p.split('-');
+        lo = val(a, kind);
+        hi = val(b, kind);
+      } else {
+        lo = val(p, kind);
+        hi = lo;
+      }
+      if (lo === null || hi === null || lo < min || hi > max || lo > hi) return null;
+      for (let v = lo; v <= hi; v += step) set.add(v);
+    }
+    if (set.size === 0) return null;
+    if (kind === 'dow' && set.has(7)) set.add(0);
+    return { set, star: raw === '*' };
+  }
+
+  function listNums(set: Set<number>): string {
+    return [...set].sort((a, b) => a - b).join(', ');
+  }
+
+  function describe(f: { minute: any; hour: any; dom: any; month: any; dow: any }, N: Names, zh: boolean) {
+    const parts: string[] = [];
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    // minute
+    const mn = [...f.minute.set].sort((a: number, b: number) => a - b);
+    if (f.minute.star) parts.push(zh ? '每分钟' : 'every minute');
+    else if (mn.length === 1) parts.push(zh ? `在第 ${mn[0]} 分钟` : `at minute ${mn[0]}`);
+    else parts.push(zh ? `在第 ${listNums(f.minute.set)} 分钟` : `at minutes ${listNums(f.minute.set)}`);
+
+    // hour
+    const hr = [...f.hour.set].sort((a: number, b: number) => a - b);
+    if (f.hour.star) parts.push(zh ? '每小时' : 'every hour');
+    else if (hr.length === 1) parts.push(zh ? `在 ${pad(hr[0])} 点` : `at ${pad(hr[0])}:00`);
+    else parts.push(zh ? `在 ${listNums(f.hour.set)} 点` : `at hours ${listNums(f.hour.set)}`);
+
+    // day of month
+    if (f.dom.star) parts.push(zh ? '每天' : 'every day');
+    else parts.push(zh ? `在每月第 ${listNums(f.dom.set)} 天` : `on day(s) ${listNums(f.dom.set)} of the month`);
+
+    // month
+    if (f.month.star) parts.push(zh ? '每月' : 'every month');
+    else {
+      const names = [...f.month.set].sort((a: number, b: number) => a - b).map((m) => N.months[m - 1]);
+      parts.push((zh ? '在 ' : 'in ') + names.join(', '));
+    }
+
+    // weekday
+    if (f.dow.star) parts.push(zh ? '每周每天' : 'any day of the week');
+    else {
+      const names = [...f.dow.set].sort((a: number, b: number) => a - b).map((d) => N.weekdays[d]);
+      parts.push((zh ? '在 ' : 'on ') + names.join(', '));
+    }
+    return parts.join(zh ? '，' : ', ');
+  }
+
+  function nextRuns(f: any, n: number, from: Date) {
+    const out: Date[] = [];
+    const d = new Date(from.getTime());
+    d.setSeconds(0, 0);
+    d.setMinutes(d.getMinutes() + 1);
+    let guard = 0;
+    const maxIter = 527040; // one year of minutes
+    while (out.length < n && guard < maxIter) {
+      const domMatch = f.dom.set.has(d.getDate());
+      const dowMatch = f.dow.set.has(d.getDay());
+      let dayOk: boolean;
+      if (f.dom.star && f.dow.star) dayOk = true;
+      else if (f.dom.star) dayOk = dowMatch;
+      else if (f.dow.star) dayOk = domMatch;
+      else dayOk = domMatch || dowMatch; // cron OR semantics
+      if (f.month.set.has(d.getMonth() + 1) && dayOk && f.hour.set.has(d.getHours()) && f.minute.set.has(d.getMinutes())) {
+        out.push(new Date(d));
+      }
+      d.setMinutes(d.getMinutes() + 1);
+      guard++;
+    }
+    return out;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-cron]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('#cron-in')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const desc = root.querySelector<HTMLElement>('[data-out="desc"]')!;
+    const next = root.querySelector<HTMLElement>('[data-out="next"]')!;
+    const N: Names = JSON.parse(root.dataset.labels || '{"weekdays":[],"months":[]}');
+
+    function render() {
+      let s = input.value.trim().toLowerCase();
+      if (NAMED[s]) s = NAMED[s];
+      const fields = s.split(/\s+/);
+      if (fields.length !== 5) {
+        status.textContent = 'invalid';
+        status.dataset.state = 'bad';
+        desc.textContent = '—';
+        next.innerHTML = '';
+        return;
+      }
+      const f = {
+        minute: parseField(fields[0], 0, 59, 'num'),
+        hour: parseField(fields[1], 0, 23, 'num'),
+        dom: parseField(fields[2], 1, 31, 'num'),
+        month: parseField(fields[3], 1, 12, 'month'),
+        dow: parseField(fields[4], 0, 6, 'dow'),
+      };
+      if (!f.minute || !f.hour || !f.dom || !f.month || !f.dow) {
+        status.textContent = 'invalid';
+        status.dataset.state = 'bad';
+        desc.textContent = '—';
+        next.innerHTML = '';
+        return;
+      }
+      status.textContent = '';
+      status.dataset.state = 'ok';
+      desc.textContent = describe(f, N, document.documentElement.lang.startsWith('zh'));
+      const runs = nextRuns(f, 5, new Date());
+      next.innerHTML = '';
+      for (const d of runs) {
+        const li = document.createElement('li');
+        li.textContent = d.toLocaleString(document.documentElement.lang.startsWith('zh') ? 'zh-CN' : undefined, {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        next.appendChild(li);
+      }
+    }
+
+    input.addEventListener('input', render);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        input.value = b.dataset.sample!;
+        render();
+      }),
+    );
+    render();
+  });
+</script>
+
+<style>
+  .cron__status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .cron__status[data-state='bad'] {
+    color: #d9534f;
+  }
+  .cron__label {
+    margin: 1.2rem 0 0.4rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    font-weight: 600;
+  }
+  .cron__desc {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.8rem;
+    min-height: 2.4rem;
+  }
+  .cron__next {
+    margin: 0;
+    padding-left: 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+  }
+  .cron__next li {
+    margin: 0.25rem 0;
+  }
+  .cron__hint {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+  .cron__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .cron__chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>

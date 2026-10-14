@@ -1,0 +1,28 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import EncodingTool from '@/components/tools/EncodingTool.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="encoding"
+  title="Base64 / URL / Hex encoder"
+  description="Encode and decode Base64, URL (percent) encoding, hex and HTML entities — on UTF-8 bytes, so non-ASCII text survives intact. Runs entirely in your browser."
+>
+  <EncodingTool lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>What this shows</h2>
+    <ul>
+      <li><strong>Base64</strong> — the padding-based encoding used in headers, JWTs and data URLs.</li>
+      <li><strong>URL (percent) encoding</strong> — what <code>encodeURIComponent</code> does, and why a space becomes <code>%20</code>.</li>
+      <li><strong>Hex</strong> — byte-level hex, handy when you are comparing captures.</li>
+      <li><strong>HTML entities</strong> — escaping text for HTML.</li>
+    </ul>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/endianness-in-practice/')}>endianness in practice</a>,
+      and <a href={localePath('en', '/posts/jwt-pitfalls/')}>JWT pitfalls</a>.
+    </p>
+  </div>
+</ToolShell>

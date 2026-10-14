@@ -1,0 +1,225 @@
+---
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const L =
+  lang === 'zh'
+    ? {
+        mode: '格式',
+        dir: '方向',
+        encode: '编码',
+        decode: '解码',
+        input: '输入',
+        output: '输出',
+        placeholder: '在这里输入或粘贴内容…',
+        copy: '复制',
+        copied: '已复制',
+        swap: '↕ 把输出换到输入',
+        hint: '全部在浏览器本地完成，不会上传任何数据。Base64/Hex 按 UTF-8 字节处理，因此中文不会乱码。',
+        err: '解码失败：输入不是有效的该格式',
+      }
+    : {
+        mode: 'Format',
+        dir: 'Direction',
+        encode: 'Encode',
+        decode: 'Decode',
+        input: 'Input',
+        output: 'Output',
+        placeholder: 'Type or paste here…',
+        copy: 'Copy',
+        copied: 'Copied',
+        swap: '↕ Move output to input',
+        hint: 'Computed locally in your browser. Base64/Hex work on UTF-8 bytes, so non-ASCII text survives intact.',
+        err: 'Decode failed: that is not valid for this format',
+      };
+---
+
+<div class="tool enc" data-enc data-err={L.err} data-copy={L.copy} data-copied={L.copied}>
+  <div class="enc__controls">
+    <div>
+      <label for="enc-mode">{L.mode}</label>
+      <select id="enc-mode" data-mode>
+        <option value="base64">Base64</option>
+        <option value="url">URL</option>
+        <option value="hex">Hex</option>
+        <option value="html">HTML</option>
+      </select>
+    </div>
+    <div>
+      <label for="enc-dir">{L.dir}</label>
+      <select id="enc-dir" data-dir>
+        <option value="encode">{L.encode}</option>
+        <option value="decode">{L.decode}</option>
+      </select>
+    </div>
+  </div>
+
+  <label for="enc-in">{L.input}</label>
+  <textarea id="enc-in" rows="4" spellcheck="false" placeholder={L.placeholder}>hello, 世界</textarea>
+
+  <p class="enc__status" data-status aria-live="polite"></p>
+
+  <div class="enc__out-head">
+    <label for="enc-out">{L.output}</label>
+    <span>
+      <button type="button" class="enc__btn" data-copy>{L.copy}</button>
+      <button type="button" class="enc__btn" data-swap>{L.swap}</button>
+    </span>
+  </div>
+  <textarea id="enc-out" rows="4" spellcheck="false" readonly></textarea>
+
+  <p class="enc__hint">{L.hint}</p>
+</div>
+
+<script>
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+
+  function toHex(bytes: Uint8Array): string {
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  function fromHex(s: string): Uint8Array | null {
+    const clean = s.replace(/[^0-9a-fA-F]/g, '');
+    if (clean.length % 2 !== 0) return null;
+    const out = new Uint8Array(clean.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+    return out;
+  }
+  function b64encode(bytes: Uint8Array): string {
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin);
+  }
+  function b64decode(s: string): Uint8Array | null {
+    try {
+      const bin = atob(s.replace(/\s+/g, ''));
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    } catch {
+      return null;
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-enc]').forEach((root) => {
+    const modeSel = root.querySelector<HTMLSelectElement>('[data-mode]')!;
+    const dirSel = root.querySelector<HTMLSelectElement>('[data-dir]')!;
+    const input = root.querySelector<HTMLTextAreaElement>('#enc-in')!;
+    const output = root.querySelector<HTMLTextAreaElement>('#enc-out')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const copyBtn = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+    const swapBtn = root.querySelector<HTMLButtonElement>('[data-swap]')!;
+
+    function run() {
+      const mode = modeSel.value;
+      const decode = dirSel.value === 'decode';
+      const text = input.value;
+      status.textContent = '';
+      status.dataset.state = 'ok';
+      if (!text) {
+        output.value = '';
+        return;
+      }
+      try {
+        if (mode === 'base64') {
+          output.value = decode ? dec.decode(b64decode(text) ?? (() => { throw new Error(); })()) : b64encode(enc.encode(text));
+        } else if (mode === 'hex') {
+          output.value = decode ? dec.decode(fromHex(text) ?? (() => { throw new Error(); })()) : toHex(enc.encode(text));
+        } else if (mode === 'url') {
+          output.value = decode ? decodeURIComponent(text) : encodeURIComponent(text);
+        } else {
+          output.value = decode
+            ? text
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&amp;/g, '&')
+            : text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+      } catch {
+        output.value = '';
+        status.textContent = (root.dataset.err as string) || 'error';
+        status.dataset.state = 'bad';
+      }
+    }
+
+    modeSel.addEventListener('change', run);
+    dirSel.addEventListener('change', run);
+    input.addEventListener('input', run);
+    swapBtn.addEventListener('click', () => {
+      input.value = output.value;
+      run();
+    });
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(output.value);
+        copyBtn.textContent = (root.dataset.copied as string) || 'copied';
+        setTimeout(() => {
+          copyBtn.textContent = (root.dataset.copy as string) || 'copy';
+        }, 1200);
+      } catch {
+        /* ignore */
+      }
+    });
+    run();
+  });
+</script>
+
+<style>
+  .enc__controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-bottom: 0.9rem;
+  }
+  .enc textarea {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    resize: vertical;
+  }
+  .enc__out-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+  .enc__out-head label {
+    margin: 0;
+  }
+  .enc__btn {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .enc__btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .enc__status {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .enc__status[data-state='bad'] {
+    color: #d9534f;
+  }
+  .enc__hint {
+    margin: 0.9rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-faint);
+  }
+</style>
