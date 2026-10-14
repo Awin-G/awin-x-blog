@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T11:05:42.877Z",
+  "generatedAt": "2026-10-14T11:54:22.435Z",
   "count": {
-    "en": 254,
-    "zh": 254
+    "en": 260,
+    "zh": 260
   },
   "en": [
     {
@@ -414,6 +414,25 @@
         "device-write-bps",
         "io.weight",
         "PSI"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "cheap-vps-providers-compared",
+      "title": "How Much RAM a Cheap VPS Needs for Self-Hosting (Measured on the Real Box)",
+      "description": "A cheap VPS does not need to be big — this blog runs on 1 vCPU and 981 MB of RAM. Real measured numbers from the box (dd, openssl, load average during a build) plus the criteria that actually decide whether a small self-hosted stack holds up.",
+      "pubDate": "2027-02-17",
+      "translationKey": "cheap-vps-providers-compared",
+      "tags": [
+        "self-hosting",
+        "devops"
+      ],
+      "keywords": [
+        "cheap VPS",
+        "VPS for self-hosting",
+        "how much RAM",
+        "VPS criteria",
+        "NVMe"
       ]
     },
     {
@@ -1162,6 +1181,25 @@
     },
     {
       "lang": "en",
+      "slug": "esp32-sensor-node-bom",
+      "title": "ESP32 battery life by design: the sensor node BOM and the real power budget",
+      "description": "A sensor node BOM audited honestly: what the board, regulator, sensor and radio choices really cost your ESP32 battery life, with a Python model computing the real average current, battery life and monthly data budget.",
+      "pubDate": "2027-02-18",
+      "translationKey": "esp32-sensor-node-bom",
+      "tags": [
+        "esp32",
+        "embedded"
+      ],
+      "keywords": [
+        "ESP32 battery life",
+        "sensor node BOM",
+        "deep sleep current",
+        "power budget",
+        "LiPo vs 18650"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "esp32-vs-esp8266-2026",
       "title": "ESP32 vs ESP8266 in 2026: what to actually buy and when",
       "description": "A practical ESP32 vs ESP8266 buying guide for 2026: CPU, RAM, flash, Wi-Fi, BLE, GPIO, security, power, toolchains and price tiers, plus a decision table and concrete picks by use case — including when an ESP32-C3 is the right default.",
@@ -1678,6 +1716,25 @@
         "IoT VLAN",
         "firewall rules",
         "guest network"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "homelab-on-a-budget",
+      "title": "A homelab on a budget: what you actually need (and what is a waste)",
+      "description": "Measured, not imagined: what a home stack really costs in RAM, disk and watts. A real 3-year homelab total cost for a used mini PC vs a VPS — and the gear that is pure waste.",
+      "pubDate": "2027-02-19",
+      "translationKey": "homelab-on-a-budget",
+      "tags": [
+        "homelab",
+        "self-hosting"
+      ],
+      "keywords": [
+        "homelab on a budget",
+        "homelab total cost",
+        "mini PC homelab",
+        "electricity cost",
+        "used hardware"
       ]
     },
     {
@@ -3217,6 +3274,25 @@
     },
     {
       "lang": "en",
+      "slug": "power-efficient-homelab",
+      "title": "Making a homelab power-efficient (measured, not guessed)",
+      "description": "Homelab power consumption measured, not guessed: real RAPL readings of idle power vs busy on an i7-8550U, a CPU governor A/B test, and an honest checklist for a power-efficient server.",
+      "pubDate": "2027-02-19",
+      "translationKey": "power-efficient-homelab",
+      "tags": [
+        "homelab",
+        "linux"
+      ],
+      "keywords": [
+        "homelab power consumption",
+        "power efficient server",
+        "RAPL",
+        "idle power",
+        "CPU governor"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "private-mesh-with-easytier",
       "title": "Building a private mesh VPN with EasyTier across my homelab machines",
       "description": "I replaced a hub-and-spoke WireGuard setup with an EasyTier mesh VPN: one overlay network name and secret, peers that punch through NAT for direct P2P paths, and a relay only when they can't. A concrete homelab walk-through — install, form the private mesh, verify routes, and expose a service.",
@@ -3392,6 +3468,27 @@
         "embeddings",
         "chunking",
         "hybrid search"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "raspberry-pi-vs-mini-pc-vs-vps",
+      "title": "Raspberry Pi vs mini PC vs VPS: where should the service actually run?",
+      "description": "A decision, not a shopping list: Raspberry Pi vs mini PC vs VPS judged on real measured CPU, disk and CPU-steal numbers from a laptop and a 1-vCPU VPS, plus power consumption, TDP, public IP and the mesh-VPN split.",
+      "pubDate": "2027-02-17",
+      "translationKey": "raspberry-pi-vs-mini-pc-vs-vps",
+      "tags": [
+        "homelab",
+        "self-hosting"
+      ],
+      "keywords": [
+        "Raspberry Pi vs mini PC",
+        "homelab hardware",
+        "VPS vs home server",
+        "power consumption",
+        "total cost of ownership",
+        "TDP",
+        "mesh VPN"
       ]
     },
     {
@@ -4573,6 +4670,24 @@
     },
     {
       "lang": "en",
+      "slug": "tools-for-embedded-work",
+      "title": "The embedded development tools I actually use, and what each one is for",
+      "description": "A working bench list, not a shopping list: the compiler with size, objdump and readelf to see what your code costs, gdb plus OpenOCD over SWD, a serial console built from picocom and socat, a logic analyzer driven by sigrok, and flashing with esptool — with real output from every tool I could run.",
+      "pubDate": "2027-02-18",
+      "translationKey": "tools-for-embedded-work",
+      "tags": [
+        "embedded"
+      ],
+      "keywords": [
+        "embedded development tools",
+        "logic analyzer",
+        "serial console",
+        "OpenOCD",
+        "sigrok"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "traceroute-lies",
       "title": "Traceroute lies: what routing actually looks like (and how mtr tells the truth)",
       "description": "Classic traceroute is a flattering cartoon: ICMP rate limits, per-flow load balancing, hidden MPLS labels, asymmetric return paths and NAT all bend it. Learn to read paths honestly with tcptraceroute, mtr and fixed-flow probes, tell queuing from distance, and diagnose a real path problem.",
@@ -5378,6 +5493,25 @@
     },
     {
       "lang": "zh",
+      "slug": "cheap-vps-providers-compared",
+      "title": "便宜的 VPS 到底需要多少内存？—— 用真实机器实测",
+      "description": "便宜的 VPS 不需要多大——这个博客就跑在 1 vCPU、981 MB 内存上。用这台机器的真实实测数据（dd、openssl、构建时的负载），讲清到底哪些标准才真正决定一个小型自托管栈能不能稳住。",
+      "pubDate": "2027-02-17",
+      "translationKey": "cheap-vps-providers-compared",
+      "tags": [
+        "self-hosting",
+        "devops"
+      ],
+      "keywords": [
+        "便宜 VPS",
+        "自托管 VPS",
+        "需要多少内存",
+        "VPS 选购标准",
+        "NVMe"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "choosing-a-vps",
       "title": "2026 年如何选 VPS：真正重要的东西（以及不重要的）",
       "description": "价格页之外，一台小型自托管服务器真正该看的 VPS 配置：内存优先于 CPU、磁盘 IO、网络上限、IPv4/IPv6、快照、延迟；哪些营销数字会说谎；便宜与高价的真实取舍；KVM 与 OpenVZ；端口 25 与滥用政策；以及一份决策清单。",
@@ -6127,6 +6261,25 @@
     },
     {
       "lang": "zh",
+      "slug": "esp32-sensor-node-bom",
+      "title": "ESP32 续航要从 BOM 设计起：电池版传感器节点的真实功耗与数据预算",
+      "description": "一份诚实的传感器节点 BOM 拆解：板子、稳压器、传感器与射频各自要让你的 ESP32 续航付出多少；再用一个 Python 模型算出真实的平均电流、电池天数与每月数据量，每个假设都明确标注。",
+      "pubDate": "2027-02-18",
+      "translationKey": "esp32-sensor-node-bom",
+      "tags": [
+        "esp32",
+        "embedded"
+      ],
+      "keywords": [
+        "ESP32 续航",
+        "传感器节点 BOM",
+        "深度睡眠电流",
+        "功耗预算",
+        "锂电 vs 18650"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "esp32-vs-esp8266-2026",
       "title": "2026 年 ESP32 vs ESP8266：到底该买哪个、什么时候买",
       "description": "一份务实的 2026 年 ESP32 vs ESP8266 选购指南：CPU、内存、Flash、Wi-Fi、BLE、GPIO、安全、功耗、工具链与价格档位，附决策表和按场景的具体推荐——包括什么时候 ESP32-C3 才是默认答案。",
@@ -6645,6 +6798,25 @@
         "IoT VLAN",
         "防火墙规则",
         "访客网络"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "homelab-on-a-budget",
+      "title": "预算有限的家用实验室：你真正需要什么，什么纯属浪费",
+      "description": "不靠想象、靠实测：一套家用服务栈在内存、磁盘和功耗上到底花多少。一台二手迷你主机对一台 VPS 的真实三年总成本，以及哪些设备对大多数人纯属浪费。",
+      "pubDate": "2027-02-19",
+      "translationKey": "homelab-on-a-budget",
+      "tags": [
+        "homelab",
+        "self-hosting"
+      ],
+      "keywords": [
+        "家用实验室预算",
+        "家用实验室总成本",
+        "迷你主机家用实验室",
+        "电费成本",
+        "二手硬件"
       ]
     },
     {
@@ -8186,6 +8358,26 @@
     },
     {
       "lang": "zh",
+      "slug": "power-efficient-homelab",
+      "title": "把 Homelab 做得更省电（实测，而非猜测）",
+      "description": "Homelab 功耗不能靠猜：本文在 i7-8550U 上用 RAPL 实测空闲功耗与满载功耗，对比 CPU 调频策略 performance/powersave 的真实差距（结论有点反直觉），并给出一份先测量、再压最大功耗项的省电清单，把省电服务器从玄学变成算术。",
+      "pubDate": "2027-02-19",
+      "translationKey": "power-efficient-homelab",
+      "tags": [
+        "homelab",
+        "linux"
+      ],
+      "keywords": [
+        "Homelab 功耗",
+        "省电服务器",
+        "RAPL",
+        "空闲功耗",
+        "CPU 调频策略",
+        "电费"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "private-mesh-with-easytier",
       "title": "用 EasyTier 搭建跨机器的私有 mesh VPN：一个 homelab 的 overlay 实践",
       "description": "我把一套 hub-and-spoke 的 WireGuard 换成了 EasyTier 的 mesh VPN：一个 overlay 网络名加一个密钥，节点之间尽力打洞走直连 P2P，走不通才回落到中继。这是一篇可照抄的 homelab 实操——安装、组网、验证路由、暴露服务。",
@@ -8361,6 +8553,27 @@
         "嵌入",
         "分块",
         "混合检索"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "raspberry-pi-vs-mini-pc-vs-vps",
+      "title": "树莓派 vs 迷你主机 vs VPS：服务到底该跑在哪里？",
+      "description": "不是一份购物清单，而是一次决策：树莓派 vs 迷你主机 vs VPS，用一台笔记本和一台 1 核 VPS 上真实测得的 CPU、磁盘与 CPU steal 数据来判断，再加上功耗、TDP、公网 IP，以及 mesh VPN 的拆分方案。",
+      "pubDate": "2027-02-17",
+      "translationKey": "raspberry-pi-vs-mini-pc-vs-vps",
+      "tags": [
+        "homelab",
+        "self-hosting"
+      ],
+      "keywords": [
+        "树莓派 vs 迷你主机",
+        "homelab 硬件",
+        "VPS vs 家用服务器",
+        "功耗",
+        "总拥有成本",
+        "TDP",
+        "mesh VPN"
       ]
     },
     {
@@ -9550,6 +9763,24 @@
         "tmux.conf",
         "send-keys",
         "tmux.conf"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "tools-for-embedded-work",
+      "title": "我实际在用的嵌入式开发工具，以及每一件是干什么的",
+      "description": "一份工作台上的真实清单，而不是购物单：用编译器和 size、objdump、readelf 看清代码的真实开销，用 gdb 加 OpenOCD 走 SWD 调试，用 picocom 与 socat 搭出串口终端，用 sigrok 驱动逻辑分析仪，用 esptool 烧录——凡是能跑的工具，都附上真实输出。",
+      "pubDate": "2027-02-18",
+      "translationKey": "tools-for-embedded-work",
+      "tags": [
+        "embedded"
+      ],
+      "keywords": [
+        "嵌入式开发工具",
+        "逻辑分析仪",
+        "串口终端",
+        "OpenOCD",
+        "sigrok"
       ]
     },
     {
