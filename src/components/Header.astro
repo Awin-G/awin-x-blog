@@ -36,6 +36,7 @@ const nav = [
           {t(lang, `nav.${item.key}` as any)}
         </a>
       ))}
+      <a href={localePath(lang, '/search/')}>{lang === 'zh' ? '搜索' : 'Search'}</a>
       <a class="lang-toggle" href={switchHref} hreflang={switchLang} rel="alternate">
         {LOCALE_LABEL[switchLang]}
       </a>

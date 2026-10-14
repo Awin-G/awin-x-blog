@@ -1,0 +1,81 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { localePath, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+const zh = lang === 'zh';
+
+const alternates: Partial<Record<Lang, string>> = {
+  en: localePath('en', '/search/'),
+  zh: localePath('zh', '/search/'),
+};
+---
+
+<BaseLayout
+  title={zh ? '搜索' : 'Search'}
+  description={
+    zh
+      ? '在全部文章里全文搜索——纯客户端，无服务器、无追踪。'
+      : 'Full-text search across every post — fully client-side, no server, no tracking.'
+  }
+  lang={lang}
+  path={localePath(lang, '/search/')}
+  alternates={alternates}
+  switchHref={localePath(other, '/search/')}
+  active="posts"
+>
+  <div class="wrap wrap--narrow" style="padding-top:2.5rem">
+    <h1>{zh ? '搜索' : 'Search'}</h1>
+    <p class="lead" style="margin-top:.5rem">
+      {zh
+        ? '在全部文章里全文搜索。索引在构建时生成，搜索完全在浏览器里跑——没有服务器，没有追踪。'
+        : 'Full-text search across every post. The index is built at deploy time and the search runs entirely in your browser — no server, no tracking.'}
+    </p>
+
+    <div id="search" style="margin-top:1.5rem"></div>
+
+    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+    <script is:inline src="/pagefind/pagefind-ui.js"></script>
+    {zh ? (
+      <script is:inline>
+        window.addEventListener('DOMContentLoaded', function () {
+          if (!window.PagefindUI) return;
+          new window.PagefindUI({
+            element: '#search',
+            showSubResults: true,
+            showImages: false,
+            translations: {
+              placeholder: '搜索全部文章…',
+              zero_results: '没有找到与“[SEARCH_TERM]”相关的结果',
+              clear_search: '清除',
+              load_more: '加载更多结果',
+              search_label: '搜索本站',
+            },
+          });
+        });
+      </script>
+    ) : (
+      <script is:inline>
+        window.addEventListener('DOMContentLoaded', function () {
+          if (!window.PagefindUI) return;
+          new window.PagefindUI({
+            element: '#search',
+            showSubResults: true,
+            showImages: false,
+            translations: {
+              placeholder: 'Search the blog…',
+              zero_results: 'No results for “[SEARCH_TERM]”',
+              clear_search: 'Clear',
+              load_more: 'Load more results',
+              search_label: 'Search this site',
+            },
+          });
+        });
+      </script>
+    )}
+  </div>
+</BaseLayout>

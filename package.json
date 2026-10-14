@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro build",
     "prebuild": "node scripts/check-content.mjs && node scripts/og.mjs",
-    "postbuild": "node scripts/sitemap-lastmod.mjs",
+    "postbuild": "node scripts/sitemap-lastmod.mjs && pagefind --site dist",
+    "search:index": "pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "check:content": "node scripts/check-content.mjs",
@@ -25,5 +26,8 @@
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.8",
     "rehype-raw": "^7.0.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
   }
 }

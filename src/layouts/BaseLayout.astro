@@ -79,7 +79,7 @@ const jsonLd = [...baseJsonLd, ...(props.jsonLd ?? [])];
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="progress" aria-hidden="true"></div>
     <Header lang={lang} switchHref={switchHref} switchLang={otherLang} active={props.active} />
-    <main id="main">
+    <main id="main" data-pagefind-body>
       <slot />
     </main>
     <Footer lang={lang} />
