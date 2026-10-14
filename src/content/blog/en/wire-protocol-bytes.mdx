@@ -1,0 +1,84 @@
+---
+title: "A wire format where the length field does not mean the length"
+description: "I reimplemented a real mesh VPN's wire protocol in C on an ESP32, then compiled the encoder on my laptop to see the actual bytes. The first thing that bit me was a header field that lies about the packet — and that lie is load-bearing."
+pubDate: 2027-02-22
+lang: en
+translationKey: wire-protocol-bytes
+tags: [embedded, networking]
+featured: false
+keywords:
+  - wire protocol
+  - EasyTier
+  - ESP32
+  - packet header
+  - little endian
+---
+
+import WireExplorer from '@/components/WireExplorer.astro';
+
+The 16-byte header I just encoded says the payload is **5 bytes long**.
+
+The frame is **49 bytes**. The payload on the wire is **33**.
+
+Nothing is broken. The header is telling the truth about one thing and staying silent about another, and if you read the packet the obvious way you will walk off the end of the buffer.
+
+## The length field counts plaintext, not bytes on the wire
+
+Here is the same five-byte payload — the word `hello` — encoded twice by the same C function, once in the clear and once encrypted:
+
+```
+--- Data frame, plaintext (25 bytes)
+  0000  15 00 00 00 dd cc bb aa  44 33 22 11 01 00 01 00  |........D3".....|
+  0016  05 00 00 00 68 65 6c 6c  6f                       |....hello|
+--- Data frame, encrypted (53 bytes)
+  0000  31 00 00 00 dd cc bb aa  44 33 22 11 01 01 01 00  |1.......D3".....|
+  0016  05 00 00 00 81 95 51 27  68 76 34 c0 d2 a4 82 dd  |......Q'hv4.....|
+  0032  3a 26 38 3e 49 a4 aa 6e  c8 10 11 12 13 14 15 16  |:&8>I..n........|
+  0048  17 18 19 1a 1b                                    |.....|
+```
+
+Two length-ish numbers live in that first line. `0x15` (21) is the frame length: 16 header bytes plus the 5 bytes on the wire. `0x31` (49) is the same field for the encrypted frame: 16 + 5 + 28.
+
+Then at offset 16 there is the header's own `len`, and it is **`05 00 00 00` in both frames**. Five. Because it counts the plaintext, and the plaintext is `hello` whether or not it gets wrapped in a 28-byte authentication tail.
+
+## The tail is tag-then-nonce, and it is the reason the two lengths disagree
+
+The extra 28 bytes on the encrypted frame are not padding. AES-128-GCM contributes a 16-byte tag, and the nonce — 12 random bytes — is appended *after* it, so the tail is `tag(16) || nonce(12)`. You can see both in the dump: the tag is the 16 bytes starting `81 95 51 27`, and the nonce is the run `10 11 12 … 1b` at the very end (a fixed nonce here only because I fed the encoder a deterministic random source so the capture would be reproducible).
+
+That is the whole trap, and it is worth stating as an invariant:
+
+> The outer frame length counts **actual bytes on the wire**. The header's `len` counts **plaintext bytes only**, and excludes the 28-byte tail.
+
+Get that backwards and your decode reads 28 bytes past the end of a packet that arrived from the network. Which is the kind of bug that is invisible in testing and catastrophic on a device.
+
+## You can check every field yourself
+
+This is a real frame, encoded by the same C that runs on the ESP32 — I copied the core to my laptop, compiled it with `gcc`, and dumped the bytes. Click a byte to see which field owns it:
+
+<WireExplorer lang="en" />
+
+## The header is fixed at 16 bytes and everything is little-endian
+
+No magic prefix, no length-prefixed options, no alignment. Four bytes of source peer id, four of destination, four one-byte fields, four bytes of plaintext length. That is the entire routing header, and it is read with explicit byte arithmetic rather than a struct cast — because the device is little-endian, the host might not be, and a `memcpy` into a struct would make the compiler's padding part of your protocol.
+
+The destination is the **final** peer, not the next hop. That surprised me: the header carries where the packet is *going*, not where it is going *next*, so a forwarder has to keep its own idea of the next hop. Reading the destination as "the next hop" produces a routing table that works in a two-node test and fails the moment a third node appears.
+
+## The handshake is unencrypted, on purpose
+
+```
+  0000  48 00 00 00 ef be ad de  00 00 00 00 02 00 01 00  |H...............|
+  0016  38 00 00 00 08 e1 cb 86  8f 0d 10 ef fd b6 f5 0d  |8...............|
+  0032  18 01 2a 06 61 77 69 6e  2d 78 32 20 84 73 fb 08  |..*.awin-x2 .s..|
+```
+
+You cannot encrypt the handshake with a key you have not agreed on yet, so this frame travels in the clear — and it is the one that carries the 32-byte identity digest derived from the network name and secret. The receiving side compares that digest and, if it does not match, marks the peer dead and never retries. A wrong secret is not a flaky connection; it is a final answer.
+
+Two smaller things in that dump that took me a reading of the source to trust: the `magic` constant at field 1 is written but never checked by the receiver, and `features` (field 4) is simply absent because the real client sends none. A codec that insists on every field in the spec would reject a packet the real daemon happily accepts.
+
+## Why this is worth getting exactly right
+
+I did not learn this protocol by reading about it. I learned it by writing an encoder, then printing the bytes it produced, then finding the places where my reading of the format and the bytes disagreed — and every single one of those places was a bug that would have appeared later as "works on my desk, drops packets in the field".
+
+The bytes are the specification. Everything else is a summary of them.
+
+There is a real ESP32-C3 on the other end of this, running this code against the genuine daemon, and the only reason that works is that the frames match byte for byte. That is a stricter test than any unit test I could have written — and it is the reason I keep the host-side encoder around, compiled and runnable, as the reference I check the device against.
