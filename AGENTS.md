@@ -169,8 +169,13 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
 ## 8. Hosts, DNS, analytics
 
 - **DNS**: Tencent DNSPod, automated via `deploy/tools/dnspod_set.py`. Apex `awin-x.top`
-  → internal overlay IP `10.126.126.1` (not publicly reachable); `www`/`blog` →
-  `88.218.79.95`.
+  → **`88.218.79.95`** (changed 2026-10-15 so Google AdSense can verify the root domain;
+  it used to point at the EasyTier overlay IP `10.126.126.1`). `www`/`blog`/`mail`/`vw`/
+  `nps`/`captcha` → `88.218.79.95`; `git`/`alist`/`s3` stay on the overlay `10.126.126.1`.
+  - The apex has its own nginx vhost (`deploy/nginx-apex.conf`, installed by hand): it
+    serves `/ads.txt` + `/robots.txt` + the ACME challenge, and **301s everything else to
+    `https://blog.awin-x.top/`**. TLS reuses the pre-existing
+    `/etc/nginx/cert/awin-x.top.pem` (the box's own SSL automation, not certbot).
 - **Analytics**: server-side **GoAccess** over nginx logs at
   **https://stats.awin-x.top/** (basic auth; credentials are in the deploy scripts —
   **not** duplicated here because this repo is mirrored to GitHub).
