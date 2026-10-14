@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T05:19:23.102Z",
+  "generatedAt": "2026-10-14T06:14:29.830Z",
   "count": {
-    "en": 230,
-    "zh": 230
+    "en": 236,
+    "zh": 236
   },
   "en": [
     {
@@ -1338,6 +1338,24 @@
     },
     {
       "lang": "en",
+      "slug": "go-testing-and-fuzzing",
+      "title": "Go Testing in Practice: Table Tests, Benchmarks, and Fuzzing",
+      "description": "A practical tour of Go's testing package: table-driven tests with subtests, benchmarks with -benchmem, coverage, go vet, and fuzzing with go test -fuzz — all with real output.",
+      "pubDate": "2027-02-06",
+      "translationKey": "go-testing-and-fuzzing",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go testing",
+        "table-driven tests",
+        "go test -fuzz",
+        "Go benchmark",
+        "subtests"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "graceful-shutdown",
       "title": "Graceful shutdown and connection draining, reproduced",
       "description": "I ran a throwaway nginx in front of a one-second app, sent SIGTERM mid-flight, and watched requests die as 502 Bad Gateway — then fixed it with real connection draining: why deploys cause 502s, nginx reload vs restart, Kubernetes preStop, and a per-stack graceful-shutdown checklist.",
@@ -1575,7 +1593,7 @@
       "lang": "en",
       "slug": "http-security-headers-and-csp",
       "title": "Content-Security-Policy and security headers that actually do something",
-      "description": "A deep-dive into Content-Security-Policy (CSP): how to run a real before/after header diff in throwaway nginx containers, how CSP nonces and hashes beat 'unsafe-inline', how frame-ancestors stops clickjacking, how Report-Only mode lets you test without breaking your site, and a copy-paste starting set for a static site.",
+      "description": "A deep-dive into Content-Security-Policy (CSP): a real before/after header diff in throwaway nginx containers, how CSP nonces and hashes beat 'unsafe-inline', how frame-ancestors stops clickjacking, how Report-Only mode lets you test without breaking your site, and a copy-paste starting set for a static site.",
       "pubDate": "2027-02-04",
       "translationKey": "http-security-headers-and-csp",
       "tags": [
@@ -1667,6 +1685,27 @@
         "epoll",
         "libaio",
         "SQPOLL"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "iproute2-policy-routing",
+      "title": "Policy routing with iproute2: routing on more than the destination",
+      "description": "Policy routing with iproute2 lets `ip rule` pick a routing table by source address, fwmark, or interface — not just the destination. Real `ip route get` output for two uplinks, source-based routing, split tunnels, and IPv6.",
+      "pubDate": "2027-02-05",
+      "translationKey": "iproute2-policy-routing",
+      "tags": [
+        "networking",
+        "linux"
+      ],
+      "keywords": [
+        "policy routing",
+        "ip rule",
+        "iproute2",
+        "routing table",
+        "ip route get",
+        "fwmark",
+        "source-based routing"
       ]
     },
     {
@@ -2434,6 +2473,25 @@
     },
     {
       "lang": "en",
+      "slug": "nginx-worker-tuning",
+      "title": "nginx worker tuning: worker_processes, worker_connections, and the limits that bite",
+      "description": "nginx worker tuning measured on real throwaway containers: why worker_processes auto equals one worker per core, the worker_connections max-connections math, and the ulimit -n / worker_rlimit_nofile ceiling that actually bites. Real warnings, real fix.",
+      "pubDate": "2027-02-07",
+      "translationKey": "nginx-worker-tuning",
+      "tags": [
+        "nginx",
+        "devops"
+      ],
+      "keywords": [
+        "nginx worker_processes",
+        "worker_connections",
+        "nginx tuning",
+        "worker_rlimit_nofile",
+        "keepalive"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "nixos-first-impressions",
       "title": "NixOS first impressions: declarative, reproducible, and occasionally maddening",
       "description": "A field report after a month of running NixOS: the appeal of declaring a whole system in one file, what a configuration.nix actually looks like, the real learning curve around the Nix language and Nix flakes, where it shines on servers and CI, where it hurts, and an honest recommendation.",
@@ -2624,6 +2682,24 @@
         "seq scan vs index scan",
         "query planner",
         "BUFFERS"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "postgres-index-bloat-and-reindex",
+      "title": "Postgres index bloat: why your index keeps growing, and how to fix it",
+      "description": "Real output from a throwaway Postgres 16 container: I churned a 2M-row table, watched an index grow 16 MB to 28 MB while VACUUM shrank nothing, then cut it back with REINDEX and REINDEX CONCURRENTLY, caught a failed CONCURRENTLY leaving an invalid index, and measured the size win.",
+      "pubDate": "2027-02-07",
+      "translationKey": "postgres-index-bloat-and-reindex",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Postgres index bloat",
+        "REINDEX CONCURRENTLY",
+        "pgstattuple",
+        "index size",
+        "autovacuum"
       ]
     },
     {
@@ -2959,6 +3035,25 @@
     },
     {
       "lang": "en",
+      "slug": "python-subprocess-and-shell-safety",
+      "title": "Python subprocess without shell injection: the list rule, real payloads, real tracebacks",
+      "description": "A hands-on guide to running commands from Python safely: why a list beats shell=True, a real shell injection demo with shlex.quote, check=True, capture_output, timeout, and env and cwd. Every block actually run.",
+      "pubDate": "2027-02-06",
+      "translationKey": "python-subprocess-and-shell-safety",
+      "tags": [
+        "python",
+        "security"
+      ],
+      "keywords": [
+        "Python subprocess",
+        "shell injection",
+        "shell=True",
+        "subprocess.run",
+        "shlex.quote"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "quic-and-http3",
       "title": "QUIC and HTTP/3 explained: what actually changed",
       "description": "A concrete walk through QUIC and HTTP/3: the TCP head-of-line blocking and handshake problems they fix, UDP transport with built-in TLS 1.3, streams and connection migration, the 0-RTT and 1-RTT handshake, QPACK, UDP 443 in nginx and Caddy, and how to test it.",
@@ -3227,6 +3322,25 @@
         "mitmproxy",
         "curl replay",
         "request signing"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "rootless-containers-and-podman",
+      "title": "Rootless containers: running containers without root (and Podman vs Docker)",
+      "description": "A rootful container daemon is root-equivalent — a container escape is host root. Real demos of user namespaces, subuid/subgid mapping, unshare, and what breaks rootless: low ports, storage drivers, cgroup delegation. An honest Podman vs Docker verdict.",
+      "pubDate": "2027-02-05",
+      "translationKey": "rootless-containers-and-podman",
+      "tags": [
+        "devops",
+        "security"
+      ],
+      "keywords": [
+        "rootless containers",
+        "Podman vs Docker",
+        "user namespaces",
+        "subuid",
+        "daemonless"
       ]
     },
     {
@@ -5846,6 +5960,24 @@
     },
     {
       "lang": "zh",
+      "slug": "go-testing-and-fuzzing",
+      "title": "Go 测试实践：表驱动测试、基准测试与模糊测试",
+      "description": "Go testing 包实战：表驱动测试与子测试、-benchmem 基准测试、覆盖率、go vet 以及 go test -fuzz 模糊测试——全部附带真实输出。",
+      "pubDate": "2027-02-06",
+      "translationKey": "go-testing-and-fuzzing",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Go testing",
+        "表驱动测试",
+        "go test -fuzz",
+        "Go benchmark",
+        "子测试"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "graceful-shutdown",
       "title": "优雅关闭与连接排空：一次真机复现",
       "description": "我用一个一次性的 nginx 挡在一个每请求约 1 秒的小应用前面，在请求进行中发送 SIGTERM，眼看着请求变成 502 Bad Gateway——然后用真正的连接排空把它修好：为什么部署会造成 502、nginx reload 与 restart 的区别、Kubernetes 的 preStop 与 terminationGracePeriodSeconds，以及各技术栈的优雅关闭清单。",
@@ -6177,6 +6309,27 @@
         "epoll",
         "libaio",
         "SQPOLL"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "iproute2-policy-routing",
+      "title": "iproute2 策略路由：不只按目的地址的路由",
+      "description": "iproute2 的 `ip rule` 策略路由让内核按源地址、fwmark 或接口来选择路由表，而不只看目的地址。用真实的 `ip route get` 输出，演示双出口、按源路由、VPN 分流隧道和 IPv6。",
+      "pubDate": "2027-02-05",
+      "translationKey": "iproute2-policy-routing",
+      "tags": [
+        "networking",
+        "linux"
+      ],
+      "keywords": [
+        "策略路由",
+        "ip rule",
+        "iproute2",
+        "路由表",
+        "ip route get",
+        "fwmark",
+        "按源路由"
       ]
     },
     {
@@ -6946,6 +7099,25 @@
     },
     {
       "lang": "zh",
+      "slug": "nginx-worker-tuning",
+      "title": "nginx worker 调优：worker_processes、worker_connections，以及真正会咬人的那些上限",
+      "description": "在真实的一次性容器里实测 nginx worker 调优：为什么 worker_processes auto 等于每核一个 worker、worker_connections 的并发上限怎么算，以及真正先撞上的 ulimit -n / worker_rlimit_nofile 文件描述符天花板。我真实地触发了 worker_connections are not enough 警告和 152 行 accept4() No file descriptors available，然后修好了它。",
+      "pubDate": "2027-02-07",
+      "translationKey": "nginx-worker-tuning",
+      "tags": [
+        "nginx",
+        "devops"
+      ],
+      "keywords": [
+        "nginx worker_processes",
+        "worker_connections",
+        "nginx 调优",
+        "worker_rlimit_nofile",
+        "keepalive"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "nixos-first-impressions",
       "title": "NixOS 初体验：声明式、可复现，偶尔让人抓狂",
       "description": "运行 NixOS 一个月后的实地报告：把整台系统声明在一个文件里的吸引力、configuration.nix 到底长什么样、Nix 语言与 Nix flakes 的真实学习曲线、它在服务器与 CI 上的用武之地、它哪里硌人，以及一个诚实的使用建议。",
@@ -7136,6 +7308,24 @@
         "seq scan vs index scan",
         "查询计划器",
         "BUFFERS"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "postgres-index-bloat-and-reindex",
+      "title": "Postgres 索引膨胀：为什么索引一直变大，以及如何修复",
+      "description": "在一次性 Postgres 16 容器中的真实输出：我对一张 200 万行的表做高强度更新，看着索引从 16 MB 涨到 28 MB 而 VACUUM 一个字节都没缩小，然后用 REINDEX 和 REINDEX CONCURRENTLY 把它砍回来，还抓到了一次失败的 CONCURRENTLY 留下无效索引。",
+      "pubDate": "2027-02-07",
+      "translationKey": "postgres-index-bloat-and-reindex",
+      "tags": [
+        "devops"
+      ],
+      "keywords": [
+        "Postgres 索引膨胀",
+        "REINDEX CONCURRENTLY",
+        "pgstattuple",
+        "索引大小",
+        "autovacuum"
       ]
     },
     {
@@ -7471,6 +7661,25 @@
     },
     {
       "lang": "zh",
+      "slug": "python-subprocess-and-shell-safety",
+      "title": "Python subprocess 与 shell 注入防护：列表传参、真实攻击演示、真实堆栈",
+      "description": "一份动手向的 Python 外部命令安全指南：为什么列表传参优于 shell=True，用真实可运行的注入示例讲解 shlex.quote，以及 check=True、capture_output、timeout、env 和 cwd 的用法。所有输出均为实际执行结果。",
+      "pubDate": "2027-02-06",
+      "translationKey": "python-subprocess-and-shell-safety",
+      "tags": [
+        "python",
+        "security"
+      ],
+      "keywords": [
+        "Python subprocess",
+        "shell 注入",
+        "shell=True",
+        "subprocess.run",
+        "shlex.quote"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "quic-and-http3",
       "title": "QUIC 与 HTTP/3 详解：到底改变了什么",
       "description": "一次讲清 QUIC 与 HTTP/3：它们要解决的 TCP 队头阻塞、握手过慢与中间盒僵化，基于 UDP、内建 TLS 1.3、流与连接迁移，0-RTT 与 1-RTT 握手、QPACK，以及 nginx 与 Caddy 里的 UDP 443 运维和测试方法。",
@@ -7739,6 +7948,25 @@
         "mitmproxy",
         "curl 重放",
         "请求签名"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "rootless-containers-and-podman",
+      "title": "无根容器：不用 root 运行容器（以及 Podman vs Docker）",
+      "description": "有 root 权限的容器守护进程等同于 host 上的 root——容器逃逸即获得宿主机 root。用真实演示讲解 user namespaces、subuid/subgid 映射、unshare，以及无根模式的代价：低端口、存储驱动、cgroup 委托。对工作站与服务器给出诚实的 Podman vs Docker 建议。",
+      "pubDate": "2027-02-05",
+      "translationKey": "rootless-containers-and-podman",
+      "tags": [
+        "devops",
+        "security"
+      ],
+      "keywords": [
+        "无根容器",
+        "Podman vs Docker",
+        "user namespaces",
+        "subuid",
+        "无守护进程"
       ]
     },
     {

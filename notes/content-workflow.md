@@ -95,6 +95,11 @@ restates an existing one.
 > only inside the scratch dir**, and touch no repo files except your two output
 > files.
 >
+> **Security demos must be harmless.** When demonstrating an injection or vulnerability,
+> use a print-only payload (`; echo INJECTED`) — never a real destructive command
+> (`rm -rf`, `dd`, an overwrite, …), even inside the scratch dir. If a demo could
+> delete or corrupt anything, rewrite it to prove the point without doing damage.
+>
 > **Integrity rule (non-negotiable):** every command/output block must be
 > *actually run*. If you cannot run it here, **do not present fabricated output
 > as real** — either label it explicitly inside the article (e.g. "illustrative,

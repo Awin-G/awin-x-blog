@@ -227,6 +227,9 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   stays clean.
 - **GoAccess**: needs `$HOME`; ignores `TZ` (hence +0800 conversion).
 - **Docker on the dev box**: works unprivileged; official images preferred.
+- **Security demos must be harmless** — print-only payloads, never a real
+  destructive command, even in a scratch dir (one subagent's `shell=True` demo
+  actually ran an `rm -rf` and deleted its own scratch repo).
 - **Vision**: this agent is text-only; use the `vision` skill / vision subagents to read
   images (per the injected vision note, the chosen model is `deepseek/deepseek-flash`).
 
