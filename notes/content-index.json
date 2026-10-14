@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-14T09:33:55.979Z",
+  "generatedAt": "2026-10-14T11:05:42.877Z",
   "count": {
-    "en": 248,
-    "zh": 248
+    "en": 254,
+    "zh": 254
   },
   "en": [
     {
@@ -279,6 +279,25 @@
         "use-after-free",
         "strict aliasing",
         "gcc warnings"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "c-ring-buffer-and-lock-free",
+      "title": "A Lock-Free Ring Buffer in C: SPSC, the One That's Actually Safe",
+      "description": "Hand-roll a lock-free SPSC ring buffer in C with atomic indices and acquire/release ordering. Real benchmarks, ThreadSanitizer race detection, and mutex comparison.",
+      "pubDate": "2027-02-15",
+      "translationKey": "c-ring-buffer-and-lock-free",
+      "tags": [
+        "c",
+        "embedded"
+      ],
+      "keywords": [
+        "lock-free ring buffer",
+        "SPSC queue",
+        "atomics C",
+        "ThreadSanitizer",
+        "memory ordering"
       ]
     },
     {
@@ -685,6 +704,25 @@
         "run queue",
         "cgroup cpu.weight",
         "SCHED_FIFO"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "cross-compiling-for-arm",
+      "title": "Cross-compiling for ARM: building on x86 for another machine",
+      "description": "A cross toolchain whose target triple differs from the host lets you build ARM binaries on an x86 box. I compile for armhf and aarch64, verify with file and readelf, hit the real Exec format error, and run it under qemu-user.",
+      "pubDate": "2027-02-16",
+      "translationKey": "cross-compiling-for-arm",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "cross-compiling",
+        "ARM toolchain",
+        "aarch64 gcc",
+        "sysroot",
+        "target triple"
       ]
     },
     {
@@ -1263,6 +1301,25 @@
     },
     {
       "lang": "en",
+      "slug": "fixed-point-math-on-mcus",
+      "title": "Fixed-Point Math Without an FPU: Q16.16 on Microcontrollers",
+      "description": "Fixed-point math on microcontrollers: why Q16.16 beats float when a chip has no FPU. Real C code, real overflow failures, a lookup-table sine, and honest timing numbers.",
+      "pubDate": "2027-02-15",
+      "translationKey": "fixed-point-math-on-mcus",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "fixed-point math",
+        "Q16.16",
+        "microcontroller math",
+        "no FPU",
+        "overflow"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "frida-basics",
       "title": "Frida tutorial: dynamic instrumentation for mobile app testing",
       "description": "A hands-on Frida tutorial for mobile app testing: what dynamic instrumentation is, running frida-tools, attaching vs spawning, hooking with Interceptor.attach, Java.perform on Android, reading and writing memory, replacing return values, and how real apps push back.",
@@ -1297,6 +1354,25 @@
         "tsvector",
         "pg_trgm",
         "GIN index"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "gdb-in-practice",
+      "title": "gdb in practice: debugging a C crash instead of guessing with printf",
+      "description": "A hands-on guide to gdb for debugging C crashes: backtraces, core dumps, conditional breakpoints, watchpoints, threads, and the -O0 vs -O2 story — with real output from real programs.",
+      "pubDate": "2027-02-14",
+      "translationKey": "gdb-in-practice",
+      "tags": [
+        "c",
+        "linux"
+      ],
+      "keywords": [
+        "gdb",
+        "debug C crash",
+        "backtrace",
+        "core dump",
+        "breakpoint"
       ]
     },
     {
@@ -2384,6 +2460,25 @@
         "bucket policy",
         "versioning",
         "S3 SDK"
+      ]
+    },
+    {
+      "lang": "en",
+      "slug": "modbus-tcp-and-rs485",
+      "title": "Modbus TCP and RTU: talking to industrial devices",
+      "description": "A hands-on tour of Modbus — the tiny protocol that runs factories. Real request/response bytes over TCP and a pty-simulated RS485 link, with CRC16 verification and exception handling.",
+      "pubDate": "2027-02-16",
+      "translationKey": "modbus-tcp-and-rs485",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "Modbus TCP",
+        "Modbus RTU",
+        "RS485",
+        "holding registers",
+        "CRC16"
       ]
     },
     {
@@ -4537,6 +4632,25 @@
     },
     {
       "lang": "en",
+      "slug": "valgrind-and-memory-profiling",
+      "title": "Valgrind in practice: leaks, invalid accesses, and where the time goes",
+      "description": "A hands-on session with valgrind on Linux: real memcheck reports for memory leaks in C, invalid reads and writes, uninitialised values, plus massif heap profiles, callgrind instruction counts and helgrind data races — with actual output and the fixes.",
+      "pubDate": "2027-02-14",
+      "translationKey": "valgrind-and-memory-profiling",
+      "tags": [
+        "c",
+        "linux"
+      ],
+      "keywords": [
+        "valgrind",
+        "memory leak C",
+        "massif",
+        "callgrind",
+        "memcheck"
+      ]
+    },
+    {
+      "lang": "en",
       "slug": "verifying-webhooks",
       "title": "Verifying webhooks: HMAC signatures, replay attacks, and the mistakes everyone makes",
       "description": "How to verify webhooks properly: HMAC-SHA256 over the raw body with a timestamp, a replay window, constant-time comparison, secret rotation, fast 2xx acks, and idempotent handlers — with real signatures, real rejections, and the timing leak that shows why == is not enough.",
@@ -5129,6 +5243,25 @@
     },
     {
       "lang": "zh",
+      "slug": "c-ring-buffer-and-lock-free",
+      "title": "C 语言无锁环形缓冲区：SPSC，唯一值得手写的那一个",
+      "description": "用 C11 原子操作和 acquire/release 内存序手写一个无锁 SPSC 环形缓冲区。真实基准测试、ThreadSanitizer 竞态检测、与互斥锁队列的性能对比。",
+      "pubDate": "2027-02-15",
+      "translationKey": "c-ring-buffer-and-lock-free",
+      "tags": [
+        "c",
+        "embedded"
+      ],
+      "keywords": [
+        "无锁环形缓冲区",
+        "SPSC 队列",
+        "C 原子操作",
+        "ThreadSanitizer",
+        "内存序"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "caddy-vs-nginx",
       "title": "反向代理选 Caddy 还是 nginx：我到底会用哪个？",
       "description": "一份动手验证的 Caddy vs nginx 反向代理对比：同一个任务分别用两边写，真实的 curl -I 输出，HTTP/3 与压缩，TLS 证书处理（automatic HTTPS 对比 certbot），配置体量与易用性，以及一份决策清单。",
@@ -5532,6 +5665,25 @@
         "运行队列",
         "cgroup cpu.weight",
         "SCHED_FIFO"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "cross-compiling-for-arm",
+      "title": "交叉编译 ARM：在 x86 上为另一台机器构建",
+      "description": "交叉编译就是用目标三元组与主机不同的工具链，在 x86 机器上构建 ARM 二进制。我用 armhf 和 aarch64 gcc 实际编译，用 file 和 readelf 验证目标格式，撞上一次真实的 Exec format error，再用 qemu-user 把 ARM 程序跑起来。",
+      "pubDate": "2027-02-16",
+      "translationKey": "cross-compiling-for-arm",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "交叉编译",
+        "ARM 工具链",
+        "aarch64 gcc",
+        "sysroot",
+        "目标三元组"
       ]
     },
     {
@@ -6114,6 +6266,25 @@
     },
     {
       "lang": "zh",
+      "slug": "fixed-point-math-on-mcus",
+      "title": "没有 FPU 的定点数学：单片机上的 Q16.16 实战",
+      "description": "很多单片机没有 FPU，一次 float 运算就是一次软浮点库调用。本文用真实 C 代码和真实输出讲清 Q16.16 定点数学：乘法溢出的真实失败、与 double 的真实误差、查找表正弦，以及诚实的计时对比与适用边界——包括什么时候不该用它。",
+      "pubDate": "2027-02-15",
+      "translationKey": "fixed-point-math-on-mcus",
+      "tags": [
+        "embedded",
+        "c"
+      ],
+      "keywords": [
+        "定点数学",
+        "Q16.16",
+        "单片机数学",
+        "无 FPU",
+        "溢出"
+      ]
+    },
+    {
+      "lang": "zh",
       "slug": "frida-basics",
       "title": "Frida 教程：面向移动应用测试的动态插桩入门",
       "description": "一份动手向的 Frida 教程：动态插桩是什么，安装 frida-tools，attach 与 spawn 的区别，用 Interceptor.attach 挂钩，Android 上的 Java.perform，读写内存，替换返回值，以及真实应用如何检测与对抗。",
@@ -6148,6 +6319,25 @@
         "tsvector",
         "pg_trgm",
         "GIN 索引"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "gdb-in-practice",
+      "title": "gdb 实战：调试 C 程序崩溃，而不是用 printf 猜",
+      "description": "gdb 实战指南：backtrace、core dump、条件断点、watchpoint、多线程调试，以及 -O0 与 -O2 的故事——全部来自真实程序的真实输出。",
+      "pubDate": "2027-02-14",
+      "translationKey": "gdb-in-practice",
+      "tags": [
+        "c",
+        "linux"
+      ],
+      "keywords": [
+        "gdb",
+        "调试 C 崩溃",
+        "backtrace",
+        "core dump",
+        "断点"
       ]
     },
     {
@@ -7238,6 +7428,25 @@
         "bucket policy",
         "版本控制",
         "S3 SDK"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "modbus-tcp-and-rs485",
+      "title": "Modbus TCP 与 RTU：如何与工业设备通信",
+      "description": "动手实操 Modbus —— 那个驱动工厂的极简协议。通过 TCP 和 pty 模拟的 RS485 链路，展示真实请求/响应字节、CRC16 校验和异常处理。",
+      "pubDate": "2027-02-16",
+      "translationKey": "modbus-tcp-and-rs485",
+      "tags": [
+        "embedded",
+        "networking"
+      ],
+      "keywords": [
+        "Modbus TCP",
+        "Modbus RTU",
+        "RS485",
+        "holding registers",
+        "CRC16"
       ]
     },
     {
@@ -9400,6 +9609,25 @@
         "网络模拟",
         "tc qdisc",
         "tbf"
+      ]
+    },
+    {
+      "lang": "zh",
+      "slug": "valgrind-and-memory-profiling",
+      "title": "Valgrind 实战：内存泄漏、非法访问，以及时间都花在哪了",
+      "description": "一次 Linux 上的 valgrind 实操：用真实的 memcheck 报告逐一看 C 语言内存泄漏、非法读写、未初始化值，再用 massif 看堆增长、callgrind 看指令热点、helgrind 看数据竞争——每条都配真实输出和修法。",
+      "pubDate": "2027-02-14",
+      "translationKey": "valgrind-and-memory-profiling",
+      "tags": [
+        "c",
+        "linux"
+      ],
+      "keywords": [
+        "valgrind",
+        "C 语言内存泄漏",
+        "massif",
+        "callgrind",
+        "memcheck"
       ]
     },
     {
