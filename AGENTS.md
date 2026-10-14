@@ -5,10 +5,11 @@
 > the thing that survives. **Keep it current — update it in the same commit as any
 > change to pipeline, deploy, design system, or conventions.**
 >
-> Last updated: 2026-10-14 (batch 44 shipped; content index + dedup/similarity system
-> in the content gate; "engineering notebook" design layer shipped and vision-verified;
-> DotLens3D article written by the vision model; deploy OOM fixed with swap +
-> incremental OG cache; operator message board is `留言.md`).
+> Last updated: 2026-10-14 (batch 45 shipped — the last mass content batch; content
+> production paused for a ~2-month observation window. Content index + dedup wired into
+> the gate; "engineering notebook" design layer shipped and vision-verified; DotLens3D
+> article written by the vision model; deploy OOM fixed with swap + incremental OG cache;
+> operator message board is `留言.md`; first goal = cover ~¥160/yr, see §15).
 
 ---
 
@@ -237,8 +238,10 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **254 articles / 508 posts / 567 pages** (after batch 44). Batches 1–44 shipped.
-  Content dates run into 2027.
+- **260 articles / 520 posts / 579 pages** (after batch 45 — **the last mass content
+  batch**). Batches 1–45 shipped. Content dates run into 2027.
+  **Content production is now paused**; next is revenue plumbing + tools + a ~2-month
+  observation window (see `notes/next-horizon.md`).
 - **Design layer shipped** (`theme.css`, the "engineering notebook" pass) — verified with
   a headless-Chromium screenshot → vision-subagent loop (measure ~78 CPL, AA contrast,
   equal-height cards, code chrome, CJK leading). Iterate visually with that loop.
