@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '@/components/FormattedDate.astro';
 import RelatedTools from '@/components/RelatedTools.astro';
+import AdSlot from '@/components/AdSlot.astro';
 import {
   SITE,
   t,
@@ -146,6 +147,8 @@ const shareLinks =
     <div class="post-grid">
       <article class="prose">
         <Content />
+
+        <AdSlot />
 
         <nav class="post-nav" aria-label="Post navigation">
           {prev ? (
