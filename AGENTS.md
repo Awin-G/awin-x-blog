@@ -285,6 +285,14 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   questions with `documentElement.scrollWidth` vs `innerWidth` (and Range rects for text
   extents) inside that iframe — never with pixel inference alone. Injecting a probe script
   into a copy of the built page also works for the direct context.
+- **Testing dark mode: use `--force-dark-mode`, not variable injection.** The site's dark
+  theme is driven entirely by `@media (prefers-color-scheme: dark)` (the `[data-theme]`
+  attribute is only *excluded* from, never applied). Injecting the dark custom properties
+  into an iframe therefore renders dark *variables* but silently skips every
+  media-conditional rule — a trap I fell into. `--force-dark-mode` makes
+  `matchMedia('(prefers-color-scheme: dark)')` genuinely match (verified), so it is the
+  correct harness. Measured result: the interactive components are fine in dark mode —
+  region tints are ΔE ≥ 11.5 apart (JND ≈ 2.3) and hex digits sit at 7.8–13.8:1 contrast.
 - **Vision**: this agent is text-only; use the `vision` skill / vision subagents to read
   images (per the injected vision note, the chosen model is `deepseek/deepseek-flash`).
 

@@ -332,6 +332,14 @@ const firstRegion = (i: number) =>
     color: var(--fg);
     font-weight: 700;
   }
+  /* Dark mode: the slate (frame-length) and teal (header) tints land at almost the
+     same lightness when mixed with the dark page background, so the two adjacent
+     regions separated only by their top bar. Lift the slate in dark mode. */
+  @media (prefers-color-scheme: dark) {
+    :global(.wire__byte[data-kind='len']) {
+      background: color-mix(in srgb, #64748b 52%, var(--bg));
+    }
+  }
   .wire__legend {
     display: flex;
     flex-wrap: wrap;
