@@ -196,6 +196,10 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
     `/var/www/stats/history.tsv` (date, requests, visitors, files, bandwidth, top pages,
     referrers). The live report only shows the current window, so this file is what a
     multi-week review is read from.
+  - **Verified working (2026-10-15)**: the timer is scheduled (next run 00:00 BST daily) and
+    the service has appended exactly one line per day (2 distinct days so far). This file is
+    the *only* record of the observation window — if it stops growing, the December review
+    has nothing to read, so check it whenever the window is discussed.
   - **First readings (2026-10-14/15)**: ~2.4–2.9k requests/day but only **10–59 visitors**,
     and most of it is bot noise (349 unique 404s, all `/wp-admin` / `*.php` scans).
     Per-UA breakdown of **`/var/log/nginx/blog.access.log`** (the *blog* vhost logs here,
