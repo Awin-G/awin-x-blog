@@ -195,13 +195,36 @@ const firstRegion = (i: number) =>
         cell.dataset.kind = region ? KIND[region.k] || 'payload' : 'payload';
         cell.dataset.field = region ? region.k : '';
         cell.textContent = b;
+        // Roving tabindex: the grid is ONE tab stop, not 25–53 of them.
+        cell.tabIndex = i === 0 ? 0 : -1;
         if (i % 16 === 0) cell.classList.add('wire__byte--rowstart');
         cell.addEventListener('mouseenter', () => show(i));
+        cell.addEventListener('focus', () => show(i));
         cell.addEventListener('click', () => show(i));
         bytesEl.appendChild(cell);
       });
       noteEl.textContent = root.dataset.empty || '';
     }
+
+    // Arrow keys move between cells, so keyboard users get the whole grid from a
+    // single tab stop (and Tab leaves the widget instead of walking 53 buttons).
+    bytesEl.addEventListener('keydown', (e: KeyboardEvent) => {
+      const cells = Array.from(bytesEl.querySelectorAll<HTMLButtonElement>('.wire__byte'));
+      const cur = cells.indexOf(document.activeElement as HTMLButtonElement);
+      if (cur < 0) return;
+      let next = -1;
+      if (e.key === 'ArrowRight') next = cur + 1;
+      else if (e.key === 'ArrowLeft') next = cur - 1;
+      else if (e.key === 'ArrowDown') next = cur + 16;
+      else if (e.key === 'ArrowUp') next = cur - 16;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = cells.length - 1;
+      else return;
+      if (next < 0 || next >= cells.length) return;
+      e.preventDefault();
+      cells.forEach((c, i) => (c.tabIndex = i === next ? 0 : -1));
+      cells[next].focus();
+    });
 
     function show(i: number) {
       const region = ownerOf(i);
