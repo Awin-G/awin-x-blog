@@ -338,6 +338,10 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   machine endpoint is valid (`/api/*.json` parse, `/rss.xml` + `/feed.json` in both
   locales, `/robots.txt`, `/ads.txt`, `/sitemap-index.xml`). Note `llms-full.txt` is
   ~7.9 MB (the whole corpus in one file) — intentional, and it is not in the sitemap.
+  **Payload baseline**: one shared stylesheet (**22 KB**), page HTML 15–33 KB, and an
+  interactive page adds a single component bundle (~10 KB) — no framework JS, no web
+  fonts, so a full page load is ~40–65 KB. `dist/` is 102 MB, almost all of it OG cards
+  and the Pagefind index.
   **Internal linking (same check)**: **0 orphan pages**; the tool pages were the weakest
   (2 inbound links each) and are now 28–178 via the tag→tool block in `PostLayout`
   (`src/lib/tools.ts` + `RelatedTools.astro`).
