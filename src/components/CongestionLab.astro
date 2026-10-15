@@ -33,6 +33,8 @@ const L = zh
       throughput: '吞吐',
       queueNow: '队列',
       hint: '默认状态下队列就是满的。把缓冲区调小，它会排空；把 RTT 调大，锯齿会被拉长。',
+      fallback:
+        '这个仿真需要 JavaScript。它展示的是：拥塞窗口一直涨，直到一次丢包把它减半（锯齿）；无论窗口多大，吞吐都被瓶颈容量封顶；超过容量的部分变成队列，也就是延迟。缓冲区一大，队列就一直满着——而塞满的缓冲区，看起来和一条慢链路一模一样。',
       caption: 'cwnd 随时间（上），瓶颈队列随时间（下）',
     }
   : {
@@ -53,6 +55,8 @@ const L = zh
       throughput: 'throughput',
       queueNow: 'queue',
       hint: 'The default already has a full queue. Turn the buffer down and it drains; turn the RTT up and the sawtooth stretches out.',
+      fallback:
+        'This simulation needs JavaScript. What it shows: the congestion window grows until a loss halves it (a sawtooth); the bottleneck capacity caps the throughput no matter how large the window gets; and everything above capacity becomes queue, which is delay. With a large buffer the queue stays full — and a full buffer looks exactly like a slow link.',
       caption: 'cwnd over time (top), bottleneck queue over time (bottom)',
     };
 ---
@@ -67,6 +71,7 @@ const L = zh
   </div>
 
   <canvas data-canvas width="760" height="360" aria-label={L.caption}></canvas>
+  <noscript><p class="cc__fallback">{L.fallback}</p></noscript>
   <p class="cc__caption">{L.caption}</p>
 
   <div class="cc__legend">
@@ -462,6 +467,16 @@ const L = zh
     margin: 0.9rem 0 0;
     font-size: 0.82rem;
     color: var(--fg-faint);
+  }
+  .cc__fallback {
+    margin: 0 0 0.6rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--bg-soft);
+    font-size: 0.92rem;
+    color: var(--fg-muted);
   }
   @media (max-width: 34rem) {
     .cc__controls {

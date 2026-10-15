@@ -88,6 +88,34 @@ const frames = [
 ];
 
 const data = JSON.stringify(frames);
+
+/** Region kind → the CSS class used for colour-coding. Kept here as well as in
+ *  the client script so the first frame can be rendered server-side: a crawler
+ *  (or a reader with JS off) then still sees a real, colour-coded byte grid
+ *  instead of an empty container. The script replaces these cells on init. */
+const KIND: Record<string, string> = {
+  outer_len: 'len',
+  from: 'header',
+  to: 'header',
+  type: 'header',
+  flags: 'header',
+  fwd: 'header',
+  rsv: 'header',
+  len: 'header',
+  payload: 'payload',
+  ct: 'payload',
+  tag: 'tail',
+  nonce: 'tail',
+  magic: 'payload',
+  pid: 'payload',
+  ver: 'payload',
+  name: 'payload',
+  digest: 'payload',
+  seq: 'payload',
+};
+const firstBytes = frames[0].bytes.trim().split(/\s+/);
+const firstRegion = (i: number) =>
+  frames[0].regions.find((r) => i >= r.s && i < r.s + r.n);
 ---
 
 <div class="wire" data-wire data-labels={data} data-hint={zh ? '点任意字节，看它属于哪个字段。' : 'Click any byte to see which field owns it.'} data-empty={zh ? '尚未选择字节——点上面的格子。' : 'No byte selected — click a cell above.'}>
@@ -99,8 +127,15 @@ const data = JSON.stringify(frames);
     ))}
   </div>
 
-  <p class="wire__hint" data-hint-text></p>
-  <div class="wire__bytes" data-bytes aria-live="polite"></div>
+  <p class="wire__hint" data-hint-text>{zh ? '点任意字节，看它属于哪个字段。' : 'Click any byte to see which field owns it.'}</p>
+  <div class="wire__bytes" data-bytes aria-live="polite">
+    {firstBytes.map((b, i) => {
+      const region = firstRegion(i);
+      return (
+        <span class="wire__byte" data-kind={KIND[region?.k] || 'payload'} data-field={region?.k || ''}>{b}</span>
+      );
+    })}
+  </div>
 
   <div class="wire__legend">
     <span><i data-k="outer_len"></i>{zh ? '帧长' : 'frame len'}</span>
@@ -109,7 +144,7 @@ const data = JSON.stringify(frames);
     <span><i data-k="tag"></i>{zh ? 'AEAD 尾（仅加密帧）' : 'AEAD tail (encrypted frames)'}</span>
   </div>
 
-  <p class="wire__note" data-note aria-live="polite"></p>
+  <p class="wire__note" data-note aria-live="polite">{zh ? '尚未选择字节——点上面的格子。' : 'No byte selected — click a cell above.'}</p>
 </div>
 
 <script>
