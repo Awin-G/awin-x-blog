@@ -368,6 +368,13 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 12. Security TODOs
 
+- **Secret audit (2026-10-15): clean.** The repo mirrors publicly to GitHub, so I scanned
+  the tracked files **and the full history** (133 commits, `git log -S` pickaxe) for key
+  material. No API keys, no cloud key shapes (`AKID`/`AKIA`/`ghp_`/`github_pat_`/`AIza`),
+  no `https://user:pass@` URLs. The only PEM-header matches are article *text* about what
+  to look for when auditing firmware, and the only high-entropy strings are hash/digest
+  examples (git SHAs, sha256, docker layer digests). The Tencent keys are referenced by
+  path only, exactly as intended. Re-run this scan after any change that touches config.
 - **Tencent Cloud API keys are hardcoded** in `/root/python/ssl_auto_download/ssl_auto_download.py`
   on TOWER and were exposed in an earlier session — **rotation is outstanding**.
 - Never commit secrets; reference their location instead (this repo mirrors to GitHub).
