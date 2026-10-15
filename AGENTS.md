@@ -326,6 +326,13 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 - **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`
   (tags + counts), generated at build time. The sitemap filter now excludes machine
   endpoints (`/api/`, `*.xml`, `*.json`, `*.txt`) so only HTML pages are listed.
+  **Full-site health check (2026-10-15)**: all **612 sitemap URLs return 200**, and every
+  machine endpoint is valid (`/api/*.json` parse, `/rss.xml` + `/feed.json` in both
+  locales, `/robots.txt`, `/ads.txt`, `/sitemap-index.xml`). Note `llms-full.txt` is
+  ~7.9 MB (the whole corpus in one file) — intentional, and it is not in the sitemap.
+  **Internal linking (same check)**: **0 orphan pages**; the tool pages were the weakest
+  (2 inbound links each) and are now 28–178 via the tag→tool block in `PostLayout`
+  (`src/lib/tools.ts` + `RelatedTools.astro`).
 - `notes/content-strategy.md` holds the topic backlog (v1 + v2) and channel strategy.
 - `notes/hn-queue.md` = ranked HN submissions with ready titles/first comments
   (posting is manual: the operator's HN account is under probation).
