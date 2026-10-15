@@ -344,12 +344,14 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
     with it set to `true` put a correct responsive unit on **530 article pages** (EN+ZH)
     and nothing on the home/tools pages. Flipping that one boolean (or the operator
     enabling Auto ads) is all that remains — plus the EEA/UK consent message.
-- **Tools** (`/tools/`, 8 total, bilingual, zero server cost): IPv6 + IPv4 subnet
+- **Tools** (`/tools/`, **9** total, bilingual, zero server cost): IPv6 + IPv4 subnet
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
   CRC calculator (6 algorithms, verified against standard check values), chmod calculator,
-  Base64/URL/Hex/HTML-entity encoder, cron explainer. Each links into the matching posts;
-  all verified to load without JS errors in a headless browser. Add more when they can
-  earn a link.
+  Base64/URL/Hex/HTML-entity encoder, cron explainer, and the **systemd hardening
+  generator** (22 real directives, each with its honest cost; output checked with
+  `systemd-analyze verify`). Each links into the matching posts, and `PostLayout` now
+  links back to them by tag. A component-usage audit (2026-10-15) found **no orphaned
+  components** — `AdSlot` had been the only one, and it is now placed.
 - **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`
   (tags + counts), generated at build time. The sitemap filter now excludes machine
   endpoints (`/api/`, `*.xml`, `*.json`, `*.txt`) so only HTML pages are listed.
