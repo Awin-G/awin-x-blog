@@ -1,0 +1,76 @@
+---
+import { localePath, type Lang } from '@/consts';
+import { toolsForTags, toolName } from '@/lib/tools';
+
+interface Props {
+  tags: readonly string[];
+  lang: Lang;
+}
+const { tags, lang } = Astro.props;
+const tools = toolsForTags(tags);
+const title = lang === 'zh' ? '配套小工具' : 'Tools for this';
+const note =
+  lang === 'zh'
+    ? '纯前端、本地计算，不上传任何数据。'
+    : 'Client-side, computed locally, nothing uploaded.';
+---
+
+{
+  tools.length > 0 && (
+    <section class="related-tools">
+      <h2>{title}</h2>
+      <ul class="related-tools__list">
+        {tools.map((slug) => (
+          <li>
+            <a href={localePath(lang, `/tools/${slug}/`)}>{toolName(slug, lang)}</a>
+          </li>
+        ))}
+      </ul>
+      <p class="related-tools__note">{note}</p>
+    </section>
+  )
+}
+
+<style>
+  .related-tools {
+    margin-top: 2.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--rule);
+  }
+  .related-tools h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.7rem;
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .related-tools__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .related-tools__list li {
+    margin: 0;
+  }
+  .related-tools__list a {
+    display: inline-block;
+    font-size: 0.88rem;
+    padding: 0.32rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .related-tools__list a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .related-tools__note {
+    margin: 0.7rem 0 0;
+    font-size: 0.8rem;
+    color: var(--fg-faint);
+  }
+</style>
