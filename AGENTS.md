@@ -161,6 +161,14 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
   in `/etc/fstab`) because the Astro build now peaks ~790 MB and the kernel was OOM-killing
   `node` mid-build (exit 137). If builds get heavier again, watch `free -m` /
   `journalctl -k | grep -i oom`.
+  - **Status check (2026-10-15)**: all four `Out of memory: Killed process … (node)` events
+    are dated **Oct 13**, i.e. *before* the swapfile; every build since has completed
+    (`blog-deploy.service` logs page output normally). Disk 72% used, 3.7 GB free.
+  - **Minor inefficiency, left alone deliberately**: `swapon --show` reveals two swaps —
+    `/dev/vda2` (512 MB, prio **-2**) and `/swapfile` (2 GB, prio **-3**). The kernel
+    therefore fills the *small* partition first and only spills into the big file. It works
+    (the fallback is automatic), so this was not changed on the operator's box; giving the
+    swapfile a higher priority would be the tidy fix if builds ever get tight again.
 - **OG cards are incremental**: `scripts/og.mjs` keeps `public/og/.manifest.json`
   (slug→hash) and only re-renders changed cards. `public/og/` is gitignored so it
   survives the deploy's `git clean`. Don't revert this to "wipe + render all 400".
@@ -276,8 +284,9 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **265 articles / 530 posts / 609 pages** (the 260-article mass phase ended at batch 45;
-  the 261st is the Open Ledger piece). Batches 1–45 shipped. Content dates run into 2027.
+- **265 articles / 530 posts / 613 pages / 612 sitemap URLs** (the 260-article mass phase
+  ended at batch 45; the 261st is the Open Ledger piece). Batches 1–45 shipped. Content
+  dates run into 2027. **9 client-side tools** (the 9th is the systemd hardening generator).
   **Mass content production is paused** — new work must be *different in kind* (see
   `notes/explore/SYNTHESIS.md`); the ~2-month observation window runs to ~2026-12-15.
 - **Five "different in kind" pieces shipped (2026-10-15), all vision-verified:**
