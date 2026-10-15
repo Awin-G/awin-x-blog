@@ -232,6 +232,12 @@ html:lang(zh) .eyebrow {
   .lang-toggle {
     margin-inline-start: 0.2rem;
   }
+  /* The code COPY button renders ~46x26px, which is a cramped thumb target.
+     Give it a comfortable size on phones without changing the bar's look. */
+  .codeblock__copy {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.7rem;
+  }
 }
 
 /* ---------- 5. Reading progress ------------------------------------------ */
