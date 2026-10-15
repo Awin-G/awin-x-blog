@@ -89,6 +89,32 @@ const incidents = zh
         detail: '写到 200 多篇之后，"又写了一篇很像的"成了最大风险，而它不会被肉眼发现。',
         fix: '建了内容索引 + 相似度门禁：≥78% 直接拦死，≥68% 警告；每个批次前先查、后重建索引。',
       },
+      {
+        what: '连"验证流程"本身都给了一个自信的错误答案',
+        detail:
+          '一轮"截图 → 视觉模型评审"报告说手机端内容"右侧被裁"、语言切换按钮"不见了"。两条都是错的。问题在工具而不在站点：无头 Chromium 的排版宽度**不能低于 500px**，所以 `--window-size=390` 实际上按 500px 排版，再把图裁成 390。',
+        fix:
+          '不再靠肉眼判断布局，改成**量**：在真正 390px 的 iframe 里用 DOM 探针比较 `documentElement.scrollWidth` 与 `innerWidth`，用 Range 矩形量文字边界。这样既找到了下面两个**真实**的移动端缺陷，也证伪了那个幽灵问题。',
+      },
+      {
+        what: '每一页在手机上都能左右滑',
+        detail:
+          '页头导航是一行**不换行**的 flex，8 个链接最小宽度 492px，把整个文档撑到 631px——而手机视口只有 390px。每一页都中招，而且此前从没人在手机宽度下检查过。',
+        fix: '窄屏（<44rem）让导航换行。实测：文档宽度 631px → 390px。',
+      },
+      {
+        what: '字节格子完全没有颜色',
+        detail:
+          '协议浏览器里的格子是 JavaScript 创建的，所以 Astro 的作用域样式属性根本加不到它们身上：我写的每条规则都在静默失效，格子退回成浏览器默认按钮样式。它看起来"还挺像那么回事"，只有逐像素检查才发现。',
+        fix:
+          '把那些规则标成 `:global()`；首帧改为服务端渲染（不跑 JS 的爬虫也能看到真实格子）；并给格子加 roving tabindex——从 53 个 Tab 停靠点变成一个。',
+      },
+      {
+        what: '一篇文章在否定它旁边的图',
+        detail:
+          '拥塞实验室的正文说锯齿"大部分时间在容量线之上"。对着渲染出来的图量，实际只有约 44%——紧挨着它的那张图并不支持这句话。',
+        fix: '改了仿真默认参数，让这句话真的成立（去掉基础丢包，队列成为永不排空的高台），并把开头改写成"画面上实际画的东西"。',
+      },
     ]
   : [
       {
@@ -115,6 +141,33 @@ const incidents = zh
         what: 'Duplicate topics started creeping in',
         detail: 'Past ~200 articles the biggest risk became "wrote another one that is nearly the same" — which the eye will not catch.',
         fix: 'Built a content index plus a similarity gate: ≥78% fails the build, ≥68% warns; the index is queried before every batch and rebuilt after.',
+      },
+      {
+        what: 'The verification loop itself gave a confidently wrong answer',
+        detail:
+          'A screenshot → vision-model review reported that content was "clipped at the right edge" on phones and that the language switch was "missing". Both were false. The fault was the harness, not the site: headless Chromium cannot lay out below 500 px, so `--window-size=390` quietly rendered a 500 px page and then cropped the image to 390.',
+        fix:
+          'Stop judging layout by eye and measure it: a DOM probe comparing `documentElement.scrollWidth` against `innerWidth`, plus Range rects for text extents, inside a genuinely 390 px iframe. That found the two *real* mobile bugs below and disproved the phantom one.',
+      },
+      {
+        what: 'Every page scrolled sideways on a phone',
+        detail:
+          'The header nav was a non-wrapping flex row of eight links with a 492 px minimum width, which made the whole document 631 px wide inside a 390 px viewport — on every page, and nobody had ever checked a phone width.',
+        fix: 'Let the nav wrap below 44 rem. Measured: document scroll width 631 px → 390 px.',
+      },
+      {
+        what: 'The byte grid had no colour at all',
+        detail:
+          'In the wire-format explorer the cells are created by JavaScript, so Astro’s scoped-style attribute never landed on them: every rule I had written silently did nothing and the cells rendered in the browser’s default button styling. It looked plausible enough that only a pixel check caught it.',
+        fix:
+          'Marked those rules `:global()`, rendered the first frame server-side so a no-JS crawler still sees a real grid, and gave the grid a roving tabindex so it is one tab stop instead of 53.',
+      },
+      {
+        what: 'An article contradicted the chart next to it',
+        detail:
+          'The congestion lab’s prose said the sawtooth "spends most of its time above" the capacity line. Measured against the rendered plot it was about 44% — the sentence was not supported by the picture sitting directly beneath it.',
+        fix:
+          'Changed the simulation defaults so the claim is actually true (no base loss, so the queue really is a plateau that never drains) and rewrote the opening to describe what is drawn.',
       },
     ];
 
