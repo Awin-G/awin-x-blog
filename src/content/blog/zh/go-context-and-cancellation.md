@@ -38,7 +38,7 @@ type Context interface {
     Deadline() (deadline time.Time, ok bool)
     Value(key any) any
 }
-}
+```
 
 接口故意设计得很小。没有*设置*值或*触发*取消的方法——这些能力只存在于构造函数返回的具体实现内部。
 

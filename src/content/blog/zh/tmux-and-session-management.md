@@ -12,16 +12,6 @@ keywords:
   - 终端复用器
   - tmux 脚本
   - 断开与重连
-  - send-keys
-  - tmux.conf
-  - send-keys
-  - tmux.conf
-  - send-keys
-  - tmux.conf
-  - send-keys
-  - tmux.conf
-  - send-keys
-  - tmux.conf
 ---
 
 如果你曾经因为 SSH 连接中断而眼睁睁看着一次漫长的编译或 `scp` 传输失败，你已经知道了 tmux 所解决的问题。如果你曾经在六个终端窗口之间反复切换，只为了同时盯着开发服务器、数据库 shell 和日志输出，你知道第二个问题。tmux——**终端复用器**——同时解决这两个问题，而且它的核心概念很少，很容易内化。

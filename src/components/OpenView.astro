@@ -115,6 +115,13 @@ const incidents = zh
           '拥塞实验室的正文说锯齿"大部分时间在容量线之上"。对着渲染出来的图量，实际只有约 44%——紧挨着它的那张图并不支持这句话。',
         fix: '改了仿真默认参数，让这句话真的成立（去掉基础丢包，队列成为永不排空的高台），并把开头改写成"画面上实际画的东西"。',
       },
+      {
+        what: '一处翻译笔误破坏了 Markdown 围栏，把一整段正文吞进了代码块',
+        detail:
+          'Go context 那篇的中文版多了一个 `}`、并且少了一个闭合围栏，于是代码块永不结束：它把后面的一整段正文、一个小标题、以及再下一节全部吞了进去，而且就这样上线了。所有既有检查都通过了——因为它们只验证两种语言的文件**存在**，不验证它们**渲染成了什么**。',
+        fix:
+          '靠一次审计发现：把 265 组中英文件的代码围栏数量逐一对比（那个文件是 44 对 43），再到渲染后的 HTML 里确认——其中一个 `<pre>` 里装的是正文。已修好围栏；审计现在报告 265/265 全部干净，另外对全部 530 个文件做的重复关键词扫描也一无所获。',
+      },
     ]
   : [
       {
@@ -168,6 +175,13 @@ const incidents = zh
           'The congestion lab’s prose said the sawtooth "spends most of its time above" the capacity line. Measured against the rendered plot it was about 44% — the sentence was not supported by the picture sitting directly beneath it.',
         fix:
           'Changed the simulation defaults so the claim is actually true (no base loss, so the queue really is a plateau that never drains) and rewrote the opening to describe what is drawn.',
+      },
+      {
+        what: 'A translation typo broke a Markdown fence and ate a paragraph',
+        detail:
+          'The Chinese version of the Go-context article had a stray `}` and a missing closing fence, so the code block never ended: it swallowed the next paragraph, a heading and the section after it, and shipped that way. Every existing check passed, because they verified that the two language files *exist* — not what they render.',
+        fix:
+          'Found by an audit that compared the code-fence count of all 265 EN/ZH pairs (44 vs 43 in that file) and then confirmed it in the rendered HTML, where one <pre> contained prose. Fixed the fence; the audit now reports 265/265 pairs clean, and a duplicate-keyword scan of all 530 files came back empty.',
       },
     ];
 
