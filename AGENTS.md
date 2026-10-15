@@ -190,10 +190,15 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
     multi-week review is read from.
   - **First readings (2026-10-14/15)**: ~2.4–2.9k requests/day but only **10–59 visitors**,
     and most of it is bot noise (349 unique 404s, all `/wp-admin` / `*.php` scans).
-    `/sitemap-0.xml` is consistently the "top page", i.e. crawlers *are* reading the
-    sitemap — they just are not ranking the pages yet. The **only** referrer sending real
-    traffic is **`ziyuan.baidu.com` (Baidu)**, so ZH content is the channel with a pulse;
-    the operator was asked to submit the sitemap in 百度搜索资源平台 (see `留言.md`).
+    Per-UA breakdown of **`/var/log/nginx/blog.access.log`** (the *blog* vhost logs here,
+    **not** to `/var/log/nginx/access.log` — grepping the wrong file yields all zeros):
+    GoogleOther 990, Googlebot 504, bingbot 84, AhrefsBot 74, YandexBot 4,
+    **Baiduspider 0**. So **Google crawls heavily but does not rank yet** (GSC verify is the
+    lever) and **Baidu has never crawled at all**. An earlier note in this file claimed the
+    `ziyuan.baidu.com` referrers meant "Baidu is the channel with a pulse" — that was wrong
+    (it was not crawl traffic) and has been corrected in `留言.md`. Human visits: a handful.
+    The interactive pieces and prose posts receive the same order of requests (2–6 each),
+    so there is **no evidence yet** that the interactive work is more popular.
 - **Verification files** live: Google (DNS TXT), Bing (`BingSiteAuth.xml`),
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
