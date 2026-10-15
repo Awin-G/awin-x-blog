@@ -211,6 +211,14 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
   by the operator is the outstanding action. IndexNow is submitted on every deploy.
+- **Baidu is a dead end for this domain (operator, 2026-10-15)** — do not invest here.
+  Two reasons: the 百度搜索资源平台 shows a **sitemap submission quota of 0**, and Baidu's
+  database still associates `awin-x.top` with the operator's **earlier, deleted Hexo site**
+  ("佳法运算") which published reverse-engineered IP-camera firmware and root-login
+  vulnerabilities. Baiduspider has never crawled the new blog (0 hits in the vhost log).
+  Context worth keeping: the operator's own background is IoT/camera firmware
+  reverse-engineering, which lines up with the ESP32/embedded/reverse-engineering side of
+  the blog.
 
 ---
 
