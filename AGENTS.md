@@ -188,6 +188,12 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
     `/var/www/stats/history.tsv` (date, requests, visitors, files, bandwidth, top pages,
     referrers). The live report only shows the current window, so this file is what a
     multi-week review is read from.
+  - **First readings (2026-10-14/15)**: ~2.4–2.9k requests/day but only **10–59 visitors**,
+    and most of it is bot noise (349 unique 404s, all `/wp-admin` / `*.php` scans).
+    `/sitemap-0.xml` is consistently the "top page", i.e. crawlers *are* reading the
+    sitemap — they just are not ranking the pages yet. The **only** referrer sending real
+    traffic is **`ziyuan.baidu.com` (Baidu)**, so ZH content is the channel with a pulse;
+    the operator was asked to submit the sitemap in 百度搜索资源平台 (see `留言.md`).
 - **Verification files** live: Google (DNS TXT), Bing (`BingSiteAuth.xml`),
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
