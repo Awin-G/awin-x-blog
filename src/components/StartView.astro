@@ -63,6 +63,52 @@ const alternates: Partial<Record<Lang, string>> = {
   en: localePath('en', '/start/'),
   zh: localePath('zh', '/start/'),
 };
+
+/** The things that are not articles — the site's differentiator, so it goes first. */
+const featured =
+  lang === 'zh'
+    ? {
+        title: '不是文章的东西',
+        desc: '真实数据、真实代码，跑在你的浏览器里——外加这个站自己的账本。',
+        items: [
+          {
+            href: '/labs/',
+            name: '交互实验',
+            desc: '五件真的会跑的东西：一次请求的时间线、逐字节的协议浏览器、WebGL 光学实验室、TCP 拥塞仿真。每件都写明"什么是真的 / 做不到什么"。',
+          },
+          {
+            href: '/tools/',
+            name: '九个小工具',
+            desc: '子网、IPv6、进制、字节序、CRC、chmod、编解码、cron，以及 systemd 加固生成器——全部在本地计算，不上传任何数据。',
+          },
+          {
+            href: '/open/',
+            name: '开源账本',
+            desc: '这个站自己的数字：文件数、双语配对、字数、代码块、近重复分布——以及一份九条的真实缺陷日志。',
+          },
+        ],
+      }
+    : {
+        title: 'Things that are not articles',
+        desc: 'Real data and real code, running in your browser — plus this site’s own ledger.',
+        items: [
+          {
+            href: '/labs/',
+            name: 'Interactive experiments',
+            desc: 'Five things that actually run: a request timeline, a byte-by-byte protocol explorer, a WebGL optics lab, a TCP congestion simulation. Each states what is real and what it cannot do.',
+          },
+          {
+            href: '/tools/',
+            name: 'Nine client-side tools',
+            desc: 'Subnet, IPv6, bases, endianness, CRC, chmod, encoding, cron, and a systemd hardening generator — all computed locally, nothing uploaded.',
+          },
+          {
+            href: '/open/',
+            name: 'The open ledger',
+            desc: 'This site’s own numbers — files, bilingual pairing, words, code blocks, the duplicate distribution — and a nine-entry defect log.',
+          },
+        ],
+      };
 ---
 
 <BaseLayout
@@ -86,6 +132,19 @@ const alternates: Partial<Record<Lang, string>> = {
         ? '这个博客已经积累了不少东西。下面按主题挑出最值得先读的文章——每条线索都能顺着标签继续读下去。'
         : 'This blog has grown. Below is a curated way in, grouped by what you care about — and every thread continues through the tags.'}
     </p>
+
+    <section style="margin-top:2.5rem">
+      <h2 style="font-size:1.3rem;margin-bottom:.3rem">{featured.title}</h2>
+      <p class="muted" style="margin-top:0">{featured.desc}</p>
+      <ul class="post-list post-list--wide">
+        {featured.items.map((it) => (
+          <li class="card">
+            <h3 class="card__title"><a href={localePath(lang, it.href)}>{it.name}</a></h3>
+            <p class="card__desc">{it.desc}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
 
     {sections.map((s) => (
       <section style="margin-top:2.5rem">
