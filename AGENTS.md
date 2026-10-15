@@ -337,6 +337,13 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   `/search/` + `/zh/search/` (index generated in `postbuild`). Fill `SUPPORT` in
   `SupportView.astro` and the `href`s in `UsesView.astro` once the affiliate/donation
   accounts exist.
+  - **Ad path, verified 2026-10-15**: `AdSlot` was previously **imported nowhere**, so the
+    manual unit would have rendered nothing even switched on (Auto ads *were* fine, since
+    `adsbygoogle.js` is in `<head>` on every page). It is now placed in `PostLayout` after
+    the article body. `ENABLED = false` keeps the build output byte-identical; a dry run
+    with it set to `true` put a correct responsive unit on **530 article pages** (EN+ZH)
+    and nothing on the home/tools pages. Flipping that one boolean (or the operator
+    enabling Auto ads) is all that remains — plus the EEA/UK consent message.
 - **Tools** (`/tools/`, 8 total, bilingual, zero server cost): IPv6 + IPv4 subnet
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
   CRC calculator (6 algorithms, verified against standard check values), chmod calculator,
