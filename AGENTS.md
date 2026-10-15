@@ -5,12 +5,14 @@
 > the thing that survives. **Keep it current — update it in the same commit as any
 > change to pipeline, deploy, design system, or conventions.**
 >
-> Last updated: 2026-10-15 (five "different in kind" pieces shipped — the Open Ledger,
-> the request ladder, the wire-protocol explorer, the bead-lens WebGL lab, and the TCP
-> congestion lab. Content index + dedup wired into the gate; "engineering notebook" design
-> layer vision-verified; home page now leads with a highlights block; README rewritten for
-> the public GitHub mirror. Deploy OOM fixed with swap + incremental OG cache; operator
-> message board is `留言.md`; first goal = cover ~¥160/yr, see §15).
+> Last updated: 2026-10-15 (a long build-out day: five interactive pieces + a systemd
+> hardening generator + a `/labs/` hub; two site-wide layout bugs found by measurement and
+> fixed (mobile horizontal scroll, hero misalignment); interactive pieces made
+> no-JS-crawlable, keyboard-accessible and dark-mode-verified; internal linking fixed
+> (tool pages 2 → 28–178 inbound links, zero orphans); the ad path found broken and wired;
+> the Open Ledger defect log extended 5 → 9 entries; full-site health, secret, dependency
+> and analytics-pipeline audits all clean. Operator actions live in `留言.md`; the first
+> goal is still to cover ~¥160/yr — see §15.)
 
 ---
 
