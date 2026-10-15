@@ -1,0 +1,501 @@
+---
+/**
+ * systemd service hardening generator.
+ *
+ * Every directive here is real systemd; every "may break" note is the honest cost
+ * of that directive. The generator emits a complete, paste-ready unit file.
+ * Runs entirely in the browser.
+ */
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+
+type Item = {
+  id: string;
+  cat: string;
+  label: string;
+  lines: string[];
+  cost: string;
+  on: boolean;
+};
+
+const CATS = zh
+  ? { fs: '文件系统', kernel: '内核与设备', proc: '进程与身份', syscall: '系统调用与能力', net: '网络', misc: '其他' }
+  : { fs: 'Filesystem', kernel: 'Kernel and devices', proc: 'Processes and identity', syscall: 'Syscalls and capabilities', net: 'Network', misc: 'Other' };
+
+const L = zh
+  ? {
+      title: 'systemd 服务加固生成器',
+      lead: '勾选你要的加固项，得到一份可直接粘贴的 unit 文件。每一项都标出**它可能弄坏什么**——因为加固的真正成本在这里，而不在指令本身。',
+      service: '服务类型',
+      daemon: '常驻服务（Type=simple，失败重启）',
+      oneshot: '一次性任务（Type=oneshot）',
+      user: '运行身份',
+      dynuser: 'DynamicUser=yes（无固定 UID）',
+      staticuser: '专用静态用户',
+      name: '服务名 / 可执行文件',
+      rw: '需要写入的路径（ProtectSystem=strict 时必须给）',
+      enable: '启用的加固项',
+      on: '已启用',
+      output: '生成的 unit 文件',
+      copy: '复制',
+      copied: '已复制',
+      presets: '预设',
+      presetWeb: 'Web 应用（反代之后）',
+      presetBackup: '备份任务',
+      presetParanoid: '偏执模式',
+      presetNone: '全不选',
+      count: '已启用',
+      warn: '注意：这不是“越严越好”。每一条都有代价，代价写在每一项下面。先加固，再跑一次真实负载，看看它有没有被挡住。',
+      related: '相关阅读',
+    }
+  : {
+      title: 'systemd service hardening generator',
+      lead: 'Tick what you want and get a paste-ready unit file. Every item states **what it may break** — because that is where hardening actually costs you, not in the directive itself.',
+      service: 'Service type',
+      daemon: 'Long-running daemon (Type=simple, restart on failure)',
+      oneshot: 'One-shot job (Type=oneshot)',
+      user: 'Identity',
+      dynuser: 'DynamicUser=yes (no stable UID)',
+      staticuser: 'Dedicated static user',
+      name: 'Service name / executable',
+      rw: 'Paths that must stay writable (required with ProtectSystem=strict)',
+      enable: 'Hardening to apply',
+      on: 'on',
+      output: 'The generated unit file',
+      copy: 'Copy',
+      copied: 'Copied',
+      presets: 'Presets',
+      presetWeb: 'Web app (behind a proxy)',
+      presetBackup: 'Backup job',
+      presetParanoid: 'Paranoid',
+      presetNone: 'None',
+      count: 'enabled',
+      warn: 'This is not “stricter is better”. Every item has a cost, and the cost is written under it. Harden, then run a real workload and see whether it got blocked.',
+      related: 'Related reading',
+    };
+
+const ITEMS: Item[] = [
+  // ---- filesystem
+  { id: 'notmp', cat: 'fs', on: true,
+    label: zh ? '私有 /tmp 与 /var/tmp' : 'Private /tmp and /var/tmp',
+    lines: ['PrivateTmp=yes'],
+    cost: zh ? '服务看不到别人的 /tmp；两个服务想通过 /tmp 交换文件就会失败。' : 'The service cannot see anyone else’s /tmp; two services passing files through /tmp will break.' },
+  { id: 'psys', cat: 'fs', on: true,
+    label: zh ? '整个文件系统只读（strict）' : 'Whole filesystem read-only (strict)',
+    lines: ['ProtectSystem=strict'],
+    cost: zh ? '包括 /usr、/etc、/boot 全部只读。服务要写任何东西，都必须用 ReadWritePaths 明确列出。' : 'Including /usr, /etc and /boot. Anything the service must write has to be listed explicitly in ReadWritePaths.' },
+  { id: 'phome', cat: 'fs', on: true,
+    label: zh ? '隐藏 /home、/root、/run/user' : 'Hide /home, /root, /run/user',
+    lines: ['ProtectHome=yes'],
+    cost: zh ? '服务读不到任何用户目录。有配置放在 /home 下就会直接失败。' : 'The service cannot read any home directory. Config that lives under /home simply fails.' },
+  { id: 'notmpfiles', cat: 'fs', on: false,
+    label: zh ? 'ProcSubset=pid' : 'ProcSubset=pid',
+    lines: ['ProcSubset=pid'],
+    cost: zh ? '/proc 下只暴露与 PID 相关的条目；读 /proc/meminfo、/proc/stat 之类的监控会失败。' : 'Only PID-related entries appear under /proc; reading /proc/meminfo, /proc/stat and similar monitoring data fails.' },
+  { id: 'umask', cat: 'fs', on: true,
+    label: zh ? 'UMask=0077' : 'UMask=0077',
+    lines: ['UMask=0077'],
+    cost: zh ? '服务新建的文件默认只有属主可读。别的进程（或运维）读不到它。' : 'Files the service creates are owner-only by default. Other processes (or an operator) cannot read them.' },
+
+  // ---- kernel and devices
+  { id: 'pdev', cat: 'kernel', on: true,
+    label: zh ? '私有 /dev' : 'Private /dev',
+    lines: ['PrivateDevices=yes'],
+    cost: zh ? '拿不到 GPU（/dev/dri）、串口、USB、GPIO。做硬件的服务不能开。' : 'No access to a GPU (/dev/dri), serial ports, USB or GPIO. A service that touches hardware cannot use this.' },
+  { id: 'pkern', cat: 'kernel', on: true,
+    label: zh ? '保护内核可调参数与模块' : 'Protect kernel tunables and modules',
+    lines: ['ProtectKernelTunables=yes', 'ProtectKernelModules=yes', 'ProtectKernelLogs=yes'],
+    cost: zh ? '服务不能改 sysctl、不能加载模块、读不到内核日志。需要调 sysctl 的服务会失败。' : 'The service cannot change sysctls, load modules, or read the kernel log. Anything that tunes sysctls fails.' },
+  { id: 'pcg', cat: 'kernel', on: true,
+    label: zh ? '保护 cgroup、时钟、主机名' : 'Protect cgroups, clock, hostname',
+    lines: ['ProtectControlGroups=yes', 'ProtectClock=yes', 'ProtectHostname=yes'],
+    cost: zh ? '服务不能改 cgroup 结构、系统时钟或主机名。会自己设主机名/时间的服务会失败。' : 'The service cannot alter the cgroup tree, the system clock, or the hostname. Services that set any of those fail.' },
+
+  // ---- processes and identity
+  { id: 'nnp', cat: 'proc', on: true,
+    label: zh ? '禁止提权' : 'No privilege escalation',
+    lines: ['NoNewPrivileges=yes'],
+    cost: zh ? 'setuid 二进制、sudo、以及任何“以后再说”的提权全部失效。几乎总是该开。' : 'setuid binaries, sudo, and any deferred privilege escalation stop working. Almost always worth it.' },
+  { id: 'dynuser', cat: 'proc', on: false,
+    label: zh ? 'DynamicUser=yes' : 'DynamicUser=yes',
+    lines: ['DynamicUser=yes'],
+    cost: zh ? 'UID 每次启动都可能变，没有持久家目录。需要稳定 UID（例如 NFS、共享卷）或持久状态目录时，得配 StateDirectory。' : 'The UID can change between starts and there is no persistent home. Needs StateDirectory if you want persistent state, and it breaks anything that depends on a stable UID (NFS, shared volumes).' },
+  { id: 'preal', cat: 'proc', on: true,
+    label: zh ? '禁止实时调度与 SUID/SGID' : 'No realtime scheduling, no SUID/SGID',
+    lines: ['RestrictRealtime=yes', 'RestrictSUIDSGID=yes'],
+    cost: zh ? '实时调度优先级和新建 setuid 文件被拒。音频/工业控制类服务可能需要实时调度。' : 'Realtime scheduling priority and creating setuid files are refused. Audio and industrial-control services may need realtime.' },
+  { id: 'lock', cat: 'proc', on: true,
+    label: zh ? '锁定 personality、禁止命名空间' : 'Lock personality, forbid namespaces',
+    lines: ['LockPersonality=yes', 'RestrictNamespaces=yes'],
+    cost: zh ? '**跑容器的服务会直接坏掉**（它需要创建命名空间）；32 位兼容（personality）也会被拒。' : '**A service that runs containers breaks outright** (it needs to create namespaces); 32-bit personality emulation is refused too.' },
+  { id: 'rmipc', cat: 'proc', on: true,
+    label: zh ? '退出时清理 IPC' : 'Remove IPC on stop',
+    lines: ['RemoveIPC=yes'],
+    cost: zh ? '停止时清掉该用户的 SysV/POSIX IPC 对象；与其他服务共享内存段会受影响。' : 'Clears the user’s SysV/POSIX IPC objects on stop; shared memory segments with other services are affected.' },
+  { id: 'protectproc', cat: 'proc', on: true,
+    label: zh ? '隐藏其他进程' : 'Hide other processes',
+    lines: ['ProtectProc=invisible'],
+    cost: zh ? '服务看不到不属于它的进程；自己读 /proc 做监控会看不到目标。' : 'The service cannot see processes that are not its own; anything that reads /proc to monitor others sees nothing.' },
+
+  // ---- syscalls and capabilities
+  { id: 'caps', cat: 'syscall', on: true,
+    label: zh ? '清空 capability 集' : 'Empty the capability set',
+    lines: ['CapabilityBoundingSet=', 'AmbientCapabilities='],
+    cost: zh ? '任何需要 root 能力的操作都会失败：绑 1024 以下端口、设时间、改网络接口。需要绑 80 端口的服务要么给回 CAP_NET_BIND_SERVICE，要么用反向代理。' : 'Anything needing a capability fails: binding a port below 1024, setting the clock, changing network interfaces. A service that binds port 80 needs CAP_NET_BIND_SERVICE back, or a reverse proxy in front.' },
+  { id: 'scfilter', cat: 'syscall', on: true,
+    label: zh ? '系统调用白名单' : 'Syscall allow-list',
+    lines: ['SystemCallFilter=@system-service', 'SystemCallErrorNumber=EPERM'],
+    cost: zh ? '@system-service 覆盖绝大多数普通服务。冷门运行时（某些 JIT、旧版解释器、自写 io_uring）可能被拦——报错是 EPERM 而不是崩溃，所以看日志能发现。' : '@system-service covers the overwhelming majority of ordinary services. Unusual runtimes (some JITs, old interpreters, hand-rolled io_uring) can get blocked — the error is EPERM rather than a crash, so it shows up in the log.' },
+  { id: 'scarch', cat: 'syscall', on: true,
+    label: zh ? '只允许本机架构的调用' : 'Native-architecture syscalls only',
+    lines: ['SystemCallArchitectures=native'],
+    cost: zh ? 'x86_64 上跑 32 位二进制会失败（没有 32 位系统调用入口）。' : 'A 32-bit binary on x86_64 fails (no 32-bit syscall entry point).' },
+  { id: 'mde', cat: 'syscall', on: false,
+    label: zh ? '禁止可写+可执行内存' : 'Forbid writable+executable memory',
+    lines: ['MemoryDenyWriteExecute=yes'],
+    cost: zh ? '**JIT 会坏**：Node 的部分场景、LuaJIT、Java、.NET、某些 Python 扩展。默认不开是有原因的。' : '**Breaks JITs**: some Node paths, LuaJIT, Java, .NET, and some Python extensions. There is a reason this is off by default.' },
+
+  // ---- network
+  { id: 'raf', cat: 'net', on: true,
+    label: zh ? '限制地址族' : 'Restrict address families',
+    lines: ['RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6'],
+    cost: zh ? '只允许这几种 socket。需要 AF_NETLINK（部分网络工具、某些解析路径）或 AF_PACKET 的服务会被拒。' : 'Only these socket families. A service needing AF_NETLINK (some network tools, some resolver paths) or AF_PACKET is refused.' },
+  { id: 'ipfilter', cat: 'net', on: false,
+    label: zh ? '按 IP 限制出网' : 'Restrict outbound by IP',
+    lines: ['IPAddressDeny=any', 'IPAddressAllow=localhost', 'IPAddressAllow=10.0.0.0/8'],
+    cost: zh ? '默认拒绝一切，只放行你列出的。**很容易把 DNS 也挡掉**——要么放行 DNS 服务器，要么用 systemd-resolved 的本地套接字。' : 'Deny everything, allow only what you list. **It is easy to block DNS by accident** — either allow your resolver’s address, or rely on systemd-resolved’s local socket.' },
+
+  // ---- misc
+  { id: 'keyring', cat: 'misc', on: true,
+    label: zh ? '私有 keyring' : 'Private keyring',
+    lines: ['KeyringMode=private'],
+    cost: zh ? '看不到其他用户的 keyring；需要共享内核 keyring 的服务会失败。' : 'Cannot see other users’ keyrings; a service that needs a shared kernel keyring fails.' },
+  { id: 'watchdog', cat: 'misc', on: false,
+    label: zh ? '看门狗（WatchdogSec）' : 'Watchdog (WatchdogSec)',
+    lines: ['WatchdogSec=30'],
+    cost: zh ? '服务必须周期性调用 sd_notify(WATCHDOG=1)，否则会被杀掉重启。**没有实现看门狗的服务会陷入重启循环。**' : 'The service must call sd_notify(WATCHDOG=1) periodically or it gets killed and restarted. **A service with no watchdog support lands in a restart loop.**' },
+];
+---
+
+<div class="tool hg" data-hg data-labels={JSON.stringify(ITEMS.map((i) => ({ id: i.id, cat: i.cat, label: i.label, lines: i.lines, cost: i.cost, on: i.on })))} data-cats={JSON.stringify(CATS)}>
+  <div class="hg__row">
+    <label for="hg-name">{L.name}</label>
+    <input id="hg-name" type="text" autocomplete="off" spellcheck="false" value="myservice" data-name />
+  </div>
+
+  <div class="hg__row">
+    <label for="hg-rw">{L.rw}</label>
+    <input id="hg-rw" type="text" autocomplete="off" spellcheck="false" value="/var/lib/myservice" data-rw />
+  </div>
+
+  <div class="hg__row">
+    <label for="hg-type">{L.service}</label>
+    <select id="hg-type" data-type>
+      <option value="daemon">{L.daemon}</option>
+      <option value="oneshot">{L.oneshot}</option>
+    </select>
+  </div>
+
+  <div class="hg__row">
+    <label for="hg-user">{L.user}</label>
+    <select id="hg-user" data-user>
+      <option value="static">{L.staticuser}</option>
+      <option value="dynamic">{L.dynuser}</option>
+    </select>
+  </div>
+
+  <p class="hg__presets">
+    {L.presets}:
+    <button type="button" class="hg__chip" data-preset="web">{L.presetWeb}</button>
+    <button type="button" class="hg__chip" data-preset="backup">{L.presetBackup}</button>
+    <button type="button" class="hg__chip" data-preset="paranoid">{L.presetParanoid}</button>
+    <button type="button" class="hg__chip" data-preset="none">{L.presetNone}</button>
+  </p>
+
+  <p class="hg__section">{L.enable}</p>
+  <div class="hg__items" data-items></div>
+
+  <p class="hg__section">{L.output}</p>
+  <div class="hg__out">
+    <button type="button" class="hg__copy" data-copy>{L.copy}</button>
+    <pre data-out><code></code></pre>
+  </div>
+
+  <p class="hg__warn">{L.warn}</p>
+</div>
+
+<script>
+  type Item = { id: string; cat: string; label: string; lines: string[]; cost: string; on: boolean };
+  type Cats = Record<string, string>;
+
+  const PRESETS: Record<string, string[]> = {
+    none: [],
+    web: ['notmp', 'psys', 'phome', 'umask', 'pdev', 'pkern', 'pcg', 'nnp', 'preal', 'lock', 'rmipc', 'protectproc', 'caps', 'scfilter', 'scarch', 'raf', 'keyring'],
+    backup: ['notmp', 'psys', 'phome', 'umask', 'pkern', 'pcg', 'nnp', 'preal', 'rmipc', 'caps', 'scfilter', 'scarch', 'keyring'],
+    paranoid: ['notmp', 'psys', 'phome', 'notmpfiles', 'umask', 'pdev', 'pkern', 'pcg', 'nnp', 'dynuser', 'preal', 'lock', 'rmipc', 'protectproc', 'caps', 'scfilter', 'scarch', 'mde', 'raf', 'ipfilter', 'keyring', 'watchdog'],
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-hg]').forEach((root) => {
+    const items: Item[] = JSON.parse(root.dataset.labels || '[]');
+    const cats: Cats = JSON.parse(root.dataset.cats || '{}');
+    const itemsEl = root.querySelector<HTMLElement>('[data-items]')!;
+    const outEl = root.querySelector<HTMLElement>('[data-out] code')!;
+    const nameEl = root.querySelector<HTMLInputElement>('[data-name]')!;
+    const rwEl = root.querySelector<HTMLInputElement>('[data-rw]')!;
+    const typeEl = root.querySelector<HTMLSelectElement>('[data-type]')!;
+    const userEl = root.querySelector<HTMLSelectElement>('[data-user]')!;
+    const copyBtn = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+
+    const state = new Map<string, boolean>(items.map((i) => [i.id, i.on]));
+
+    // Build the checklist, grouped by category.
+    const byCat = new Map<string, Item[]>();
+    items.forEach((i) => {
+      if (!byCat.has(i.cat)) byCat.set(i.cat, []);
+      byCat.get(i.cat)!.push(i);
+    });
+    byCat.forEach((group, cat) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'hg__group';
+      const h = document.createElement('p');
+      h.className = 'hg__cat';
+      h.textContent = cats[cat] || cat;
+      wrap.appendChild(h);
+      group.forEach((it) => {
+        const row = document.createElement('div');
+        row.className = 'hg__item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = `hg-${it.id}`;
+        cb.checked = state.get(it.id) || false;
+        cb.addEventListener('change', () => {
+          state.set(it.id, cb.checked);
+          row.classList.toggle('hg__item--off', !cb.checked);
+          render();
+        });
+        const lab = document.createElement('label');
+        lab.htmlFor = cb.id;
+        lab.innerHTML = `<span class="hg__label">${it.label}</span><code class="hg__lines">${it.lines.join('  ')}</code><span class="hg__cost">${it.cost}</span>`;
+        row.classList.toggle('hg__item--off', !cb.checked);
+        row.appendChild(cb);
+        row.appendChild(lab);
+        wrap.appendChild(row);
+      });
+      itemsEl.appendChild(wrap);
+    });
+
+    function render() {
+      const name = nameEl.value.trim() || 'myservice';
+      const rw = rwEl.value.split(',').map((s) => s.trim()).filter(Boolean);
+      const type = typeEl.value;
+      const user = userEl.value;
+
+      const enabled = items.filter((i) => state.get(i.id));
+      const lines: string[] = [];
+      lines.push('[Unit]');
+      lines.push(`Description=${name}`);
+      lines.push('After=network-online.target');
+      lines.push('Wants=network-online.target');
+      lines.push('');
+      lines.push('[Service]');
+      if (type === 'oneshot') {
+        lines.push('Type=oneshot');
+        lines.push(`ExecStart=/usr/local/bin/${name}`);
+      } else {
+        lines.push('Type=simple');
+        lines.push(`ExecStart=/usr/local/bin/${name}`);
+        lines.push('Restart=on-failure');
+        lines.push('RestartSec=2');
+      }
+      if (user === 'dynamic') {
+        lines.push('DynamicUser=yes');
+      } else {
+        lines.push(`User=${name}`);
+        lines.push(`Group=${name}`);
+      }
+      if (rw.length) {
+        lines.push(`StateDirectory=${name}`);
+        lines.push(`ReadWritePaths=${rw.join(' ')}`);
+      }
+      // The hardening block, in a stable order (as defined in ITEMS).
+      enabled.forEach((i) => i.lines.forEach((l) => lines.push(l)));
+      lines.push('');
+      lines.push('[Install]');
+      lines.push('WantedBy=multi-user.target');
+      outEl.textContent = lines.join('\n') + '\n';
+
+      const cnt = root.querySelector<HTMLElement>('[data-count]');
+      if (cnt) cnt.textContent = `${enabled.length}/${items.length}`;
+    }
+
+    [nameEl, rwEl].forEach((el) => el.addEventListener('input', render));
+    [typeEl, userEl].forEach((el) => el.addEventListener('change', render));
+
+    root.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const want = new Set(PRESETS[b.dataset.preset || 'none'] || []);
+        items.forEach((i) => state.set(i.id, want.has(i.id)));
+        // Reflect into the checkboxes.
+        items.forEach((i) => {
+          const cb = root.querySelector<HTMLInputElement>(`#hg-${i.id}`);
+          if (cb) {
+            cb.checked = state.get(i.id) || false;
+            cb.closest('.hg__item')?.classList.toggle('hg__item--off', !cb.checked);
+          }
+        });
+        if (b.dataset.preset === 'paranoid') userEl.value = 'dynamic';
+        if (b.dataset.preset === 'backup') typeEl.value = 'oneshot';
+        render();
+      }),
+    );
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(outEl.textContent || '');
+        const old = copyBtn.textContent;
+        copyBtn.textContent = '✓';
+        setTimeout(() => (copyBtn.textContent = old), 1200);
+      } catch {
+        /* clipboard unavailable; the pre is selectable anyway */
+      }
+    });
+
+    render();
+  });
+</script>
+
+<style>
+  .hg__row {
+    margin-bottom: 0.7rem;
+  }
+  .hg__presets {
+    margin: 1rem 0 0.4rem;
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+  }
+  .hg__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.2rem 0.55rem;
+    margin-right: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .hg__chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .hg__section {
+    margin: 1.2rem 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .hg__group {
+    margin-bottom: 0.9rem;
+  }
+  .hg__cat {
+    margin: 0 0 0.35rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--fg);
+  }
+  .hg__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.55rem;
+    align-items: start;
+    padding: 0.35rem 0;
+    border-top: 1px solid var(--rule);
+  }
+  .hg__item--off .hg__cost,
+  .hg__item--off .hg__lines {
+    opacity: 0.45;
+  }
+  .hg__item input {
+    margin-top: 0.2rem;
+    width: auto;
+  }
+  .hg__item label {
+    display: block;
+    margin: 0;
+    font-weight: 400;
+    color: var(--fg-muted);
+  }
+  .hg__label {
+    display: block;
+    font-weight: 600;
+    color: var(--fg);
+    font-size: 0.9rem;
+  }
+  .hg__lines {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--accent);
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0.1rem 0;
+  }
+  .hg__cost {
+    display: block;
+    font-size: 0.83rem;
+    line-height: 1.55;
+    color: var(--fg-muted);
+  }
+  .hg__out {
+    position: relative;
+  }
+  .hg__out pre {
+    margin: 0;
+    max-height: 26rem;
+    overflow: auto;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .hg__copy {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.5rem;
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-elev);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .hg__copy:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .hg__warn {
+    margin: 1rem 0 0;
+    padding: 0.7rem 0.9rem;
+    border-left: 3px solid var(--mark);
+    background: color-mix(in srgb, var(--mark) 7%, var(--bg-soft));
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 0.86rem;
+    color: var(--fg-muted);
+  }
+</style>

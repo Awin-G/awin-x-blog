@@ -1,0 +1,38 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import HardenGenerator from '@/components/tools/HardenGenerator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="harden"
+  title="systemd 服务加固生成器"
+  description="勾选你想要的加固项，得到一份可直接粘贴的 systemd unit 文件——每一项旁边都写着它的代价。全部在浏览器本地生成。"
+>
+  <HardenGenerator lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>为什么"代价"比指令本身更重要</h2>
+    <p>
+      抄一份加固指令清单很容易；知道哪一条会在凌晨三点把你的服务弄坏，不容易。
+      上面每一项都写明了它限制什么、<em>以及</em>它拿走了什么——私有 <code>/dev</code> 意味着没有 GPU，
+      <code>MemoryDenyWriteExecute</code> 意味着没有 JIT，<code>RestrictNamespaces</code> 意味着所有跑容器的服务直接失效。
+    </p>
+    <p>
+      真正有效的流程是：先开，再跑一次真实负载，然后读 journal。被拦下的系统调用配合
+      <code>SystemCallErrorNumber=EPERM</code> 会表现为权限错误而不是崩溃——二分排查时这正是你要的。
+    </p>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/systemd-hardening/')}>systemd 加固</a>、
+      <a href={localePath('zh', '/posts/systemd-unit-cookbook/')}>systemd unit 手册</a>、
+      <a href={localePath('zh', '/posts/linux-capabilities/')}>Linux capabilities</a>、
+      <a href={localePath('zh', '/posts/container-seccomp-hardening/')}>容器里的 seccomp</a>。
+    </p>
+    <p>
+      上面的输出用 systemd 自己的工具验证过。对默认预设和"全选"预设跑
+      <code>systemd-analyze verify</code>，它只报一件事——<code>Command /usr/local/bin/&lt;name&gt; is not
+      executable</code>——因为这是模板，那个路径该由你填。没有任何未知或格式错误的指令。
+    </p>
+  </div>
+</ToolShell>

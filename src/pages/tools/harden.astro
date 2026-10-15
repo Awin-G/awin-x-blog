@@ -1,0 +1,41 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import HardenGenerator from '@/components/tools/HardenGenerator.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="harden"
+  title="systemd hardening generator"
+  description="Tick the hardening you want and get a paste-ready systemd unit file — with the cost of every directive written next to it. Runs entirely in your browser."
+>
+  <HardenGenerator lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>Why the cost matters more than the directive</h2>
+    <p>
+      Copying a list of hardening directives is easy; knowing which one will break your service at 03:00 is not.
+      Every item above says what it restricts <em>and</em> what it takes away — a private <code>/dev</code> means no GPU,
+      <code>MemoryDenyWriteExecute</code> means no JIT, <code>RestrictNamespaces</code> means anything that runs
+      containers stops working.
+    </p>
+    <p>
+      The workflow that actually works: enable, then run a real workload, then read the journal. A blocked syscall
+      with <code>SystemCallErrorNumber=EPERM</code> shows up as a permission error rather than a crash, which is
+      exactly what you want when you are bisecting.
+    </p>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/systemd-hardening/')}>systemd hardening</a>,
+      <a href={localePath('en', '/posts/systemd-unit-cookbook/')}>the systemd unit cookbook</a>,
+      <a href={localePath('en', '/posts/linux-capabilities/')}>Linux capabilities</a>, and
+      <a href={localePath('en', '/posts/container-seccomp-hardening/')}>seccomp in containers</a>.
+    </p>
+    <p>
+      The output above is checked with systemd's own tool. <code>systemd-analyze verify</code> on the default
+      and on the all-options-on preset reports exactly one thing — <code>Command /usr/local/bin/&lt;name&gt; is not
+      executable</code> — because it is a template and that path is yours to fill in. No unknown or malformed
+      directives.
+    </p>
+  </div>
+</ToolShell>
