@@ -283,7 +283,12 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   `congestion-lab` (a 2D-canvas TCP congestion/bufferbloat simulation).
   All are `.mdx` articles importing an Astro component — the pipeline needed no changes.
   Interactive articles are the current shape; the home page has a "Start with these"
-  highlights block pointing at them.
+  highlights block pointing at them, and **`/labs/`** (bilingual) is the hub: each entry
+  states what is real and what it cannot do, plus how they were verified.
+  **Robustness/a11y conventions for interactive pieces**: render the first state
+  server-side (no-JS crawlers — Baidu's is weak at JS — must see real content), add a
+  `<noscript>` fallback with the conclusions in text for canvas widgets, and never create
+  a long tab-stop run (the byte grid uses a roving tabindex + arrow keys: one tab stop).
 - **The Open Ledger (first "different in kind" bet, 2026-10-15)**: `/open/` is a live
   audit page whose numbers are computed from the repo at build time (files, pairs, words,
   code blocks, the near-duplicate distribution, a real defect log), plus the companion
