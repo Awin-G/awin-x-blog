@@ -196,8 +196,13 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
   - **Trend data for the observation window**: `blog-analytics-snapshot.timer` runs
     `deploy/analytics-snapshot.sh` daily on TOWER, appending one line per day to
     `/var/www/stats/history.tsv` (date, requests, visitors, files, bandwidth, top pages,
-    referrers). The live report only shows the current window, so this file is what a
-    multi-week review is read from.
+    referrers, **crawler breakdown**, **top non-bot article paths**). The live report only
+    shows the current window, so this file is what a multi-week review is read from.
+    The last two columns were added 2026-10-15 because they are what the December decision
+    actually needs — which crawler is working the site, and which articles non-bots ask for.
+    The script (`deploy/analytics-snapshot.sh`) is installed at `/srv/blog/analytics-snapshot.sh`
+    — **copy it there after changing the repo version**, since the systemd unit runs the
+    installed copy, not the repo one (the repo checkout only updates when a deploy runs).
   - **Verified working (2026-10-15)**: the timer is scheduled (next run 00:00 BST daily) and
     the service has appended exactly one line per day (2 distinct days so far). This file is
     the *only* record of the observation window — if it stops growing, the December review
