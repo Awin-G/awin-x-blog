@@ -354,6 +354,11 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   interactive page adds a single component bundle (~10 KB) — no framework JS, no web
   fonts, so a full page load is ~40–65 KB. `dist/` is 102 MB, almost all of it OG cards
   and the Pagefind index.
+  **Dependency posture (2026-10-15)**: **7 direct dependencies** (6 Astro plugins + the
+  `astro` core, plus `pagefind` in dev), `npm audit` **0 vulnerabilities** at every level,
+  and `npm outdated` reports nothing. Keep it that way — this is what makes the build fit
+  in 981 MB and the payload stay tiny; add a dependency only for something that cannot be
+  hand-written.
   **Internal linking (same check)**: **0 orphan pages**; the tool pages were the weakest
   (2 inbound links each) and are now 28–178 via the tag→tool block in `PostLayout`
   (`src/lib/tools.ts` + `RelatedTools.astro`).
