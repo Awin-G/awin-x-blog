@@ -1,0 +1,249 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { t, localePath, type Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const other: Lang = lang === 'zh' ? 'en' : 'zh';
+
+const copy =
+  lang === 'zh'
+    ? {
+        title: '交互实验',
+        lead: '这些不是文章。它们是在你的浏览器里真实运行的东西——真实的数据、真实的代码。每一件都写明了它究竟计算了什么，以及它做不到什么。',
+        real: '真实的部分',
+        cannot: '做不到的部分',
+        items: [
+          {
+            href: '/posts/request-ladder/',
+            kind: '滚动时间线',
+            name: '一次请求的 1.07 秒',
+            what: '一次真实的 `curl -v`，做成随滚动点亮的时间线。零 JavaScript——纯 CSS `animation-timeline: view()`。',
+            real: '所有时间数字来自对本站的一次真实请求：DNS 5.2ms、TCP 324.3ms、TLS 234.3ms、服务器 278ms、传输 229.5ms。',
+            cannot: '这是一次测量，不是基准测试。换一个网络、换一天，数字就会变。',
+          },
+          {
+            href: '/posts/wire-protocol-bytes/',
+            kind: '可交互',
+            name: '逐字节看一个真实协议',
+            what: '点任意一个字节，看它属于哪个字段、以及为什么重要。',
+            real: '四个帧（明文数据 / 加密数据 / 握手 / Ping）由 ESPTier 自己的 C 编码器在主机上编译后产出，并做了往返解码验证。',
+            cannot: '它是四个帧，不是一段实时抓包；也不包含设备上的时序行为。',
+          },
+          {
+            href: '/posts/bead-lens-lab/',
+            kind: '可玩',
+            name: '玻璃珠透镜实验室',
+            what: '把真实的光线追迹着色器移植到 WebGL2：拖动旋转、调参、实时重算。',
+            real: '片元着色器就是桌面程序跑的那一份（`#version 330 core` → `#version 300 es`），逐像素从针孔相机发出主光线。',
+            cannot: '只做正向仿真（不解决"生成可打印图像"的逆问题）；单一折射率，所以没有色散；针孔相机，所以没有景深。',
+          },
+          {
+            href: '/posts/congestion-lab/',
+            kind: '可玩',
+            name: 'TCP 拥塞控制实验室',
+            what: '实时仿真的拥塞窗口与瓶颈队列：上格是锯齿，下格是队列。',
+            real: '三条真实的关系——窗口会涨、容量封顶吞吐、队列变成延迟——都在图上。',
+            cannot: '它是每个往返走一步，不是逐包仿真：没有快速重传、没有 SACK、没有 pacing，所以不要拿它算真实吞吐。',
+          },
+          {
+            href: '/open/',
+            kind: '数据',
+            name: '开源账本',
+            what: '这个站自己的数字，在构建时从仓库里算出来。',
+            real: '文件数、双语配对、字数、代码块、最近似文章对的相似度分布，以及一份真实的缺陷日志。',
+            cannot: '它描述的是语料的形状，不是它的质量。',
+          },
+        ],
+        toolsNote: '另有 8 个纯前端小工具（子网、IPv6、进制、字节序、CRC、chmod、编解码、cron）。',
+        toolsLink: '看工具',
+        verifyTitle: '这些东西是怎么被检查的',
+        verify: [
+          '每个组件都跑了"截图 → 视觉模型评审 → 修 → 再截图"的闭环。它抓到过真问题，不是走形式：',
+          '**字节格子完全没有颜色**——格子是 JavaScript 创建的，Astro 的作用域属性加不到它们身上，于是我的 CSS 全都没生效，格子退回成浏览器默认按钮样式。改用 `:global()` 后才真正着色。',
+          '**手机端整页能左右滑**——页头 8 个不换行的导航链接把整个文档撑到 631px，而手机视口只有 390px。',
+          '**首页 hero 与全站错位 32px**——`.hero` 的 `padding: … 0 …` 简写把 `.wrap` 的内边距清零了。',
+          '布局类的结论不靠肉眼：用 DOM 探针量 `documentElement.scrollWidth` 与 `innerWidth`，用 Range 矩形量文字边界。像素推断错过，而且错得很自信。',
+        ],
+      }
+    : {
+        title: 'Interactive experiments',
+        lead: 'These are not articles. They are things that actually run in your browser — real data, real code. Each one states what it genuinely computes, and what it cannot.',
+        real: 'What is real',
+        cannot: 'What it cannot do',
+        items: [
+          {
+            href: '/posts/request-ladder/',
+            kind: 'scroll timeline',
+            name: 'The 1.07 seconds of one request',
+            what: 'A real `curl -v` as a timeline that lights up as you scroll. Zero JavaScript — pure CSS `animation-timeline: view()`.',
+            real: 'Every number comes from one real request to this site: DNS 5.2 ms, TCP 324.3 ms, TLS 234.3 ms, server 278 ms, transfer 229.5 ms.',
+            cannot: 'It is one measurement, not a benchmark. A different network or a different day gives different numbers.',
+          },
+          {
+            href: '/posts/wire-protocol-bytes/',
+            kind: 'interactive',
+            name: 'A real protocol, byte by byte',
+            what: 'Click any byte to see which field owns it, and why it matters.',
+            real: 'The four frames (plaintext data, encrypted data, handshake, ping) were produced by ESPTier’s own C encoder, compiled on a host, and round-trip decoded.',
+            cannot: 'It is four frames, not a live capture, and it says nothing about timing on the device.',
+          },
+          {
+            href: '/posts/bead-lens-lab/',
+            kind: 'playable',
+            name: 'The bead-lens optics lab',
+            what: 'A real ray-tracing shader ported to WebGL2: drag to orbit, turn the knobs, watch it recompute.',
+            real: 'The fragment shader is the same one the desktop program runs (`#version 330 core` → `#version 300 es`), firing one primary ray per pixel from a pinhole camera.',
+            cannot: 'Forward simulation only (it does not solve the inverse, printable-image problem); a single refractive index, so no dispersion; a pinhole camera, so no depth of field.',
+          },
+          {
+            href: '/posts/congestion-lab/',
+            kind: 'playable',
+            name: 'The TCP congestion-control lab',
+            what: 'A live simulation of the congestion window and the bottleneck queue: a sawtooth on top, the queue below.',
+            real: 'Three real relationships are on the chart — the window grows, capacity caps throughput, the queue becomes delay.',
+            cannot: 'It steps once per round trip, not once per packet: no fast retransmit, no SACK, no pacing. Do not use it to estimate real throughput.',
+          },
+          {
+            href: '/open/',
+            kind: 'data',
+            name: 'The open ledger',
+            what: 'This site’s own numbers, computed from the repository at build time.',
+            real: 'File count, bilingual pairing, word count, code blocks, the near-duplicate similarity distribution, and a real defect log.',
+            cannot: 'It describes the shape of the corpus, not its quality.',
+          },
+        ],
+        toolsNote: 'There are also 8 client-side tools (subnet, IPv6, bases, endianness, CRC, chmod, encoding, cron).',
+        toolsLink: 'See the tools',
+        verifyTitle: 'How these are checked',
+        verify: [
+          'Every component went through a screenshot → vision-model review → fix → re-screenshot loop. It has caught real defects, not ceremony:',
+          '**The byte cells had no colour at all** — the cells are created by JavaScript, so Astro’s scoped-style attribute never landed on them and my CSS silently did nothing; they fell back to the browser’s default button styling. `:global()` fixed it.',
+          '**Every page scrolled sideways on a phone** — eight non-wrapping header links gave the nav a 492px minimum and forced the whole document to 631px inside a 390px viewport.',
+          '**The home hero sat 32px out of alignment** — `.hero`’s `padding: … 0 …` shorthand zeroed the inline padding `.wrap` had just set.',
+          'Layout claims are not decided by eye: a DOM probe measures `documentElement.scrollWidth` against `innerWidth`, and Range rects measure text extents. Pixel inference got this wrong, confidently.',
+        ],
+      };
+---
+
+<BaseLayout
+  title={copy.title}
+  description={copy.lead}
+  lang={lang}
+  path={localePath(lang, '/labs/')}
+  alternates={{ en: localePath('en', '/labs/'), zh: localePath('zh', '/labs/') }}
+  switchHref={localePath(other, '/labs/')}
+  active="start"
+>
+  <div class="wrap wrap--narrow" style="padding-top:2.5rem">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href={localePath(lang, '/')}>{t(lang, 'nav.home')}</a></li>
+        <li aria-current="page">{copy.title}</li>
+      </ol>
+    </nav>
+
+    <h1>{copy.title}</h1>
+    <p class="lead">{copy.lead}</p>
+
+    <ul class="labs">
+      {copy.items.map((it) => (
+        <li class="labs__item">
+          <p class="labs__kind">{it.kind}</p>
+          <h2 class="labs__name"><a href={localePath(lang, it.href)}>{it.name}</a></h2>
+          <p class="labs__what">{it.what}</p>
+          <dl class="labs__meta">
+            <div>
+              <dt>{copy.real}</dt>
+              <dd>{it.real}</dd>
+            </div>
+            <div>
+              <dt>{copy.cannot}</dt>
+              <dd>{it.cannot}</dd>
+            </div>
+          </dl>
+        </li>
+      ))}
+    </ul>
+
+    <p class="muted" style="margin-top:1.5rem">
+      {copy.toolsNote} <a href={localePath(lang, '/tools/')}>{copy.toolsLink} →</a>
+    </p>
+
+    <h2 style="margin-top:2.5rem">{copy.verifyTitle}</h2>
+    {copy.verify.map((p) => <p set:html={p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .labs {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+  .labs__item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    padding: 1.1rem 1.2rem;
+  }
+  .labs__kind {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.3rem;
+  }
+  .labs__name {
+    font-size: 1.16rem;
+    margin: 0 0 0.45rem;
+  }
+  .labs__name a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .labs__name a:hover {
+    color: var(--accent);
+  }
+  .labs__what {
+    margin: 0 0 0.7rem;
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+  }
+  .labs__meta {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--rule);
+  }
+  .labs__meta div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+  @media (max-width: 34rem) {
+    .labs__meta div {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+  }
+  .labs__meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+  .labs__meta dd {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+  }
+</style>
