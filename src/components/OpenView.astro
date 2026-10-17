@@ -122,6 +122,13 @@ const incidents = zh
         fix:
           '靠一次审计发现：把 265 组中英文件的代码围栏数量逐一对比（那个文件是 44 对 43），再到渲染后的 HTML 里确认——其中一个 `<pre>` 里装的是正文。已修好围栏；审计现在报告 265/265 全部干净，另外对全部 530 个文件做的重复关键词扫描也一无所获。',
       },
+      {
+        what: '我自己的配置生成器吐出了 nginx 拒绝加载的配置',
+        detail:
+          'nginx 生成器的第一个版本**从没闭合 `location` 块**：它开了 `location / {`、写完代理指令，就直接进了 `location /assets/ {`。四个预设的括号全都不配对，等于把一份 nginx 会报 "unexpected end of file, expecting }" 的配置交给读者。',
+        fix:
+          '不再靠肉眼看输出，改成把四个预设都喂给容器里的 `nginx -t`——正是它把问题顶了出来。现在四个都报 "syntax is ok / test is successful"。这跟 systemd 生成器用 `systemd-analyze verify` 是同一个习惯。',
+      },
     ]
   : [
       {
@@ -182,6 +189,13 @@ const incidents = zh
           'The Chinese version of the Go-context article had a stray `}` and a missing closing fence, so the code block never ended: it swallowed the next paragraph, a heading and the section after it, and shipped that way. Every existing check passed, because they verified that the two language files *exist* — not what they render.',
         fix:
           'Found by an audit that compared the code-fence count of all 265 EN/ZH pairs (44 vs 43 in that file) and then confirmed it in the rendered HTML, where one <pre> contained prose. Fixed the fence; the audit now reports 265/265 pairs clean, and a duplicate-keyword scan of all 530 files came back empty.',
+      },
+      {
+        what: 'My own config generator emitted config that nginx refused to load',
+        detail:
+          'The first version of the nginx generator never closed its `location` block: it opened `location / {`, wrote the proxy directives, then went straight into `location /assets/ {`. Every preset was unbalanced, and it would have handed readers a config that nginx rejects with "unexpected end of file, expecting }".',
+        fix:
+          'Stopped eyeballing the output and fed all four presets to `nginx -t` inside a container — which is what surfaced it. All four now report "syntax is ok / test is successful". Same habit as the systemd generator, whose output is checked with `systemd-analyze verify`.',
       },
     ];
 

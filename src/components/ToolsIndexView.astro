@@ -59,6 +59,11 @@ const copy =
             name: 'systemd 加固生成器',
             desc: '勾选加固项，得到可直接粘贴的 unit 文件——每一项旁边都写着它的代价。',
           },
+          {
+            slug: 'nginx',
+            name: 'nginx 反向代理生成器',
+            desc: '带 TLS、响应头、缓存与限速的反向代理 server 块——拆成 http/server 两段，保证 nginx 真的能启动。',
+          },
         ],
         note: '更多工具会陆续加入——如果你想要某个特定工具，欢迎来信。',
       }
@@ -111,6 +116,11 @@ const copy =
             slug: 'harden',
             name: 'systemd hardening generator',
             desc: 'Tick the hardening you want and get a paste-ready unit file — with the cost of every directive written next to it.',
+          },
+          {
+            slug: 'nginx',
+            name: 'nginx reverse-proxy generator',
+            desc: 'A reverse-proxy server block with TLS, headers, caching and rate limiting — split into http/server so nginx actually starts.',
           },
         ],
         note: 'More tools are coming. If there is one you wish existed, get in touch.',

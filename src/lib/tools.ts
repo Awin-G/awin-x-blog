@@ -10,7 +10,8 @@ export type ToolSlug =
   | 'chmod'
   | 'encoding'
   | 'cron'
-  | 'harden';
+  | 'harden'
+  | 'nginx';
 
 export const TOOL_NAMES: Record<ToolSlug, { en: string; zh: string }> = {
   ipv6: { en: 'IPv6 address calculator', zh: 'IPv6 地址计算器' },
@@ -22,6 +23,7 @@ export const TOOL_NAMES: Record<ToolSlug, { en: string; zh: string }> = {
   encoding: { en: 'Base64 / URL / Hex encoder', zh: 'Base64 / URL / Hex 编解码' },
   cron: { en: 'cron explainer', zh: 'cron 表达式解释器' },
   harden: { en: 'systemd hardening generator', zh: 'systemd 加固生成器' },
+  nginx: { en: 'nginx reverse-proxy generator', zh: 'nginx 反向代理生成器' },
 };
 
 /**
@@ -34,10 +36,10 @@ export const TOOL_NAMES: Record<ToolSlug, { en: string; zh: string }> = {
  */
 const BY_TAG: Record<string, ToolSlug[]> = {
   networking: ['subnet', 'ipv6', 'crc'],
-  nginx: ['subnet', 'harden'],
-  'self-hosting': ['harden', 'cron', 'subnet'],
-  homelab: ['subnet', 'harden'],
-  devops: ['harden', 'cron', 'chmod'],
+  nginx: ['nginx', 'subnet', 'harden'],
+  'self-hosting': ['nginx', 'harden', 'cron'],
+  homelab: ['subnet', 'harden', 'nginx'],
+  devops: ['nginx', 'harden', 'cron'],
   systemd: ['harden', 'cron'],
   linux: ['chmod', 'cron', 'harden'],
   embedded: ['bases', 'endian', 'crc'],
@@ -45,7 +47,7 @@ const BY_TAG: Record<string, ToolSlug[]> = {
   rust: ['bases', 'endian'],
   esp32: ['crc', 'bases'],
   easytier: ['subnet', 'crc'],
-  security: ['harden', 'encoding'],
+  security: ['nginx', 'harden', 'encoding'],
   'reverse-engineering': ['encoding', 'endian'],
   python: ['cron', 'encoding'],
   ai: ['encoding'],
