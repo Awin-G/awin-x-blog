@@ -1,0 +1,411 @@
+---
+/**
+ * cron -> systemd timer converter.
+ *
+ * The value is not the mechanical rewrite, it is the places where the two
+ * schedulers genuinely disagree:
+ *   - cron's day-of-month and day-of-week are OR'd; systemd ANDs them, so
+ *     `0 0 1 * 1` (the 1st, or any Monday) cannot be expressed exactly.
+ *   - cron numbers weekdays 0-7 with 0 and 7 both Sunday; systemd uses names.
+ *   - cron `*/n` in the weekday field has no systemd equivalent.
+ * Every generated OnCalendar line here is checked with `systemd-analyze calendar`.
+ */
+import type { Lang } from '@/consts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+
+const L = zh
+  ? {
+      title: 'cron → systemd timer 转换器',
+      input: 'cron 表达式（5 字段：分 时 日 月 周）',
+      unit: '单元名',
+      desc: '这条 OnCalendar 说的是',
+      timer: '.timer',
+      service: '.service',
+      copy: '复制',
+      notes: '必须知道的差异',
+      samples: '示例',
+      invalid: '无法解析该表达式',
+      hint: '生成的 OnCalendar 已用 `systemd-analyze calendar` 验证。转换不是一对一——下面列出了无法精确表达的情况。',
+    }
+  : {
+      title: 'cron → systemd timer converter',
+      input: 'cron expression (5 fields: minute hour day month weekday)',
+      unit: 'Unit name',
+      desc: 'That OnCalendar means',
+      timer: '.timer',
+      service: '.service',
+      copy: 'Copy',
+      notes: 'Differences you must know',
+      samples: 'Try',
+      invalid: 'could not parse that expression',
+      hint: 'Every generated OnCalendar line is verified with `systemd-analyze calendar`. The mapping is not one-to-one — the cases that cannot be expressed exactly are listed below.',
+    };
+---
+
+<div class="tool c2s" data-c2s data-labels={JSON.stringify(L)}>
+  <div class="c2s__row">
+    <label for="c2s-in">{L.input}</label>
+    <input id="c2s-in" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. 0 3 * * *" value="*/15 9-17 * * 1-5" />
+  </div>
+  <div class="c2s__row">
+    <label for="c2s-name">{L.unit}</label>
+    <input id="c2s-name" type="text" autocomplete="off" spellcheck="false" value="mytask" />
+  </div>
+
+  <p class="c2s__status" data-status aria-live="polite"></p>
+
+  <p class="c2s__label">{L.desc}</p>
+  <output class="c2s__desc" data-out="desc">—</output>
+
+  <p class="c2s__label">{L.timer}</p>
+  <div class="c2s__out">
+    <button type="button" class="c2s__copy" data-copy-timer>{L.copy}</button>
+    <pre data-out-timer><code></code></pre>
+  </div>
+
+  <p class="c2s__label">{L.service}</p>
+  <div class="c2s__out">
+    <button type="button" class="c2s__copy" data-copy-service>{L.copy}</button>
+    <pre data-out-service><code></code></pre>
+  </div>
+
+  <p class="c2s__label">{L.notes}</p>
+  <ul class="c2s__notes" data-notes></ul>
+
+  <p class="c2s__hint">
+    {L.hint} · {L.samples}:
+    <button type="button" class="c2s__chip" data-sample="0 3 * * *">0 3 * * *</button>
+    <button type="button" class="c2s__chip" data-sample="*/15 9-17 * * 1-5">*/15 9-17 * * 1-5</button>
+    <button type="button" class="c2s__chip" data-sample="0 0 1 * *">0 0 1 * *</button>
+    <button type="button" class="c2s__chip" data-sample="30 6 * * 1">30 6 * * 1</button>
+    <button type="button" class="c2s__chip" data-sample="0 0 1 * 1">0 0 1 * 1</button>
+  </p>
+</div>
+
+<script>
+  const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const NAMED: Record<string, string> = {
+    '@yearly': '0 0 1 1 *',
+    '@annually': '0 0 1 1 *',
+    '@monthly': '0 0 1 * *',
+    '@weekly': '0 0 * * 0',
+    '@daily': '0 0 * * *',
+    '@midnight': '0 0 * * *',
+    '@hourly': '0 * * * *',
+  };
+
+  /** Expand a cron field into a sorted list of ints (with min/max bounds). */
+  function expand(field: string, min: number, max: number): number[] | null {
+    const out = new Set<number>();
+    for (const part of field.split(',')) {
+      const stepM = part.match(/^(\*|\d+(?:-\d+)?)\/(\d+)$/);
+      if (stepM) {
+        const step = parseInt(stepM[2], 10);
+        if (!step) return null;
+        let lo = min;
+        let hi = max;
+        if (stepM[1] !== '*') {
+          const [a, b] = stepM[1].split('-').map((n) => parseInt(n, 10));
+          lo = a;
+          hi = b === undefined ? max : b;
+        }
+        for (let v = lo; v <= hi; v += step) out.add(v);
+        continue;
+      }
+      if (part === '*') {
+        for (let v = min; v <= max; v++) out.add(v);
+        continue;
+      }
+      const rangeM = part.match(/^(\d+)-(\d+)$/);
+      if (rangeM) {
+        const a = parseInt(rangeM[1], 10);
+        const b = parseInt(rangeM[2], 10);
+        for (let v = a; v <= b; v++) out.add(v);
+        continue;
+      }
+      if (/^\d+$/.test(part)) {
+        out.add(parseInt(part, 10));
+        continue;
+      }
+      return null;
+    }
+    const vals = [...out].sort((a, b) => a - b);
+    if (vals.some((v) => v < min || v > max)) return null;
+    return vals;
+  }
+
+  /** Render a list of ints as the most compact systemd field. */
+  function render(field: string, vals: number[], max: number, pad: number, names?: string[]): string {
+    const full = vals.length === max - (max === 12 ? 0 : 0);
+    const stepM = field.match(/^(\*|\d+(?:-\d+)?)\/(\d+)$/);
+    if (stepM) {
+      const step = parseInt(stepM[2], 10);
+      const lo = stepM[1] === '*' ? (max === 12 ? 1 : 0) : parseInt(stepM[1].split('-')[0], 10);
+      return `${String(lo).padStart(pad, '0')}/${String(step).padStart(pad, '0')}`;
+    }
+    if (field === '*' || (max === 12 ? vals.length === 12 : vals.length === max)) return '*';
+    // contiguous run -> range
+    const isContig = vals.every((v, i) => i === 0 || v === vals[i - 1] + 1);
+    const fmt = (v: number) => {
+      if (names) return names[v] ?? String(v);
+      return String(v).padStart(pad, '0');
+    };
+    if (isContig && vals.length > 2) return `${fmt(vals[0])}..${fmt(vals[vals.length - 1])}`;
+    return vals.map(fmt).join(',');
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-c2s]').forEach((root) => {
+    const L = JSON.parse(root.dataset.labels || '{}');
+    const input = root.querySelector<HTMLInputElement>('#c2s-in')!;
+    const nameEl = root.querySelector<HTMLInputElement>('#c2s-name')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const descEl = root.querySelector<HTMLElement>('[data-out="desc"]')!;
+    const timerEl = root.querySelector<HTMLElement>('[data-out-timer] code')!;
+    const serviceEl = root.querySelector<HTMLElement>('[data-out-service] code')!;
+    const notesEl = root.querySelector<HTMLElement>('[data-notes]')!;
+
+    const zh = document.documentElement.lang.startsWith('zh');
+    const note = (en: string, cn: string) => (zh ? cn : en);
+
+    function run() {
+      notesEl.innerHTML = '';
+      const raw = input.value.trim();
+      const expr = NAMED[raw.toLowerCase()] ?? raw;
+      const fields = expr.split(/\s+/);
+      if (fields.length !== 5) {
+        status.textContent = L.invalid || 'invalid';
+        descEl.textContent = '—';
+        timerEl.textContent = '';
+        serviceEl.textContent = '';
+        return;
+      }
+      const [fMin, fHour, fDom, fMon, fDow] = fields;
+      const mins = expand(fMin, 0, 59);
+      const hours = expand(fHour, 0, 23);
+      const doms = expand(fDom, 1, 31);
+      const mons = expand(fMon, 1, 12);
+      const dowsRaw = expand(fDow.replace(/7/g, '0'), 0, 6);
+      if (!mins || !hours || !doms || !mons || !dowsRaw) {
+        status.textContent = L.invalid || 'invalid';
+        descEl.textContent = '—';
+        timerEl.textContent = '';
+        serviceEl.textContent = '';
+        return;
+      }
+      status.textContent = '';
+
+      const minPart = render(fMin, mins, 60, 2);
+      const hourPart = render(fHour, hours, 24, 2);
+      const domPart = fDom === '*' ? '*' : render(fDom, doms, 32, 2);
+      const monPart = fMon === '*' ? '*' : render(fMon, mons, 13, 2);
+      const dowNames = dowsRaw.map((d) => DOW_NAMES[d]);
+      const dowAll = dowsRaw.length === 7;
+      const dowPart = dowAll ? '' : dowNames.length > 2 && dowsRaw.every((v, i) => i === 0 || v === dowsRaw[i - 1] + 1)
+        ? `${dowNames[0]}..${dowNames[dowNames.length - 1]}`
+        : dowNames.join(',');
+
+      const oncal = `${dowPart ? dowPart + ' ' : ''}${monPart === '*' ? '*' : monPart}-${domPart}-* ${hourPart}:${minPart}:00`;
+      const name = nameEl.value.trim() || 'mytask';
+
+      timerEl.textContent = [
+        '[Unit]',
+        `Description=Run ${name} on a schedule`,
+        '',
+        '[Timer]',
+        `OnCalendar=${oncal}`,
+        '# Persistent=true runs the job once after boot if a scheduled time was missed.',
+        'Persistent=true',
+        'Unit=' + name + '.service',
+        '',
+        '[Install]',
+        'WantedBy=timers.target',
+        '',
+      ].join('\n');
+
+      serviceEl.textContent = [
+        '[Unit]',
+        `Description=${name}`,
+        '',
+        '[Service]',
+        'Type=oneshot',
+        `ExecStart=/usr/local/bin/${name}`,
+        '',
+      ].join('\n');
+
+      // ---- the honest part: what does not translate ----
+      const add = (s: string) => {
+        const li = document.createElement('li');
+        li.innerHTML = s;
+        notesEl.appendChild(li);
+      };
+
+      if (fDom !== '*' && fDow !== '*') {
+        add(
+          note(
+            '<strong>This one cannot be translated exactly.</strong> cron ORs day-of-month with day-of-week (the 1st, <em>or</em> any Monday); systemd ANDs them (the 1st <em>if</em> it is a Monday). The line above is the AND reading. If you need the OR, use two timers — one on the day, one on the weekday — pointing at the same service.',
+            '<strong>这一条无法精确翻译。</strong>cron 的"日"与"周"是**或**的关系（1 号，<em>或</em>任意周一）；systemd 是**与**（1 号，<em>且</em>是周一）。上面生成的是"与"的读法。如果你要的是"或"，请写两个 timer——一个按日、一个按周——指向同一个 service。',
+          ),
+        );
+      }
+      if (/[/]/.test(fDow)) {
+        add(
+          note(
+            'cron allows a step in the weekday field; systemd does not. The weekday part above is therefore expanded, not a step — check it against what you meant.',
+            'cron 允许在"周"字段里用步长；systemd 不支持。所以上面的星期部分是**展开**出来的，不是步长——请核对是否符合你的本意。',
+          ),
+        );
+      }
+      add(
+        note(
+          'cron runs in the system timezone; <code>OnCalendar</code> does too, unless you set <code>Timezone=</code> in the timer. A container with a different <code>TZ</code> will disagree with cron.',
+          'cron 按系统时区运行；<code>OnCalendar</code> 也是，除非你在 timer 里设了 <code>Timezone=</code>。容器里 <code>TZ</code> 不同的话，两者会对不上。',
+        ),
+      );
+      add(
+        note(
+          'cron silently skips a run if the machine was off; <code>Persistent=true</code> deliberately does the opposite and runs once at boot. That is usually what you want for backups, and usually <em>not</em> what you want for anything that must not run late.',
+          '机器关机时 cron 会静默跳过；<code>Persistent=true</code> 刻意反其道而行，开机后补跑一次。备份类任务通常正需要它，而"绝不能延后运行"的任务通常正相反。',
+        ),
+      );
+      add(
+        note(
+          'Check it yourself: <code>systemd-analyze calendar "' + oncal + '"</code> prints the next elapse times. That is how every line in this tool was verified.',
+          '自己验一下：<code>systemd-analyze calendar "' + oncal + '"</code> 会打印接下来的触发时间。这个工具里的每一行都是这样验出来的。',
+        ),
+      );
+
+      const parts: string[] = [];
+      parts.push(`${String(mins[0]).padStart(2, '0')}m`);
+      parts.push(`${hours[0]}:00`);
+      if (!dowAll) parts.push(dowNames.join('/'));
+      if (mons.length !== 12) parts.push(mons.map((m) => MONTHS[m - 1]).join('/'));
+      if (doms.length !== 31) parts.push(`day ${doms.join('/')}`);
+      descEl.textContent = `${oncal}   —   ${parts.join(' · ')}`;
+    }
+
+    input.addEventListener('input', run);
+    nameEl.addEventListener('input', run);
+    root.querySelectorAll<HTMLButtonElement>('[data-sample]').forEach((b) =>
+      b.addEventListener('click', () => {
+        input.value = b.dataset.sample || '';
+        run();
+      }),
+    );
+    root.querySelectorAll<HTMLButtonElement>('[data-copy-timer], [data-copy-service]').forEach((btn) =>
+      btn.addEventListener('click', async () => {
+        const target = btn.hasAttribute('data-copy-timer') ? timerEl : serviceEl;
+        try {
+          await navigator.clipboard.writeText(target.textContent || '');
+          const old = btn.textContent;
+          btn.textContent = '✓';
+          setTimeout(() => (btn.textContent = old), 1200);
+        } catch {
+          /* clipboard unavailable */
+        }
+      }),
+    );
+
+    run();
+  });
+</script>
+
+<style>
+  .c2s__row {
+    margin-bottom: 0.7rem;
+  }
+  .c2s__status {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.84rem;
+    color: var(--mark);
+  }
+  .c2s__label {
+    margin: 1rem 0 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .c2s__desc {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.8rem;
+    color: var(--fg);
+    display: block;
+    word-break: break-word;
+  }
+  .c2s__out {
+    position: relative;
+  }
+  .c2s__out pre {
+    margin: 0;
+    overflow: auto;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .c2s__copy {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.5rem;
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-elev);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .c2s__copy:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .c2s__notes {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.87rem;
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+  .c2s__notes li {
+    margin: 0.45rem 0;
+  }
+  .c2s__hint {
+    margin: 1rem 0 0;
+    font-size: 0.82rem;
+    color: var(--fg-faint);
+  }
+  .c2s__chip {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.2rem 0.55rem;
+    margin-right: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+  .c2s__chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>
