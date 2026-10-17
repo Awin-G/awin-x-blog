@@ -9,12 +9,12 @@
 #
 # Output: /var/www/stats/history.tsv, tab-separated:
 #   date  total_requests  unique_visitors  unique_files  bandwidth  top_pages  referrers
-#         crawlers  top_articles
+#         crawlers  top_articles  browser_ips
 #
-# The last two columns were added 2026-10-15 because they are what the December
-# review actually needs: which crawler is (or is not) working the site, and which
-# articles get requested by something that is not a bot. Older lines simply have
-# fewer columns.
+# The last three columns were added 2026-10-15/17 because they are what the December
+# review actually needs: which crawler is (or is not) working the site, which articles
+# real clients ask for (ranked by DISTINCT IP, not hits), and how many browser-shaped
+# clients there were. Older lines simply have fewer columns.
 set -euo pipefail
 
 REPORT="${REPORT:-/var/www/stats/report.json}"
@@ -28,7 +28,6 @@ fi
 
 python3 - "$REPORT" "$HISTORY" "$LOGS" <<'PY'
 import json, os, re, sys, datetime
-from collections import Counter
 
 report, history = sys.argv[1], sys.argv[2]
 logs = sys.argv[3].split()
@@ -47,14 +46,22 @@ day = datetime.date.today().isoformat()
 top = ", ".join(f"{r.get('data')}({r.get('hits', {}).get('count', 0)})" for r in rows("requests")[:3])
 referrers = ", ".join(f"{r.get('data')}({r.get('hits', {}).get('count', 0)})" for r in rows("referring_sites")[:3])
 
-# --- crawler breakdown + non-bot article requests, straight from the raw logs ---
+# --- crawler breakdown + human-ish article requests, straight from the raw logs ---
 NAMED = ["Googlebot", "GoogleOther", "bingbot", "Baiduspider", "YandexBot", "AhrefsBot"]
 counts = {k: 0 for k in NAMED}
 other_bots = 0
-articles = Counter()
+articles = {}          # slug -> set of client IPs
+human_ips = set()
 BOT = re.compile(
     r"bot|crawl|spider|scan|python-|curl|wget|Go-http|monitor|zgrab|masscan|"
     r"facebookexternalhit|Semrush|PetalBot|Bytespider|Ahrefs|HeadlessChrome",
+    re.I,
+)
+# CLI tools are not visitors either — and this catches the orchestrator's own
+# verification requests (curl 8.x from the dev box), which otherwise polluted the
+# numbers: ~674 of them in the first three days.
+TOOLISH = re.compile(
+    r"^(curl|wget|python|Go-http|Java|libwww|okhttp|axios|node-fetch|HTTPie|HTTP\b)",
     re.I,
 )
 
@@ -63,7 +70,8 @@ for path in logs:
         continue
     with open(path, errors="replace") as fh:
         for line in fh:
-            # combined log format: ... "request" status size "referer" "ua"
+            # combined log format: ip - - [time] "request" status size "referer" "ua"
+            ip = line.split(" ", 1)[0]
             parts = line.split('"')
             ua = parts[-2] if len(parts) >= 2 else ""
             hit = None
@@ -73,15 +81,26 @@ for path in logs:
                     break
             if hit:
                 counts[hit] += 1
-            elif BOT.search(ua):
+                continue
+            if not ua or ua == "-" or BOT.search(ua) or TOOLISH.match(ua):
                 other_bots += 1
-            elif ua:
-                m = re.search(r"GET /(?:zh/)?posts/([a-z0-9-]+)/", line)
-                if m:
-                    articles[m.group(1)] += 1
+                continue
+            if "Mozilla" not in ua:
+                other_bots += 1
+                continue
+            # A browser-shaped UA from a real client: count by DISTINCT IP, because a
+            # raw hit count is dominated by scrapers (551 hits came from one spoofed
+            # 2015 Firefox UA). Distinct IPs is the better human proxy.
+            human_ips.add(ip)
+            m = re.search(r"GET /(?:zh/)?posts/([a-z0-9-]+)/", line)
+            if m:
+                articles.setdefault(m.group(1), set()).add(ip)
 
 crawlers = " ".join(f"{k}={counts[k]}" for k in NAMED) + f" other={other_bots}"
-top_articles = ", ".join(f"{slug}({n})" for slug, n in articles.most_common(3)) or "-"
+top_articles = (
+    ", ".join(f"{slug}({len(ips)})" for slug, ips in sorted(articles.items(), key=lambda kv: -len(kv[1]))[:3])
+    or "-"
+)
 
 line = "\t".join([
     day,
@@ -93,6 +112,7 @@ line = "\t".join([
     referrers,
     crawlers,
     top_articles,
+    str(len(human_ips)),
 ])
 
 existing = []
