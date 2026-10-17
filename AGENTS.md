@@ -331,9 +331,9 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **265 articles / 530 posts / 613 pages / 612 sitemap URLs** (the 260-article mass phase
+- **265 articles / 530 posts / 615 pages / 614 sitemap URLs** (the 260-article mass phase
   ended at batch 45; the 261st is the Open Ledger piece). Batches 1–45 shipped. Content
-  dates run into 2027. **9 client-side tools** (the 9th is the systemd hardening generator).
+  dates run into 2027. **10 client-side tools** (the last two are the systemd hardening and nginx generators).
   **Mass content production is paused** — new work must be *different in kind* (see
   `notes/explore/SYNTHESIS.md`); the ~2-month observation window runs to ~2026-12-15.
 - **Five "different in kind" pieces shipped (2026-10-15), all vision-verified:**
@@ -371,12 +371,14 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
     with it set to `true` put a correct responsive unit on **530 article pages** (EN+ZH)
     and nothing on the home/tools pages. Flipping that one boolean (or the operator
     enabling Auto ads) is all that remains — plus the EEA/UK consent message.
-- **Tools** (`/tools/`, **9** total, bilingual, zero server cost): IPv6 + IPv4 subnet
+- **Tools** (`/tools/`, **10** total, bilingual, zero server cost): IPv6 + IPv4 subnet
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
   CRC calculator (6 algorithms, verified against standard check values), chmod calculator,
   Base64/URL/Hex/HTML-entity encoder, cron explainer, and the **systemd hardening
   generator** (22 real directives, each with its honest cost; output checked with
-  `systemd-analyze verify`). Each links into the matching posts, and `PostLayout` now
+  `systemd-analyze verify`), and the **nginx reverse-proxy generator** (output split into
+  http/server because `limit_req_zone` & co. are illegal in a server block; all four presets
+  checked with `nginx -t`, which caught an unclosed `location` block on the first try). Each links into the matching posts, and `PostLayout` now
   links back to them by tag. A component-usage audit (2026-10-15) found **no orphaned
   components** — `AdSlot` had been the only one, and it is now placed.
 - **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`
