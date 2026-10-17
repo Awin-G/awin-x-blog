@@ -196,13 +196,19 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
   - **Trend data for the observation window**: `blog-analytics-snapshot.timer` runs
     `deploy/analytics-snapshot.sh` daily on TOWER, appending one line per day to
     `/var/www/stats/history.tsv` (date, requests, visitors, files, bandwidth, top pages,
-    referrers, **crawler breakdown**, **top non-bot article paths**). The live report only
-    shows the current window, so this file is what a multi-week review is read from.
-    The last two columns were added 2026-10-15 because they are what the December decision
-    actually needs — which crawler is working the site, and which articles non-bots ask for.
+    referrers, **crawler breakdown**, **top articles by distinct IP**, **browser-IP count**).
+    The live report only shows the current window, so this file is what a multi-week review
+    is read from.
+    The last three columns were added 2026-10-15/17 because they are what the December
+    decision actually needs. Two measurement lessons went into them:
+    - **Hit counts lie.** 551 requests came from a single spoofed 2015 Firefox UA, so the
+      article column now ranks by **distinct client IPs**, not hits.
+    - **The orchestrator pollutes its own data.** ~674 requests were my own `curl`
+      verifications, so CLI user agents are excluded from the human-ish buckets.
     The script (`deploy/analytics-snapshot.sh`) is installed at `/srv/blog/analytics-snapshot.sh`
     — **copy it there after changing the repo version**, since the systemd unit runs the
-    installed copy, not the repo one (the repo checkout only updates when a deploy runs).
+    installed copy, not the repo one (and the repo checkout only updates when a deploy runs;
+    I got this wrong twice).
   - **Verified working (2026-10-15/16)**: the timer is scheduled (00:00 BST daily) and the
     service was exercised **through systemd** (`systemctl start …` → `Result=success`,
     exit 0) with the enriched 9-column output, and it is idempotent (re-running replaces
@@ -218,8 +224,20 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
     lever) and **Baidu has never crawled at all**. An earlier note in this file claimed the
     `ziyuan.baidu.com` referrers meant "Baidu is the channel with a pulse" — that was wrong
     (it was not crawl traffic) and has been corrected in `留言.md`. Human visits: a handful.
-    The interactive pieces and prose posts receive the same order of requests (2–6 each),
-    so there is **no evidence yet** that the interactive work is more popular.
+  - **Trend, 2026-10-14 → 17** (from the enriched columns): requests 2918 → 3826 → 4550 →
+    4342; GoAccess "visitors" 59 → 119 → 160 → 274; **browser-shaped distinct IPs 238** on
+    the 17th. So traffic *is* drifting up, but slowly and mostly from crawlers.
+    - **Googlebot/GoogleOther fell off sharply after the 15th** (1526 → 96 → 44) — that
+      burst was a crawl, not a habit. bingbot is steady (~43–142/day).
+    - **Baiduspider finally appeared on 2026-10-17 (2 requests)** — the first crawl ever,
+      presumably triggered by the IndexNow/sitemap activity. The operator had already
+      written Baidu off, so treat this as noise unless it grows.
+    - **The interactive pieces are the top articles by distinct IP**: on the 17th,
+      `bead-lens-lab(7)`, `request-ladder(6)`, `wire-protocol-bytes(6)`. That is the first
+      real evidence that the "different in kind" work is what distinct clients fetch —
+      still small, but it is the metric to watch. (An earlier version of this note said
+      there was "no evidence" the interactive work was more popular; that was based on the
+      hit-count metric, which the spoofed UA above had already invalidated.)
 - **Verification files** live: Google (DNS TXT), Bing (`BingSiteAuth.xml`),
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
