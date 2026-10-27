@@ -52,6 +52,8 @@ counts = {k: 0 for k in NAMED}
 other_bots = 0
 articles = {}          # slug -> set of client IPs
 human_ips = set()
+ua_stats = {}          # ua -> [hits, set(ips)]  (used to spot distributed scrapers)
+rows_after_ua = []     # (line, ua, ip) kept for a second pass
 BOT = re.compile(
     r"bot|crawl|spider|scan|python-|curl|wget|Go-http|monitor|zgrab|masscan|"
     r"facebookexternalhit|Semrush|PetalBot|Bytespider|Ahrefs|HeadlessChrome",
@@ -88,15 +90,33 @@ for path in logs:
             if "Mozilla" not in ua:
                 other_bots += 1
                 continue
-            # A browser-shaped UA from a real client: count by DISTINCT IP, because a
-            # raw hit count is dominated by scrapers (551 hits came from one spoofed
-            # 2015 Firefox UA). Distinct IPs is the better human proxy.
-            human_ips.add(ip)
-            m = re.search(r"GET /(?:zh/)?posts/([a-z0-9-]+)/", line)
-            if m:
-                articles.setdefault(m.group(1), set()).add(ip)
+            # Record per-UA so we can spot distributed scrapers below.
+            st = ua_stats.setdefault(ua, [0, set()])
+            st[0] += 1
+            st[1].add(ip)
+            rows_after_ua.append((line, ua, ip))
+
+# A distributed scraper is one *fixed* UA spread over many IPs with ~1 request each
+# (a proxy pool, so the per-IP rate limit never trips). This is exactly what showed
+# up on 2026-10-21..27: one fake "Mac Chrome/142" UA, 157 IPs, 177 requests.
+# Counting those IPs as "visitors" is how a scraper looks like growth.
+scraper_uas = {
+    ua for ua, (n, ips) in ua_stats.items() if len(ips) >= 20 and n / max(len(ips), 1) < 1.5
+}
+scraped = 0
+
+for line, ua, ip in rows_after_ua:
+    if ua in scraper_uas:
+        scraped += 1
+        continue
+    human_ips.add(ip)
+    m = re.search(r"GET /(?:zh/)?posts/([a-z0-9-]+)/", line)
+    if m:
+        articles.setdefault(m.group(1), set()).add(ip)
 
 crawlers = " ".join(f"{k}={counts[k]}" for k in NAMED) + f" other={other_bots}"
+if scraped:
+    crawlers += f" scraped={scraped}"
 top_articles = (
     ", ".join(f"{slug}({len(ips)})" for slug, ips in sorted(articles.items(), key=lambda kv: -len(kv[1]))[:3])
     or "-"

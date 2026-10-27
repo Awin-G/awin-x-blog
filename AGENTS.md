@@ -224,20 +224,33 @@ pairing (every EN has a ZH and vice-versa) · broken internal links · duplicate
     lever) and **Baidu has never crawled at all**. An earlier note in this file claimed the
     `ziyuan.baidu.com` referrers meant "Baidu is the channel with a pulse" — that was wrong
     (it was not crawl traffic) and has been corrected in `留言.md`. Human visits: a handful.
-  - **Trend, 2026-10-14 → 17** (from the enriched columns): requests 2918 → 3826 → 4550 →
+  - **Trend, 2026-10-14 → 27** (from the enriched columns): requests 2918 → 3826 → 4550 →
     4342; GoAccess "visitors" 59 → 119 → 160 → 274; **browser-shaped distinct IPs 238** on
     the 17th. So traffic *is* drifting up, but slowly and mostly from crawlers.
     - **Googlebot/GoogleOther fell off sharply after the 15th** (1526 → 96 → 44) — that
       burst was a crawl, not a habit. bingbot is steady (~43–142/day).
-    - **Baiduspider finally appeared on 2026-10-17 (2 requests)** — the first crawl ever,
-      presumably triggered by the IndexNow/sitemap activity. The operator had already
-      written Baidu off, so treat this as noise unless it grows.
-    - **The interactive pieces are the top articles by distinct IP**: on the 17th,
-      `bead-lens-lab(7)`, `request-ladder(6)`, `wire-protocol-bytes(6)`. That is the first
-      real evidence that the "different in kind" work is what distinct clients fetch —
-      still small, but it is the metric to watch. (An earlier version of this note said
-      there was "no evidence" the interactive work was more popular; that was based on the
-      hit-count metric, which the spoofed UA above had already invalidated.)
+    - **Baiduspider appeared on 2026-10-17 and again on 10-21..23** (2, then 14/52/24) —
+      it does crawl occasionally after all. Still negligible; the operator has written
+      Baidu off, so treat it as noise unless it grows.
+    - **The interactive pieces were the top articles by distinct IP** on the 17th
+      (`bead-lens-lab(7)`, `request-ladder(6)`, `wire-protocol-bytes(6)`) — the first
+      evidence the "different in kind" work is what distinct clients fetch.
+  - **THE BIG CORRECTION (2026-10-27)**: on 10-21..27 the numbers exploded — visitors
+    453 → 490 → **965** → **1289**, browser-IPs up to ~700. It was **not** growth. It was a
+    **distributed scraper**: five different browser UAs each spread over 30–84 IPs with
+    **exactly one request per IP** (proxy pool, so no per-IP rate limit ever trips). The
+    honest numbers: Google search referrers ~51 requests over five days, **external
+    (non-self) referrers only 36**, and the top *articles* by distinct IP are 2–4 each.
+    Baidu 0, no real audience.
+    - The snapshot now detects this: UAs with `≥20 IPs` and `<1.5 requests/IP` are counted
+      as `scraped=` and excluded from the human buckets. Re-running 10-27 gave
+      `scraped=532`, browser-IPs **255** (was ~700), and top articles of
+      `docker-compose-cookbook(4), sqlite-json1-and-generated-columns(3), graceful-shutdown(2)`.
+    - **Lesson**: distinct-IP is *not* a human proxy on its own — a proxy pool defeats it.
+      The ratio of requests-per-IP (≈1.00 across many IPs for one UA) is the tell.
+    - The scrapers *targeted* `wireguard-vs-openvpn`, `quic-and-http3` and
+      `best-self-hosted-apps-2026` — i.e. the high-search-volume comparison/roundup
+      posts. That is at least a hint about which topics have demand.
 - **Verification files** live: Google (DNS TXT), Bing (`BingSiteAuth.xml`),
   Baidu (`baidu_verify_codeva-...html`).
 - **Indexing**: Google crawls + reads the sitemap but hasn't indexed yet; GSC "Verify"
