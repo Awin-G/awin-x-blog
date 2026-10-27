@@ -7,7 +7,7 @@
  *   - cron's day-of-month and day-of-week are OR'd; systemd ANDs them, so
  *     `0 0 1 * 1` (the 1st, or any Monday) cannot be expressed exactly.
  *   - cron numbers weekdays 0-7 with 0 and 7 both Sunday; systemd uses names.
- *   - cron `*/n` in the weekday field has no systemd equivalent.
+ *   - cron's step syntax in the weekday field has no systemd equivalent.
  * Every generated OnCalendar line here is checked with `systemd-analyze calendar`.
  */
 import type { Lang } from '@/consts';

@@ -11,7 +11,8 @@ export type ToolSlug =
   | 'encoding'
   | 'cron'
   | 'harden'
-  | 'nginx';
+  | 'nginx'
+  | 'cron2systemd';
 
 export const TOOL_NAMES: Record<ToolSlug, { en: string; zh: string }> = {
   ipv6: { en: 'IPv6 address calculator', zh: 'IPv6 地址计算器' },
@@ -24,6 +25,7 @@ export const TOOL_NAMES: Record<ToolSlug, { en: string; zh: string }> = {
   cron: { en: 'cron explainer', zh: 'cron 表达式解释器' },
   harden: { en: 'systemd hardening generator', zh: 'systemd 加固生成器' },
   nginx: { en: 'nginx reverse-proxy generator', zh: 'nginx 反向代理生成器' },
+  cron2systemd: { en: 'cron → systemd timer converter', zh: 'cron → systemd timer 转换器' },
 };
 
 /**
@@ -40,8 +42,8 @@ const BY_TAG: Record<string, ToolSlug[]> = {
   'self-hosting': ['nginx', 'harden', 'cron'],
   homelab: ['subnet', 'harden', 'nginx'],
   devops: ['nginx', 'harden', 'cron'],
-  systemd: ['harden', 'cron'],
-  linux: ['chmod', 'cron', 'harden'],
+  systemd: ['harden', 'cron2systemd', 'cron'],
+  linux: ['cron2systemd', 'chmod', 'harden'],
   embedded: ['bases', 'endian', 'crc'],
   c: ['bases', 'endian', 'crc'],
   rust: ['bases', 'endian'],

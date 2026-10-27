@@ -329,6 +329,12 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
   questions with `documentElement.scrollWidth` vs `innerWidth` (and Range rects for text
   extents) inside that iframe — never with pixel inference alone. Injecting a probe script
   into a copy of the built page also works for the direct context.
+- **Docker is stopped and disabled on BOOK (since the 2026-10-27 reboot).** Every earlier
+  headless-Chromium recipe in this file goes through
+  `mcr.microsoft.com/playwright:v1.54.0-noble`; that no longer works. Use the **native
+  `/usr/bin/chromium`** on BOOK instead: `chromium --headless=new --no-sandbox --disable-gpu
+  --virtual-time-budget=9000 --dump-dom <url>` (and `--screenshot=...`), served from
+  `python3 -m http.server --directory dist`. Only start Docker again if the operator asks.
 - **Testing dark mode: use `--force-dark-mode`, not variable injection.** The site's dark
   theme is driven entirely by `@media (prefers-color-scheme: dark)` (the `[data-theme]`
   attribute is only *excluded* from, never applied). Injecting the dark custom properties
@@ -344,9 +350,10 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
 
 ## 11. Current state
 
-- **265 articles / 530 posts / 615 pages / 614 sitemap URLs** (the 260-article mass phase
+- **265 articles / 530 posts / 617 pages / 616 sitemap URLs** (the 260-article mass phase
   ended at batch 45; the 261st is the Open Ledger piece). Batches 1–45 shipped. Content
-  dates run into 2027. **10 client-side tools** (the last two are the systemd hardening and nginx generators).
+  dates run into 2027. **11 client-side tools** (the last three are the systemd hardening and nginx generators,
+  and the cron -> systemd timer converter).
   **Mass content production is paused** — new work must be *different in kind* (see
   `notes/explore/SYNTHESIS.md`); the ~2-month observation window runs to ~2026-12-15.
 - **Five "different in kind" pieces shipped (2026-10-15), all vision-verified:**
@@ -384,14 +391,17 @@ best. Prefer a **system that can evolve** (tokens + components) over one-off sty
     with it set to `true` put a correct responsive unit on **530 article pages** (EN+ZH)
     and nothing on the home/tools pages. Flipping that one boolean (or the operator
     enabling Auto ads) is all that remains — plus the EEA/UK consent message.
-- **Tools** (`/tools/`, **10** total, bilingual, zero server cost): IPv6 + IPv4 subnet
+- **Tools** (`/tools/`, **11** total, bilingual, zero server cost): IPv6 + IPv4 subnet
   calculators, number-base converter (bit editor), endianness visualizer (IEEE-754),
   CRC calculator (6 algorithms, verified against standard check values), chmod calculator,
   Base64/URL/Hex/HTML-entity encoder, cron explainer, and the **systemd hardening
   generator** (22 real directives, each with its honest cost; output checked with
   `systemd-analyze verify`), and the **nginx reverse-proxy generator** (output split into
   http/server because `limit_req_zone` & co. are illegal in a server block; all four presets
-  checked with `nginx -t`, which caught an unclosed `location` block on the first try). Each links into the matching posts, and `PostLayout` now
+  checked with `nginx -t`, which caught an unclosed `location` block on the first try), and the
+  **cron -> systemd timer converter** (emits a .timer + .service pair and names the cases cron can
+  express but systemd cannot — day-of-month OR day-of-week becomes AND, weekday steps do not exist;
+  11 representative expressions all pass `systemd-analyze calendar`). Each links into the matching posts, and `PostLayout` now
   links back to them by tag. A component-usage audit (2026-10-15) found **no orphaned
   components** — `AdSlot` had been the only one, and it is now placed.
 - **Static JSON API**: `/api/posts.json` (every post, both locales) + `/api/tags.json`

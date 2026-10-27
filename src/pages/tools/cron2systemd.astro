@@ -1,0 +1,54 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CronToSystemd from '@/components/tools/CronToSystemd.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="en"
+  slug="cron2systemd"
+  title="cron → systemd timer converter"
+  description="Turn a cron expression into a .timer + .service pair — and see the cases cron can express that systemd cannot. Every OnCalendar line is verified with systemd-analyze calendar."
+>
+  <CronToSystemd lang="en" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>The conversion is not one-to-one, and that is the useful part</h2>
+    <p>
+      A straight rewrite of five fields is easy. The reason people get bitten is the semantics they
+      did not notice changing:
+    </p>
+    <ul>
+      <li>
+        <strong>Day-of-month OR day-of-week.</strong> In cron, <code>0 0 1 * 1</code> means "the 1st
+        <em>or</em> any Monday". systemd <code>OnCalendar</code> <em>and</em>s the fields: the 1st
+        <em>if</em> it is a Monday. That schedule cannot be expressed in one timer — you need two.
+      </li>
+      <li>
+        <strong>Weekday numbering.</strong> cron uses 0–7 (0 and 7 are both Sunday); systemd uses
+        <code>Mon..Sun</code>. A step in the weekday field (<code>*/2</code>) has no systemd
+        equivalent and has to be expanded.
+      </li>
+      <li>
+        <strong>Missed runs.</strong> cron silently skips a run when the machine is off.
+        <code>Persistent=true</code> deliberately does the opposite and runs once at boot — right for
+        backups, wrong for anything that must not run late.
+      </li>
+      <li>
+        <strong>Timezone.</strong> Both use the system timezone by default. In a container with a
+        different <code>TZ</code>, they will disagree with each other.
+      </li>
+    </ul>
+    <p>
+      Check any line yourself with <code>systemd-analyze calendar "*-*-* 03:00:00"</code> — it prints
+      the next elapse times. That is how every expression this tool emits was verified: eleven
+      representative cron expressions (including steps, ranges, lists and the OR-vs-AND case) all
+      produced an <code>OnCalendar</code> that <code>systemd-analyze calendar</code> accepts.
+    </p>
+    <p>
+      Related reading: <a href={localePath('en', '/posts/systemd-timers-vs-cron/')}>systemd timers vs cron</a>,
+      <a href={localePath('en', '/posts/systemd-unit-cookbook/')}>the systemd unit cookbook</a>, and
+      <a href={localePath('en', '/posts/systemd-service-watchdog/')}>the watchdog</a>.
+    </p>
+  </div>
+</ToolShell>

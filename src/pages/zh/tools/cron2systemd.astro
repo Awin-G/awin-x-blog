@@ -1,0 +1,49 @@
+---
+import ToolShell from '@/components/ToolShell.astro';
+import CronToSystemd from '@/components/tools/CronToSystemd.astro';
+import { localePath } from '@/consts';
+---
+
+<ToolShell
+  lang="zh"
+  slug="cron2systemd"
+  title="cron → systemd timer 转换器"
+  description="把 cron 表达式转成 .timer + .service 一对文件——并指出 cron 能表达、而 systemd 表达不了的情况。每一条 OnCalendar 都用 systemd-analyze calendar 验证过。"
+>
+  <CronToSystemd lang="zh" />
+
+  <div class="prose" style="margin-top:2rem">
+    <h2>转换不是一对一——而那正是有用之处</h2>
+    <p>
+      把五个字段改写成 <code>OnCalendar</code> 很容易。真正让人栽跟头的是**你没注意到的语义变化**：
+    </p>
+    <ul>
+      <li>
+        <strong>"日"与"周"在 cron 里是「或」，在 systemd 里是「与」。</strong>
+        <code>0 0 1 * 1</code> 在 cron 里是"1 号<em>或</em>任意周一"；systemd 的 <code>OnCalendar</code>
+        却是"1 号<em>且</em>是周一"。这种排期一个 timer 表达不了，得写两个。
+      </li>
+      <li>
+        <strong>星期编号不同。</strong>cron 用 0–7（0 和 7 都是周日）；systemd 用 <code>Mon..Sun</code>。
+        而 cron 在星期字段里用步长（<code>*/2</code>）在 systemd 里没有对应写法，只能展开。
+      </li>
+      <li>
+        <strong>错过的运行。</strong>机器关机时 cron 会静默跳过；<code>Persistent=true</code>
+        刻意反其道而行，开机补跑一次——备份类任务正需要它，"绝不能延后运行"的任务正相反。
+      </li>
+      <li>
+        <strong>时区。</strong>两者默认都用系统时区。容器里 <code>TZ</code> 不同时，它们会和对方对不上。
+      </li>
+    </ul>
+    <p>
+      自己验一下：<code>systemd-analyze calendar "*-*-* 03:00:00"</code> 会打印接下来的触发时间。
+      这个工具吐出的每一条表达式都是这样验出来的：11 条有代表性的 cron 表达式（含步长、区间、列表、
+      以及「或 vs 与」那一条）生成的 <code>OnCalendar</code> 全部被 <code>systemd-analyze calendar</code> 接受。
+    </p>
+    <p>
+      相关阅读：<a href={localePath('zh', '/posts/systemd-timers-vs-cron/')}>systemd timers vs cron</a>、
+      <a href={localePath('zh', '/posts/systemd-unit-cookbook/')}>systemd unit 手册</a>、
+      <a href={localePath('zh', '/posts/systemd-service-watchdog/')}>看门狗</a>。
+    </p>
+  </div>
+</ToolShell>

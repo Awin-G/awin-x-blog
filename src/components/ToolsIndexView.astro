@@ -64,6 +64,11 @@ const copy =
             name: 'nginx 反向代理生成器',
             desc: '带 TLS、响应头、缓存与限速的反向代理 server 块——拆成 http/server 两段，保证 nginx 真的能启动。',
           },
+          {
+            slug: 'cron2systemd',
+            name: 'cron → systemd timer 转换器',
+            desc: '把 cron 表达式转成 .timer + .service 一对文件，并指出 cron 能表达、systemd 表达不了的情况。',
+          },
         ],
         note: '更多工具会陆续加入——如果你想要某个特定工具，欢迎来信。',
       }
@@ -121,6 +126,11 @@ const copy =
             slug: 'nginx',
             name: 'nginx reverse-proxy generator',
             desc: 'A reverse-proxy server block with TLS, headers, caching and rate limiting — split into http/server so nginx actually starts.',
+          },
+          {
+            slug: 'cron2systemd',
+            name: 'cron → systemd timer converter',
+            desc: 'Turn a cron expression into a .timer + .service pair, with the cases cron can express and systemd cannot.',
           },
         ],
         note: 'More tools are coming. If there is one you wish existed, get in touch.',
